@@ -1,0 +1,43 @@
+.ticker-bar {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.ticker-bar-inner {
+  width: 500px;
+  overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 10px 0;
+  mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
+}
+
+.ticker-bar-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: tickerBarScroll 8s linear infinite;
+}
+
+.ticker-bar.ticker-reverse .ticker-bar-track {
+  animation-direction: reverse;
+}
+
+.ticker-bar-track span {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.35);
+  padding: 0 8px;
+  text-transform: uppercase;
+}
+
+.ticker-bar-dot {
+  color: var(--primary) !important;
+}
+
+@keyframes tickerBarScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
