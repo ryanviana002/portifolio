@@ -44,6 +44,10 @@ export default function Navbar() {
             <a href={l.href} onClick={() => setMenuOpen(false)}>{l.label}</a>
           </li>
         ))}
+        <li className="navbar-mobile-actions">
+          <a href="#contato" className="btn-outline" onClick={() => setMenuOpen(false)}>INICIAR PROJETO</a>
+          <a href="https://wa.me/5519992525515" target="_blank" rel="noreferrer" className="btn-solid" onClick={() => setMenuOpen(false)}>WHATSAPP</a>
+        </li>
       </ul>
 
       <div className="navbar-actions">

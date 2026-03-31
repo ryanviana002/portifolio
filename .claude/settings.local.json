@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:autoairshop.vercel.app)"
+      "WebFetch(domain:autoairshop.vercel.app)",
+      "Bash(npm run:*)"
     ]
   }
 }
