@@ -8,7 +8,7 @@ const projects = [
     desc: 'Site institucional para oficina de ar-condicionado automotivo com seções de serviços, diferenciais e CTA para contato direto via WhatsApp.',
     tech: ['React', 'Vite', 'CSS3'],
     color: '#0ea5e9',
-    link: 'https://autoairshop.vercel.app/',
+    link: 'https://autoarshop.vercel.app/',
     preview: '/preview-autoairshop.png',
   },
   {
