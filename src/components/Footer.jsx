@@ -69,7 +69,7 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <span>© 2026 Ryan Dev Creator — Todos os direitos reservados.</span>
-        <span className="footer-designed">DESIGNED & DEVELOPED BY RYAN</span>
+        <a href="https://ryandevcreator.vercel.app" target="_blank" rel="noreferrer" className="footer-designed">DESIGNED & DEVELOPED BY RDCreator</a>
         <a href="#contato" className="footer-cta">INICIAR PROJETO</a>
       </div>
     </footer>
