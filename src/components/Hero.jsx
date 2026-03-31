@@ -275,8 +275,6 @@ export default function Hero() {
     <section id="inicio" className="hero">
       <canvas ref={canvasRef} className="hero-canvas" />
 
-      <div className="hero-glow glow-pink" />
-      <div className="hero-glow glow-cyan" />
 
       <div className="hero-layout">
         <div className="hero-content">
@@ -290,7 +288,7 @@ export default function Hero() {
             <span className="line3">{splitLetters('DIGITAL.')}</span>
           </h1>
           <p className="hero-sub">
-            Sites que convertem. Sistemas que entregam. Design que impressiona.
+            Design que vende. Código que funciona.
           </p>
         </div>
 
@@ -299,19 +297,11 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="hero-ticker">
-        <div className="ticker-track">
-          {[
-            'WEB DESIGN', 'DEV 4GL INFORMIX', 'DESIGNER CANVA',
-            'WEB DESIGN', 'DEV 4GL INFORMIX', 'DESIGNER CANVA',
-          ].map((t, i) => (
-            <span key={i}>{t} <span className="dot">•</span> </span>
-          ))}
-        </div>
-      </div>
 
       <div className="hero-scroll">
-        <span className="scroll-arrow">↓</span>
+        <svg className="scroll-arrow" viewBox="0 0 24 24" width="32" height="32">
+          <polygon points="12,20 2,6 22,6" fill="rgba(255,255,255,0.5)"/>
+        </svg>
       </div>
     </section>
   );
