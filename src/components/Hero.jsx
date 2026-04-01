@@ -1,6 +1,103 @@
 import { useEffect, useRef, useState } from 'react';
 import './Hero.css';
 
+const TERMINAL_STEPS = [
+  { type: 'cmd', text: 'npm create rdc-project@latest' },
+  { type: 'out', text: '✓ Projeto criado com sucesso!' },
+  { type: 'cmd', text: 'cd meu-site && npm install' },
+  { type: 'out', text: '✓ Dependências instaladas' },
+  { type: 'cmd', text: 'git init && git add .' },
+  { type: 'out', text: '✓ Repositório inicializado' },
+  { type: 'cmd', text: 'git commit -m "🚀 launch"' },
+  { type: 'out', text: '✓ 1 commit criado' },
+  { type: 'cmd', text: 'deploy --prod' },
+  { type: 'out', text: '✓ Site publicado em produção!' },
+];
+
+function TerminalIcon() {
+  const [lines, setLines] = useState([]);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [currentText, setCurrentText] = useState('');
+  const [typing, setTyping] = useState(true);
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    if (currentStep >= TERMINAL_STEPS.length) {
+      // reinicia após pausa
+      const t = setTimeout(() => {
+        setLines([]);
+        setCurrentStep(0);
+        setCurrentText('');
+        setTyping(true);
+      }, 2500);
+      return () => clearTimeout(t);
+    }
+
+    const step = TERMINAL_STEPS[currentStep];
+
+    if (step.type !== 'cmd') {
+      // output aparece de uma vez após pausa
+      const t = setTimeout(() => {
+        setLines(l => [...l, step]);
+        setCurrentStep(s => s + 1);
+        setCurrentText('');
+      }, 400);
+      return () => clearTimeout(t);
+    }
+
+    if (!typing) return;
+
+    if (currentText.length < step.text.length) {
+      const t = setTimeout(() => {
+        setCurrentText(step.text.slice(0, currentText.length + 1));
+      }, 45);
+      return () => clearTimeout(t);
+    } else {
+      // terminou de digitar — aguarda e avança
+      const t = setTimeout(() => {
+        setLines(l => [...l, step]);
+        setCurrentStep(s => s + 1);
+        setCurrentText('');
+      }, 600);
+      return () => clearTimeout(t);
+    }
+  }, [currentStep, currentText, typing]);
+
+
+  const step = TERMINAL_STEPS[currentStep];
+  const isTypingCmd = step && step.type === 'cmd';
+
+  return (
+    <div className="terminal">
+      <div className="terminal-bar">
+        <span className="tb-dot" style={{background:'#ff5f57'}} />
+        <span className="tb-dot" style={{background:'#ffbd2e'}} />
+        <span className="tb-dot" style={{background:'#28ca41'}} />
+        <span className="tb-title">rdc — terminal</span>
+      </div>
+      <div className="terminal-body">
+        {lines.map((l, i) => (
+          <div key={i} className={`t-line t-${l.type}`}>
+            {l.type === 'cmd' && <span className="t-prompt">❯ </span>}
+            {l.type === 'url'
+              ? <a href={l.text} className="t-url">{l.text}</a>
+              : <span>{l.text}</span>
+            }
+          </div>
+        ))}
+        {isTypingCmd && currentStep < TERMINAL_STEPS.length && (
+          <div className="t-line t-cmd">
+            <span className="t-prompt">❯ </span>
+            <span>{currentText}</span>
+            <span className="t-cursor" />
+          </div>
+        )}
+        <div ref={bottomRef} />
+      </div>
+    </div>
+  );
+}
+
 function RocketIcon() {
   const [launched, setLaunched] = useState(false);
   const [bursting, setBursting] = useState(false);
@@ -161,6 +258,7 @@ function splitLetters(text, extraClass) {
 
 export default function Hero() {
   const canvasRef = useRef(null);
+  const brushRef = useRef(null);
   const mouse = useRef({ x: 0, y: 0 });
   const titleRef = useRef(null);
 
@@ -238,6 +336,104 @@ export default function Hero() {
     return () => window.removeEventListener('mousemove', onMove);
   }, []);
 
+  // Dissolve effect
+  useEffect(() => {
+    const canvas = brushRef.current;
+    const ctx = canvas.getContext('2d');
+    let W = canvas.width = window.innerWidth;
+    let H = canvas.height = window.innerHeight;
+    let last = null;
+    let animId;
+
+    const LIFETIME = 2500;
+    const holes = [];
+
+    const isLight = () => document.documentElement.getAttribute('data-theme') === 'light';
+
+    const draw = () => {
+      const now = Date.now();
+      const light = isLight();
+
+      ctx.clearRect(0, 0, W, H);
+
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = light ? 'rgba(10,10,30,0.22)' : 'rgba(255,255,255,0.14)';
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.globalCompositeOperation = 'destination-out';
+      for (let i = holes.length - 1; i >= 0; i--) {
+        const h = holes[i];
+        const age = now - h.born;
+        if (age > LIFETIME) { holes.splice(i, 1); continue; }
+        const t = age / LIFETIME;
+        const alpha = t < 0.2 ? t / 0.2 : 1 - (t - 0.2) / 0.8;
+        const grad = ctx.createRadialGradient(h.x, h.y, 0, h.x, h.y, h.r);
+        grad.addColorStop(0, `rgba(0,0,0,${alpha})`);
+        grad.addColorStop(0.5, `rgba(0,0,0,${alpha * 0.5})`);
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(h.x, h.y, h.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalCompositeOperation = 'source-over';
+
+      animId = requestAnimationFrame(draw);
+    };
+    animId = requestAnimationFrame(draw);
+
+    const onMove = e => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const now = Date.now();
+
+      if (last) {
+        const dx = x - last.x;
+        const dy = y - last.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const steps = Math.max(1, Math.floor(dist / 5));
+        for (let s = 0; s <= steps; s++) {
+          holes.push({
+            x: last.x + dx * s / steps,
+            y: last.y + dy * s / steps,
+            r: 32 + Math.random() * 12,
+            born: now,
+          });
+        }
+      }
+      last = { x, y };
+    };
+
+    const onLeave = () => { last = null; };
+
+    const hero = canvas.parentElement;
+    const heroRect = () => hero.getBoundingClientRect();
+
+    const onWindowMove = e => {
+      const r = heroRect();
+      if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+        onMove(e);
+      } else {
+        last = null;
+      }
+    };
+
+    window.addEventListener('mousemove', onWindowMove);
+
+    const onResize = () => {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('mousemove', onWindowMove);
+      window.removeEventListener('resize', onResize);
+    };
+  }, []);
+
 
   useEffect(() => {
     const title = titleRef.current;
@@ -274,6 +470,7 @@ export default function Hero() {
   return (
     <section id="inicio" className="hero">
       <canvas ref={canvasRef} className="hero-canvas" />
+      <canvas ref={brushRef} className="hero-brush" />
 
 
       <div className="hero-layout">
@@ -293,7 +490,7 @@ export default function Hero() {
         </div>
 
         <div className="hero-logo-wrap">
-          <RocketIcon />
+          <TerminalIcon />
         </div>
       </div>
 
