@@ -10,6 +10,9 @@ import Impacto from './components/Impacto';
 import Contato from './components/Contato';
 import Footer from './components/Footer';
 import Ticker from './components/Ticker';
+import LoadingScreen from './components/LoadingScreen';
+import SectionNav from './components/SectionNav';
+import useReveal from './hooks/useReveal';
 
 function WaIcon() {
   return (
@@ -69,13 +72,39 @@ function playWind(duration, vol) {
 function App() {
   const cursorRef = useRef(null);
   const [waOpen, setWaOpen] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  useReveal();
 
   useEffect(() => {
     const cursor = cursorRef.current;
 
+    const sectionColors = {
+      inicio: '#00f2fe',
+      sobre: '#9e9eff',
+      servicos: '#ff007f',
+      metodo: '#00f2fe',
+      portfolio: '#0ea5e9',
+      impacto: '#ff007f',
+      contato: '#00f2fe',
+    };
+
+    const updateCursorColor = () => {
+      const sections = Object.keys(sectionColors);
+      for (const id of [...sections].reverse()) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= window.innerHeight / 2) {
+          cursor.style.background = sectionColors[id];
+          break;
+        }
+      }
+    };
+
     const onMove = e => {
       cursor.style.left = e.clientX + 'px';
       cursor.style.top = e.clientY + 'px';
+      updateCursorColor();
     };
 
     const onEnter = () => { cursor.classList.add('big'); playWind(0.3, 0.06); };
@@ -109,7 +138,10 @@ function App() {
 
   return (
     <>
+      {!loaded && <LoadingScreen onDone={() => setLoaded(true)} />}
+
       <div className="cursor" ref={cursorRef} />
+      <SectionNav />
 
       <Navbar />
       <Hero />

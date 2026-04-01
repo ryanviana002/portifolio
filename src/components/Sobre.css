@@ -65,25 +65,118 @@
   background-clip: text;
 }
 
-.sobre-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+/* Foto */
+.sobre-foto-wrap {
+  position: relative;
+  margin-bottom: 32px;
+  display: inline-block;
 }
-.sobre-tag {
+
+.sobre-foto {
+  width: 260px;
+  height: 320px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.03);
+  position: relative;
+}
+
+.sobre-foto-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.sobre-foto-placeholder {
+  display: none;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(255,0,127,0.08), rgba(0,242,254,0.06));
+}
+.sobre-foto-placeholder span {
+  font-size: 56px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #ff007f, #00f2fe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.sobre-foto-placeholder p {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 2px;
+}
+
+.sobre-foto-badge {
+  position: absolute;
+  bottom: -16px;
+  right: -16px;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff007f, #9e9eff);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 24px rgba(255,0,127,0.4);
+}
+.badge-num {
+  font-size: 18px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+}
+.badge-label {
+  font-size: 8px;
+  color: rgba(255,255,255,0.8);
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+/* Skills */
+.sobre-skills {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.skill-item { display: flex; flex-direction: column; gap: 6px; }
+
+.skill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.skill-name {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 1.5px;
-  padding: 8px 18px;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 2px;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.6);
   text-transform: uppercase;
-  transition: border-color 0.2s, color 0.2s;
 }
-.sobre-tag:hover {
-  border-color: var(--primary);
-  color: var(--primary);
+.skill-pct {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.skill-track {
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.skill-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 3px;
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sobre-text {

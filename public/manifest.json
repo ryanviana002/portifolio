@@ -1,0 +1,14 @@
+{
+  "name": "RDCreator — Criação de Sites & Sistemas",
+  "short_name": "RDCreator",
+  "description": "Design que vende. Código que funciona.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020204",
+  "theme_color": "#ff007f",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/logo-rdc.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/logo-rdc.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

@@ -1,29 +1,66 @@
+import { useEffect, useRef, useState } from 'react';
 import './Impacto.css';
 
 const stats = [
-  { num: '+5', label: 'Anos de experiência', desc: 'Desenvolvendo soluções digitais reais.' },
-  { num: '+30', label: 'Projetos entregues', desc: 'Sites, sistemas e peças visuais.' },
-  { num: '3', label: 'Especialidades', desc: 'Web, 4GL Informix e Design.' },
-  { num: '100%', label: 'Comprometimento', desc: 'Do briefing à entrega final.' },
+  { num: 5, suffix: '+', label: 'Anos de experiência', desc: 'Desenvolvendo soluções digitais reais.' },
+  { num: 30, suffix: '+', label: 'Projetos entregues', desc: 'Sites, sistemas e peças visuais.' },
+  { num: 3, suffix: '', label: 'Especialidades', desc: 'Web, 4GL Informix e Design.' },
+  { num: 100, suffix: '%', label: 'Comprometimento', desc: 'Do briefing à entrega final.' },
 ];
 
 const testimonials = [
   {
-    text: '"O Ryan entregou um site incrível para nossa oficina. Moderno, rápido e exatamente o que precisávamos. Recomendo muito!"',
-    name: '— Cliente Auto Ar Shop',
-    role: 'Empresário • São Paulo',
+    text: '"Sistema moderno, rápido e bem estruturado. O site trouxe muito mais credibilidade pra nossa empresa e facilitou o contato com clientes."',
+    name: '— Genuína Ar Automotivo',
+    role: 'Climatização Automotiva • Campinas/SP',
   },
   {
-    text: '"Sistema entregue no prazo, funciona perfeitamente. Relatórios claros, integração perfeita. Profissional de verdade."',
-    name: '— Gestor Industrial',
-    role: 'Setor Industrial • Interior SP',
+    text: '"Atendimento excelente e entrega acima do esperado. O site ficou profissional, intuitivo e ajudou bastante na geração de novos clientes."',
+    name: '— Victor',
+    role: 'Prestação de Serviços • Brasil',
   },
   {
-    text: '"As peças de design ficaram ótimas! Identidade visual coerente, posts lindos. Muito criativo e atencioso."',
-    name: '— Empreendedora Digital',
-    role: 'E-commerce • Brasil',
+    text: '"Profissional dedicado e comprometido. Resultado final superou as expectativas — site bonito, rápido e que realmente converte."',
+    name: '— Auto Ar Shop',
+    role: 'Mecânico Automotivo • Campinas/SP',
   },
 ];
+
+function AnimatedCounter({ target, suffix }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef(null);
+  const started = useRef(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !started.current) {
+        started.current = true;
+        const duration = 1800;
+        const steps = 60;
+        const increment = target / steps;
+        let current = 0;
+        const interval = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            setCount(target);
+            clearInterval(interval);
+          } else {
+            setCount(Math.floor(current));
+          }
+        }, duration / steps);
+      }
+    }, { threshold: 0.4 });
+
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [target]);
+
+  return (
+    <span ref={ref} className="stat-big">
+      {count}{suffix}
+    </span>
+  );
+}
 
 export default function Impacto() {
   return (
@@ -48,7 +85,7 @@ export default function Impacto() {
         <div className="stats-grid">
           {stats.map((s, i) => (
             <div key={i} className="stat-card">
-              <span className="stat-big">{s.num}</span>
+              <AnimatedCounter target={s.num} suffix={s.suffix} />
               <span className="stat-title">{s.label}</span>
               <span className="stat-desc">{s.desc}</span>
             </div>

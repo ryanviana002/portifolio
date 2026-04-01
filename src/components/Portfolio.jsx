@@ -59,7 +59,7 @@ export default function Portfolio() {
                 <div className="proj-thumb-bg" />
                 {p.preview ? (
                   <div className="proj-preview">
-                    <img src={p.preview} alt={p.title} className="proj-preview-img" />
+                    <img src={p.preview} alt={p.title} className="proj-preview-img" loading="lazy" />
                   </div>
                 ) : p.link.includes('github') ? (
                   <div className="proj-github-thumb">
