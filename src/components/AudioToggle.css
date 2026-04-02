@@ -1,0 +1,73 @@
+.audio-toggle {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 800;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(2,2,4,0.8);
+  backdrop-filter: blur(12px);
+  color: rgba(255,255,255,0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.audio-toggle:hover {
+  border-color: rgba(255,0,127,0.5);
+  color: #ff007f;
+  box-shadow: 0 0 16px rgba(255,0,127,0.2);
+}
+
+.audio-toggle.active {
+  border-color: rgba(255,0,127,0.6);
+  color: #ff007f;
+  box-shadow: 0 0 20px rgba(255,0,127,0.3);
+}
+
+/* Barras animadas quando tocando */
+.audio-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 16px;
+}
+
+.audio-bars span {
+  width: 3px;
+  background: #ff007f;
+  border-radius: 2px;
+  animation: bar-bounce 0.8s ease-in-out infinite;
+}
+
+.audio-bars span:nth-child(1) { height: 6px;  animation-delay: 0s; }
+.audio-bars span:nth-child(2) { height: 12px; animation-delay: 0.15s; }
+.audio-bars span:nth-child(3) { height: 9px;  animation-delay: 0.3s; }
+.audio-bars span:nth-child(4) { height: 14px; animation-delay: 0.1s; }
+
+@keyframes bar-bounce {
+  0%, 100% { transform: scaleY(0.4); }
+  50%       { transform: scaleY(1); }
+}
+
+.audio-loading {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,0,127,0.3);
+  border-top-color: #ff007f;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .audio-toggle { bottom: 16px; right: 16px; }
+}

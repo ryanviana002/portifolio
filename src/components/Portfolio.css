@@ -48,10 +48,88 @@
   padding: 32px;
   position: relative;
   overflow: hidden;
-  transition: border-color 0.3s, transform 0.2s;
+  transition: border-color 0.3s, box-shadow 0.3s;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  will-change: transform;
+}
+
+/* Live preview overlay */
+.proj-live-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(0.92) translateY(8px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+  z-index: 3;
+  padding: 8px;
+  display: flex;
+  align-items: stretch;
+}
+
+.proj-card:hover .proj-live-overlay {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+
+.proj-browser {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  background: #0a0a0f;
+}
+
+.proj-browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+
+.pb-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+}
+.pb-dot:nth-child(1) { background: #ff5f57; }
+.pb-dot:nth-child(2) { background: #ffbd2e; }
+.pb-dot:nth-child(3) { background: #28ca41; }
+
+.pb-url {
+  font-size: 9px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.5px;
+  margin-left: 6px;
+  font-family: monospace;
+}
+
+.proj-browser-frame {
+  flex: 1;
+  border: none;
+  width: 300%;
+  height: 300%;
+  transform: scale(0.333);
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+.tilt-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  border-radius: inherit;
+  transition: background 0.1s;
 }
 .proj-card::before {
   content: '';
@@ -105,12 +183,26 @@
   object-fit: cover;
   object-position: top;
   opacity: 0.85;
-  transition: opacity 0.3s, transform 0.4s;
+  transition: opacity 0.4s, transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .proj-card:hover .proj-preview-img {
   opacity: 1;
-  transform: scale(1.03);
+  transform: scale(1.06) translateY(-4px);
+}
+
+.proj-preview::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(2,2,4,0.6) 100%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.proj-card:hover .proj-preview::after {
+  opacity: 1;
 }
 
 .proj-github-thumb {

@@ -28,11 +28,13 @@ export default function SectionNav() {
     return () => observers.forEach(o => o?.disconnect());
   }, []);
 
+  const activeLabel = sections.find(s => s.id === active)?.label ?? '';
+
   return (
     <nav className="section-nav">
+      <span className="sn-active-label">{activeLabel}</span>
       {sections.map(({ id, label }) => (
         <a key={id} href={`#${id}`} className={`sn-dot${active === id ? ' active' : ''}`} title={label}>
-          <span className="sn-label">{label}</span>
           <span className="sn-circle" />
         </a>
       ))}

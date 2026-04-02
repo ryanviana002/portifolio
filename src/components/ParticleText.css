@@ -1,0 +1,7 @@
+.particle-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #020204;
+  pointer-events: none;
+}

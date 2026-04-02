@@ -11,7 +11,7 @@ const TERMINAL_STEPS = [
   { type: 'cmd', text: 'git commit -m "🚀 launch"' },
   { type: 'out', text: '✓ 1 commit criado' },
   { type: 'cmd', text: 'deploy --prod' },
-  { type: 'out', text: '✓ Site publicado em produção!' },
+  { type: 'out', text: '✓ Pronto! Pressione Enter...' },
 ];
 
 function TerminalIcon() {
@@ -22,16 +22,18 @@ function TerminalIcon() {
   const bottomRef = useRef(null);
 
   useEffect(() => {
-    if (currentStep >= TERMINAL_STEPS.length) {
-      // reinicia após pausa
-      const t = setTimeout(() => {
-        setLines([]);
-        setCurrentStep(0);
-        setCurrentText('');
-        setTyping(true);
-      }, 2500);
-      return () => clearTimeout(t);
-    }
+    const onReset = () => {
+      setLines([]);
+      setCurrentStep(0);
+      setCurrentText('');
+      setTyping(true);
+    };
+    window.addEventListener('rdc:terminal-reset', onReset);
+    return () => window.removeEventListener('rdc:terminal-reset', onReset);
+  }, []);
+
+  useEffect(() => {
+    if (currentStep >= TERMINAL_STEPS.length) return;
 
     const step = TERMINAL_STEPS[currentStep];
 
@@ -91,6 +93,9 @@ function TerminalIcon() {
             <span>{currentText}</span>
             <span className="t-cursor" />
           </div>
+        )}
+        {currentStep >= TERMINAL_STEPS.length && (
+          <div className="t-enter-hint">[ ENTER ]</div>
         )}
         <div ref={bottomRef} />
       </div>
@@ -271,9 +276,12 @@ export default function Hero() {
 
     const isLight = () => document.documentElement.getAttribute('data-theme') === 'light';
 
-    // --- stars (dark mode) ---
     const STAR_COUNT = 120;
-    const SPEED = 0.6;
+    let speed = 0.6;
+    let targetSpeed = 0.6;
+    let lastScrollY = window.scrollY;
+    let scrollVel = 0;
+
     const stars = Array.from({ length: STAR_COUNT }, () => ({
       x: W / 2 + (Math.random() - 0.5) * 200,
       y: H / 2 + (Math.random() - 0.5) * 200,
@@ -282,14 +290,27 @@ export default function Hero() {
     }));
     stars.forEach(s => s.pz = s.z);
 
+    const onScroll = () => {
+      const dy = window.scrollY - lastScrollY;
+      lastScrollY = window.scrollY;
+      scrollVel = Math.abs(dy);
+      targetSpeed = 0.6 + Math.min(scrollVel * 0.5, 18);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+
     function update() {
       const light = isLight();
+
+      // Suaviza velocidade
+      speed += (targetSpeed - speed) * 0.08;
+      targetSpeed = Math.max(0.6, targetSpeed * 0.92);
+
       ctx.fillStyle = light ? '#ffffff' : '#020204';
       ctx.fillRect(0, 0, W, H);
 
       for (const s of stars) {
         s.pz = s.z;
-        s.z -= SPEED;
+        s.z -= speed;
         if (s.z <= 0) {
           s.x = W / 2 + (Math.random() - 0.5) * 200;
           s.y = H / 2 + (Math.random() - 0.5) * 200;
@@ -324,17 +345,37 @@ export default function Hero() {
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', onResize);
+      window.removeEventListener('scroll', onScroll);
     };
   }, []);
 
   useEffect(() => {
     const onMove = e => {
-      mouse.current.x = e.clientX;
-      mouse.current.y = e.clientY;
+      mouse.current = { x: e.clientX, y: e.clientY };
     };
     window.addEventListener('mousemove', onMove);
     return () => window.removeEventListener('mousemove', onMove);
   }, []);
+
+  useEffect(() => {
+    const onKey = e => {
+      if (e.key === 'Enter') {
+        const hero = document.getElementById('inicio');
+        if (!hero) return;
+        const rect = hero.getBoundingClientRect();
+        if (rect.top <= 0 && rect.bottom >= 0) {
+          window.dispatchEvent(new Event('rdc:matrix'));
+          // Reinicia terminal após o Matrix terminar (~4s)
+          setTimeout(() => {
+            window.dispatchEvent(new Event('rdc:terminal-reset'));
+          }, 4000);
+        }
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
 
   // Dissolve effect
   useEffect(() => {
@@ -442,12 +483,15 @@ export default function Hero() {
     let origins = null;
 
     const onMove = e => {
-      if (!origins) {
-        origins = Array.from(letters).map(l => {
-          const r = l.getBoundingClientRect();
-          return { cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
-        });
-      }
+      // Recalcula sempre para não ficar desatualizado após animações
+      origins = Array.from(letters).map(l => {
+        const t = l.style.transform;
+        l.style.transform = '';
+        const r = l.getBoundingClientRect();
+        l.style.transform = t;
+        return { cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
+      });
+
       letters.forEach((letter, i) => {
         const { cx, cy } = origins[i];
         const dx = e.clientX - cx;

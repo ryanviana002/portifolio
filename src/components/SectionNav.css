@@ -7,33 +7,29 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  align-items: center;
+}
+
+.sn-active-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: #ff007f;
+  text-transform: uppercase;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  rotate: 180deg;
+  margin-bottom: 8px;
+  transition: opacity 0.3s;
 }
 
 .sn-dot {
   display: flex;
   align-items: center;
-  gap: 8px;
-  justify-content: flex-end;
+  justify-content: center;
   text-decoration: none;
   cursor: pointer;
-}
-
-.sn-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  color: rgba(255,255,255,0.4);
-  opacity: 0;
-  transform: translateX(4px);
-  transition: opacity 0.2s, transform 0.2s;
-  white-space: nowrap;
-  text-transform: uppercase;
-}
-
-.sn-dot:hover .sn-label,
-.sn-dot.active .sn-label {
-  opacity: 1;
-  transform: translateX(0);
 }
 
 .sn-circle {

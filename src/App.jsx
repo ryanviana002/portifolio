@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import './App.css';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -11,7 +12,13 @@ import Contato from './components/Contato';
 import Footer from './components/Footer';
 import Ticker from './components/Ticker';
 import LoadingScreen from './components/LoadingScreen';
+import AudioToggle from './components/AudioToggle';
 import SectionNav from './components/SectionNav';
+import ParticleText from './components/ParticleText';
+import MatrixRain from './components/MatrixRain';
+import SleepMode from './components/SleepMode';
+import BackToTop from './components/BackToTop';
+import ShakeEaster from './components/ShakeEaster';
 import useReveal from './hooks/useReveal';
 
 function WaIcon() {
@@ -72,8 +79,34 @@ function playWind(duration, vol) {
 function App() {
   const cursorRef = useRef(null);
   const [waOpen, setWaOpen] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const [particleDone, setParticleDone] = useState(false);
+  const [matrix, setMatrix] = useState(false);
+
+  useEffect(() => {
+    const onMatrix = () => setMatrix(true);
+    window.addEventListener('rdc:matrix', onMatrix);
+    return () => window.removeEventListener('rdc:matrix', onMatrix);
+  }, []);
   useReveal();
+
+  // Console easter egg
+  useEffect(() => {
+    const style1 = 'color:#ff007f;font-size:20px;font-weight:900;';
+    const style2 = 'color:#00f2fe;font-size:12px;font-weight:600;';
+    const style3 = 'color:#9e9eff;font-size:11px;';
+    const style4 = 'color:rgba(255,255,255,0.4);font-size:10px;';
+    console.log('%c██████╗ ██████╗  ██████╗', style1);
+    console.log('%c██╔══██╗██╔══██╗██╔════╝', style1);
+    console.log('%c██████╔╝██║  ██║██║     ', style1);
+    console.log('%c██╔══██╗██║  ██║██║     ', style1);
+    console.log('%c██║  ██║██████╔╝╚██████╗', style1);
+    console.log('%c╚═╝  ╚═╝╚═════╝  ╚═════╝', style1);
+    console.log('%c\n👀 Oi, dev curioso!', style2);
+    console.log('%cVocê inspecionou o site certo — bom olho.', style3);
+    console.log('%cEste portfólio foi construído com React + Vite, CSS puro e muito café.', style3);
+    console.log('%c\n📩 Quer trabalhar junto? ryanviana002@gmail.com', style2);
+    console.log('%chttps://ryancreator.dev', style4);
+  }, []);
 
   useEffect(() => {
     const cursor = cursorRef.current;
@@ -138,7 +171,11 @@ function App() {
 
   return (
     <>
-      {!loaded && <LoadingScreen onDone={() => setLoaded(true)} />}
+      {!particleDone && <ParticleText onDone={() => setParticleDone(true)} />}
+      {matrix && <MatrixRain onDone={() => setMatrix(false)} />}
+      <SleepMode />
+      <BackToTop />
+      <ShakeEaster />
 
       <div className="cursor" ref={cursorRef} />
       <SectionNav />
@@ -157,7 +194,8 @@ function App() {
       <Ticker items={['QUALIDADE', 'PRAZO', 'RESULTADO', 'COMPROMETIMENTO']} reverse />
       <Contato />
       <Footer />
-
+      <AudioToggle />
+      <Analytics />
     </>
   );
 }

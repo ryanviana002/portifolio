@@ -1,6 +1,70 @@
 import { useEffect, useRef } from 'react';
 import './Sobre.css';
 
+const techs = [
+  {
+    name: 'React',
+    color: '#61dafb',
+    icon: <svg viewBox="0 0 100 100" width="26" height="26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="50" cy="50" rx="10" ry="10" fill="#61dafb"/>
+      <ellipse cx="50" cy="50" rx="46" ry="18" stroke="#61dafb" strokeWidth="4" fill="none"/>
+      <ellipse cx="50" cy="50" rx="46" ry="18" stroke="#61dafb" strokeWidth="4" fill="none" transform="rotate(60 50 50)"/>
+      <ellipse cx="50" cy="50" rx="46" ry="18" stroke="#61dafb" strokeWidth="4" fill="none" transform="rotate(120 50 50)"/>
+    </svg>,
+  },
+  {
+    name: 'CSS3',
+    color: '#2965f1',
+    icon: <svg viewBox="0 0 100 100" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" rx="10" fill="#2965f1"/>
+      <text x="50" y="55" textAnchor="middle" dominantBaseline="middle" fontSize="36" fontWeight="900" fill="white" fontFamily="Arial, sans-serif">CSS3</text>
+    </svg>,
+  },
+  {
+    name: 'Vite',
+    color: '#9e9eff',
+    icon: <svg viewBox="0 0 100 100" width="26" height="26" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="50,5 95,25 50,50 5,25" fill="#9e9eff" opacity="0.3"/>
+      <polygon points="50,5 95,25 50,50" fill="#ff007f" opacity="0.8"/>
+      <polygon points="50,50 95,25 95,75 50,95" fill="#9e9eff" opacity="0.5"/>
+      <polygon points="50,50 5,25 5,75 50,95" fill="#9e9eff" opacity="0.8"/>
+      <line x1="50" y1="10" x2="30" y2="80" stroke="#fff" strokeWidth="5" strokeLinecap="round"/>
+      <line x1="30" y1="50" x2="65" y2="50" stroke="#fff" strokeWidth="4" strokeLinecap="round"/>
+    </svg>,
+  },
+  {
+    name: 'JavaScript',
+    color: '#f7df1e',
+    icon: <svg viewBox="0 0 100 100" width="26" height="26" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="#f7df1e" rx="8"/>
+      <text x="12" y="75" fontSize="52" fontWeight="900" fill="#222" fontFamily="Arial">JS</text>
+    </svg>,
+  },
+  {
+    name: 'Canva',
+    color: '#00c4cc',
+    icon: <svg viewBox="0 0 100 100" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="canva-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00c4cc"/>
+          <stop offset="100%" stopColor="#7d2ae8"/>
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="50" fill="url(#canva-grad)"/>
+      <text x="50" y="57" textAnchor="middle" dominantBaseline="middle" fontSize="26" fontWeight="bold" fontStyle="italic" fill="white" fontFamily="Georgia, serif">Canva</text>
+    </svg>,
+  },
+  {
+    name: '4GL',
+    color: '#9e9eff',
+    icon: <svg viewBox="0 0 100 100" width="26" height="26" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" rx="10" fill="#1a1a2e"/>
+      <rect x="5" y="5" width="90" height="90" rx="8" fill="none" stroke="#9e9eff" strokeWidth="3"/>
+      <text x="50" y="62" textAnchor="middle" fontSize="30" fontWeight="900" fill="#9e9eff" fontFamily="monospace">4GL</text>
+    </svg>,
+  },
+];
+
 const skills = [
   { name: '4GL Informix', level: 98, color: '#9e9eff' },
   { name: 'Web Design / UI', level: 92, color: '#ff007f' },
@@ -50,7 +114,7 @@ export default function Sobre() {
           <div className="sobre-left">
             <div className="sobre-foto-wrap">
               <div className="sobre-foto">
-                <img src="/foto-ryan.jpg" alt="Ryan Viana" className="sobre-foto-img"
+                <img src="/foto-ryan.png" alt="Ryan Viana" className="sobre-foto-img"
                   onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
                 />
                 <div className="sobre-foto-placeholder">
@@ -62,6 +126,15 @@ export default function Sobre() {
                 <span className="badge-num">+5</span>
                 <span className="badge-label">anos de exp.</span>
               </div>
+            </div>
+
+            <div className="sobre-techs">
+              {techs.map(t => (
+                <div key={t.name} className="tech-icon" style={{ '--tech-color': t.color }}>
+                  {t.icon}
+                  <span>{t.name}</span>
+                </div>
+              ))}
             </div>
 
             <div className="sobre-skills">

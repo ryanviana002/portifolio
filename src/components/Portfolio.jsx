@@ -1,4 +1,41 @@
+import { useRef, useState } from 'react';
 import './Portfolio.css';
+
+function TiltCard({ children, style, className }) {
+  const cardRef = useRef(null);
+
+  const onMove = e => {
+    const card = cardRef.current;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    const rotateX = ((y - cy) / cy) * -8;
+    const rotateY = ((x - cx) / cx) * 8;
+    card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
+    card.style.transition = 'transform 0.05s ease';
+    const shine = card.querySelector('.tilt-shine');
+    if (shine) {
+      shine.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.08), transparent 60%)`;
+    }
+  };
+
+  const onLeave = () => {
+    const card = cardRef.current;
+    card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) translateY(0)';
+    card.style.transition = 'transform 0.5s ease';
+    const shine = card.querySelector('.tilt-shine');
+    if (shine) shine.style.background = 'transparent';
+  };
+
+  return (
+    <div ref={cardRef} className={className} style={style} onMouseMove={onMove} onMouseLeave={onLeave}>
+      <div className="tilt-shine" />
+      {children}
+    </div>
+  );
+}
 
 const projects = [
   {
@@ -54,7 +91,7 @@ export default function Portfolio() {
 
         <div className="portfolio-grid">
           {projects.map((p, i) => (
-            <div key={i} className="proj-card" style={{ '--accent-color': p.color }}>
+            <TiltCard key={i} className="proj-card" style={{ '--accent-color': p.color }}>
               <div className="proj-thumb">
                 <div className="proj-thumb-bg" />
                 {p.preview ? (
@@ -92,7 +129,7 @@ export default function Portfolio() {
                 </div>
               </div>
               <a href={p.link} target="_blank" rel="noreferrer" className="proj-cta">VER MAIS</a>
-            </div>
+            </TiltCard>
           ))}
         </div>
 

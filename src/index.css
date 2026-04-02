@@ -261,28 +261,40 @@ ul {
 /* Scroll reveal animations */
 .reveal {
   opacity: 0;
-  transform: translateY(32px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transform: translateY(40px);
+  filter: blur(4px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              filter 0.8s ease;
 }
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
+  filter: blur(0);
 }
 .reveal-left {
   opacity: 0;
-  transform: translateX(-32px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transform: translateX(-40px);
+  filter: blur(4px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              filter 0.8s ease;
 }
 .reveal-left.visible {
   opacity: 1;
   transform: translateX(0);
+  filter: blur(0);
 }
 .reveal-right {
   opacity: 0;
-  transform: translateX(32px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transform: translateX(40px);
+  filter: blur(4px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              filter 0.8s ease;
 }
 .reveal-right.visible {
   opacity: 1;
   transform: translateX(0);
+  filter: blur(0);
 }

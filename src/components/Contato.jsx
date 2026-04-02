@@ -1,5 +1,14 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import emailjs from '@emailjs/browser';
 import './Contato.css';
+
+// Para ativar o EmailJS:
+// 1. Crie conta em emailjs.com
+// 2. Crie um Service (Gmail) e um Template
+// 3. Substitua as constantes abaixo
+const EMAILJS_SERVICE = 'service_rdc';
+const EMAILJS_TEMPLATE = 'template_rdc';
+const EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY';
 
 const services = [
   'Criação de Site',
@@ -13,16 +22,29 @@ const services = [
 export default function Contato() {
   const [form, setForm] = useState({ nome: '', email: '', whatsapp: '', empresa: '', servico: '', objetivo: '' });
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const formRef = useRef(null);
 
   const handle = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
-  const submit = e => {
+  const submit = async e => {
     e.preventDefault();
     if (!form.nome || !form.whatsapp || !form.objetivo) return;
+
+    setSending(true);
+
+    // Tenta enviar por email
+    try {
+      await emailjs.sendForm(EMAILJS_SERVICE, EMAILJS_TEMPLATE, formRef.current, EMAILJS_PUBLIC_KEY);
+    } catch {}
+
+    // Sempre abre WhatsApp também
     const msg = encodeURIComponent(
       `Olá Ryan! Me chamo *${form.nome}*.\n\nEmpresa/Projeto: ${form.empresa || '—'}\nServiço: ${form.servico || '—'}\nE-mail: ${form.email || '—'}\n\nObjetivo: ${form.objetivo}`
     );
     window.open(`https://wa.me/5519992525515?text=${msg}`, '_blank');
+
+    setSending(false);
     setSent(true);
   };
 
@@ -68,7 +90,7 @@ export default function Contato() {
                 <p>Obrigado pelo contato. Retorno em breve.</p>
               </div>
             ) : (
-              <form className="contato-form" onSubmit={submit}>
+              <form className="contato-form" onSubmit={submit} ref={formRef}>
                 <div className="form-row">
                   <div className="form-group">
                     <label>Seu Nome *</label>
@@ -107,8 +129,8 @@ export default function Contato() {
                     required
                   />
                 </div>
-                <button type="submit" className="form-submit">
-                  ENVIAR PELO WHATSAPP
+                <button type="submit" className="form-submit" disabled={sending}>
+                  {sending ? 'ENVIANDO...' : 'ENVIAR PELO WHATSAPP'}
                 </button>
                 <p className="form-note">
                   Ao enviar, você será redirecionado ao WhatsApp com sua mensagem pré-preenchida.

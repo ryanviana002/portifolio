@@ -77,9 +77,10 @@
   height: 320px;
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,0,127,0.25);
+  background: #000;
   position: relative;
+  box-shadow: inset 0 0 40px rgba(255,0,127,0.15);
 }
 
 .sobre-foto-img {
@@ -87,6 +88,17 @@
   height: 100%;
   object-fit: cover;
   object-position: top;
+  filter: drop-shadow(0 0 3px rgba(0,242,254,1)) drop-shadow(0 0 6px rgba(255,0,127,0.7));
+}
+
+.sobre-foto::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 30%;
+  background: linear-gradient(to bottom, transparent, rgba(2,2,4,0.5));
+  pointer-events: none;
+  border-radius: 0 0 16px 16px;
 }
 
 .sobre-foto-placeholder {
@@ -138,6 +150,48 @@
   color: rgba(255,255,255,0.8);
   letter-spacing: 0.5px;
   text-align: center;
+}
+
+/* Tech icons */
+.sobre-techs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tech-icon {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 5px;
+  background: rgba(255,255,255,0.03);
+  color: var(--tech-color);
+  transition: border-color 0.2s, background 0.2s;
+  flex-shrink: 0;
+}
+
+.tech-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.tech-icon span {
+  font-size: 10px;
+}
+
+.tech-icon:hover {
+  border-color: var(--tech-color);
+  background: rgba(255,255,255,0.06);
+}
+
+.tech-icon span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.5);
 }
 
 /* Skills */

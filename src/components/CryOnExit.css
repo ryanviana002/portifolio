@@ -1,0 +1,74 @@
+.cry-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99995;
+  background: rgba(2,2,4,0.92);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: cryFadeIn 0.4s ease;
+}
+
+@keyframes cryFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.cry-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cry-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.cry-emoji {
+  font-size: 72px;
+  animation: cryBob 1.5s ease-in-out infinite;
+}
+
+@keyframes cryBob {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50%       { transform: translateY(-10px) rotate(5deg); }
+}
+
+.cry-title {
+  font-size: clamp(24px, 4vw, 40px);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -1px;
+}
+
+.cry-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 1px;
+}
+
+.cry-btn {
+  margin-top: 8px;
+  padding: 14px 36px;
+  background: linear-gradient(135deg, rgba(255,0,127,0.5), rgba(255,77,109,0.4));
+  border: 1px solid rgba(255,0,127,0.5);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.cry-btn:hover {
+  box-shadow: 0 0 30px rgba(255,0,127,0.5);
+  transform: translateY(-2px);
+}
