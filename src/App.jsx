@@ -124,6 +124,25 @@ function App() {
 
   useReveal();
 
+  // Proteção anti-scraping e anti-cópia
+  useEffect(() => {
+    // Detectar bots/scrapers pelo user-agent
+    const ua = navigator.userAgent.toLowerCase();
+    const botPatterns = ['firecrawl', 'scrapy', 'wget', 'curl', 'python-requests', 'go-http', 'headlesschrome', 'phantomjs', 'selenium'];
+    const isBot = botPatterns.some(p => ua.includes(p)) || navigator.webdriver;
+    if (isBot) {
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#020204;color:#ff007f;font-family:monospace;font-size:18px;text-align:center;padding:40px;">Acesso não autorizado.<br/>Entre em contato: ryanviana002@gmail.com</div>';
+      return;
+    }
+
+    const onContext = e => {
+      const tag = e.target.tagName;
+      if (tag !== 'INPUT' && tag !== 'TEXTAREA') e.preventDefault();
+    };
+    document.addEventListener('contextmenu', onContext);
+    return () => document.removeEventListener('contextmenu', onContext);
+  }, []);
+
 
   // Console easter egg
   useEffect(() => {
