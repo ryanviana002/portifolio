@@ -75,30 +75,25 @@
 .sobre-foto {
   width: 260px;
   height: 320px;
+  position: relative;
+  background: linear-gradient(160deg, #0d0015, #000);
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(255,0,127,0.25);
-  background: #000;
-  position: relative;
-  box-shadow: inset 0 0 40px rgba(255,0,127,0.15);
+  border: 1px solid rgba(0,242,254,0.2);
+  box-shadow: 0 0 30px rgba(0,242,254,0.08), 0 0 60px rgba(255,0,127,0.05);
+  z-index: 1;
 }
 
 .sobre-foto-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top;
-  filter: drop-shadow(0 0 3px rgba(0,242,254,1)) drop-shadow(0 0 6px rgba(255,0,127,0.7));
+  object-position: center top;
+  display: block;
 }
 
-.sobre-foto::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 30%;
-  background: linear-gradient(to bottom, transparent, rgba(2,2,4,0.5));
-  pointer-events: none;
-  border-radius: 0 0 16px 16px;
+.sobre-foto-wrap::before {
+  display: none;
 }
 
 .sobre-foto-placeholder {
@@ -138,6 +133,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 0 24px rgba(255,0,127,0.4);
+  z-index: 2;
 }
 .badge-num {
   font-size: 18px;
@@ -305,4 +301,13 @@
   .sobre-inner { padding: 0 24px; }
   .sobre-grid { grid-template-columns: 1fr; gap: 48px; }
   .sobre-stats { gap: 24px; }
+}
+
+@media (max-width: 768px) {
+  .sobre-left { align-items: center; }
+  .sobre-foto { width: 220px; height: 270px; }
+  .sobre-foto-wrap::before { width: 226px; height: 276px; }
+  .sobre-techs { justify-content: center; }
+  .sobre-stats { flex-direction: column; gap: 16px; align-items: center; }
+  .stat { text-align: center; }
 }

@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react';
-import './ShakeEaster.css';
+import { useEffect } from 'react';
 
 export default function ShakeEaster() {
-  const [show, setShow] = useState(false);
 
   useEffect(() => {
     let lastX = null, lastY = null, lastZ = null;
@@ -25,8 +23,7 @@ export default function ShakeEaster() {
 
         if (shakeCount >= 3) {
           shakeCount = 0;
-          setShow(true);
-          setTimeout(() => setShow(false), 3000);
+          window.dispatchEvent(new Event('rdc:matrix'));
         }
       }
 
@@ -51,15 +48,5 @@ export default function ShakeEaster() {
     return () => window.removeEventListener('devicemotion', onMotion);
   }, []);
 
-  if (!show) return null;
-
-  return (
-    <div className="shake-overlay">
-      <div className="shake-content">
-        <div className="shake-emoji">🤙</div>
-        <p className="shake-msg">Isso aí! Você sacudiu!</p>
-        <p className="shake-sub">Bora criar algo incrível?</p>
-      </div>
-    </div>
-  );
+  return null;
 }

@@ -14,11 +14,42 @@ const TERMINAL_STEPS = [
   { type: 'out', text: '✓ Pronto! Pressione Enter...' },
 ];
 
+const COMMANDS = {
+  help: [
+    '  help       — mostra este menu',
+    '  projects   — veja meus projetos',
+    '  contact    — entre em contato',
+    '  skills     — minhas habilidades',
+    '  clear      — limpa o terminal',
+  ],
+  projects: [
+    '  → AutoAir Shop   — e-commerce automotivo',
+    '  → Genuína Burger — cardápio digital',
+    '  → RDCreator      — este portfólio',
+    '  use: ryancreator.dev/portfolio',
+  ],
+  contact: [
+    '  📧 ryanviana002@gmail.com',
+    '  💬 wa.me/5519992525515',
+    '  🌐 ryancreator.dev',
+  ],
+  skills: [
+    '  ████████████ 4GL Informix  98%',
+    '  ███████████░ Web Design    92%',
+    '  ██████████░░ React / Vite  88%',
+    '  █████████░░░ CSS / Anim.   85%',
+    '  ████████░░░░ Canva         80%',
+  ],
+};
+
 function TerminalIcon() {
   const [lines, setLines] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [currentText, setCurrentText] = useState('');
   const [typing, setTyping] = useState(true);
+  const [interactive, setInteractive] = useState(false);
+  const [input, setInput] = useState('');
+  const inputRef = useRef(null);
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -27,10 +58,41 @@ function TerminalIcon() {
       setCurrentStep(0);
       setCurrentText('');
       setTyping(true);
+      setInteractive(false);
+      setInput('');
     };
+    const onInteractive = () => setInteractive(true);
     window.addEventListener('rdc:terminal-reset', onReset);
-    return () => window.removeEventListener('rdc:terminal-reset', onReset);
+    window.addEventListener('rdc:terminal-interactive', onInteractive);
+    return () => {
+      window.removeEventListener('rdc:terminal-reset', onReset);
+      window.removeEventListener('rdc:terminal-interactive', onInteractive);
+    };
   }, []);
+
+  // Quando termina a animação, entra no modo interativo após Enter
+  useEffect(() => {
+    if (!interactive) return;
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }, [interactive]);
+
+  const handleCommand = (cmd) => {
+    const trimmed = cmd.trim().toLowerCase();
+    const newLines = [{ type: 'cmd', text: cmd }];
+    if (trimmed === 'clear') {
+      setLines([{ type: 'out', text: 'Terminal limpo. Digite help para começar.' }]);
+      setInput('');
+      return;
+    }
+    const output = COMMANDS[trimmed];
+    if (output) {
+      output.forEach(t => newLines.push({ type: 'out', text: t }));
+    } else if (trimmed) {
+      newLines.push({ type: 'out', text: `  comando não encontrado: ${trimmed}. Tente "help"` });
+    }
+    setLines(l => [...l, ...newLines]);
+    setInput('');
+  };
 
   useEffect(() => {
     if (currentStep >= TERMINAL_STEPS.length) return;
@@ -94,8 +156,22 @@ function TerminalIcon() {
             <span className="t-cursor" />
           </div>
         )}
-        {currentStep >= TERMINAL_STEPS.length && (
-          <div className="t-enter-hint">[ ENTER ]</div>
+        {currentStep >= TERMINAL_STEPS.length && !interactive && (
+          <div className="t-enter-hint" onClick={() => setInteractive(true)}>[ ENTER ]</div>
+        )}
+        {interactive && (
+          <div className="t-line t-cmd">
+            <span className="t-prompt">❯ </span>
+            <input
+              ref={inputRef}
+              className="t-input"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleCommand(input); }}
+              spellCheck={false}
+              autoComplete="off"
+            />
+          </div>
         )}
         <div ref={bottomRef} />
       </div>
@@ -305,7 +381,7 @@ export default function Hero() {
       speed += (targetSpeed - speed) * 0.08;
       targetSpeed = Math.max(0.6, targetSpeed * 0.92);
 
-      ctx.fillStyle = light ? '#ffffff' : '#020204';
+      ctx.fillStyle = light ? '#ffffff' : '#050510';
       ctx.fillRect(0, 0, W, H);
 
       for (const s of stars) {
@@ -357,6 +433,30 @@ export default function Hero() {
     return () => window.removeEventListener('mousemove', onMove);
   }, []);
 
+  // Relâmpago a cada 15s
+  useEffect(() => {
+    const flash = () => {
+      const el = document.getElementById('inicio');
+      if (!el) return;
+      el.style.transition = 'none';
+      el.style.filter = 'brightness(3) saturate(2)';
+      setTimeout(() => {
+        el.style.filter = 'brightness(1.4)';
+        el.style.transition = 'filter 0.15s ease';
+        setTimeout(() => {
+          el.style.filter = 'brightness(2)';
+          setTimeout(() => {
+            el.style.filter = '';
+            el.style.transition = 'filter 0.3s ease';
+          }, 80);
+        }, 60);
+      }, 40);
+    };
+
+    const id = setInterval(flash, 15000);
+    return () => clearInterval(id);
+  }, []);
+
   useEffect(() => {
     const onKey = e => {
       if (e.key === 'Enter') {
@@ -364,8 +464,8 @@ export default function Hero() {
         if (!hero) return;
         const rect = hero.getBoundingClientRect();
         if (rect.top <= 0 && rect.bottom >= 0) {
+          window.dispatchEvent(new Event('rdc:terminal-interactive'));
           window.dispatchEvent(new Event('rdc:matrix'));
-          // Reinicia terminal após o Matrix terminar (~4s)
           setTimeout(() => {
             window.dispatchEvent(new Event('rdc:terminal-reset'));
           }, 4000);
@@ -395,10 +495,8 @@ export default function Hero() {
       const now = Date.now();
       const light = isLight();
 
-      ctx.clearRect(0, 0, W, H);
-
       ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = light ? 'rgba(10,10,30,0.22)' : 'rgba(255,255,255,0.14)';
+      ctx.fillStyle = light ? '#ffffff' : '#0a0a12';
       ctx.fillRect(0, 0, W, H);
 
       ctx.globalCompositeOperation = 'destination-out';
@@ -483,7 +581,6 @@ export default function Hero() {
     let origins = null;
 
     const onMove = e => {
-      // Recalcula sempre para não ficar desatualizado após animações
       origins = Array.from(letters).map(l => {
         const t = l.style.transform;
         l.style.transform = '';
@@ -517,6 +614,7 @@ export default function Hero() {
       <canvas ref={brushRef} className="hero-brush" />
 
 
+
       <div className="hero-layout">
         <div className="hero-content">
           <p className="hero-tag">CRIAÇÃO DIGITAL & DESENVOLVIMENTO</p>
@@ -539,11 +637,6 @@ export default function Hero() {
       </div>
 
 
-      <div className="hero-scroll">
-        <svg className="scroll-arrow" viewBox="0 0 24 24" width="32" height="32">
-          <polygon points="12,20 2,6 22,6" fill="rgba(255,255,255,0.5)"/>
-        </svg>
-      </div>
     </section>
   );
 }

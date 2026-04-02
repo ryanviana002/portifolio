@@ -1,27 +1,66 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import './AudioToggle.css';
 
-// Stream lo-fi público e gratuito
-const LOFI_STREAM = 'https://streams.ilovemusic.de/iloveradio17.mp3';
+const STREAMS = [
+  'https://streams.ilovemusic.de/iloveradio17.mp3',
+  'https://radio.plaza.one/mp3',
+];
 
 export default function AudioToggle() {
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
   const audioRef = useRef(null);
+  const actxRef = useRef(null);
+  const analyserRef = useRef(null);
+  const rafRef = useRef(null);
+
+  const stopAnalyser = () => {
+    cancelAnimationFrame(rafRef.current);
+    window.dispatchEvent(new CustomEvent('rdc:audio-level', { detail: 0 }));
+  };
+
+  const startAnalyser = (audio) => {
+    try {
+      const actx = new (window.AudioContext || window.webkitAudioContext)();
+      actxRef.current = actx;
+      const source = actx.createMediaElementSource(audio);
+      const analyser = actx.createAnalyser();
+      analyser.fftSize = 64;
+      analyserRef.current = analyser;
+      source.connect(analyser);
+      analyser.connect(actx.destination);
+      const data = new Uint8Array(analyser.frequencyBinCount);
+
+      const tick = () => {
+        analyser.getByteFrequencyData(data);
+        const avg = data.reduce((a, b) => a + b, 0) / data.length / 255;
+        window.dispatchEvent(new CustomEvent('rdc:audio-level', { detail: avg }));
+        rafRef.current = requestAnimationFrame(tick);
+      };
+      tick();
+    } catch {}
+  };
+
+  const tryPlay = (idx) => {
+    if (idx >= STREAMS.length) { setLoading(false); setPlaying(false); return; }
+    const audio = new Audio(STREAMS[idx]);
+    audio.volume = 0.07;
+    audioRef.current = audio;
+    audio.oncanplay = () => { setLoading(false); startAnalyser(audio); };
+    audio.onerror = () => tryPlay(idx + 1);
+    audio.play().catch(() => tryPlay(idx + 1));
+  };
 
   const toggle = () => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio(LOFI_STREAM);
-      audioRef.current.volume = 0.3;
-      audioRef.current.oncanplay = () => setLoading(false);
-    }
-
     if (!playing) {
       setLoading(true);
-      audioRef.current.play().catch(() => setLoading(false));
       setPlaying(true);
+      tryPlay(0);
     } else {
-      audioRef.current.pause();
+      stopAnalyser();
+      audioRef.current?.pause();
+      audioRef.current = null;
+      try { actxRef.current?.close(); } catch {}
       setPlaying(false);
       setLoading(false);
     }
@@ -31,7 +70,7 @@ export default function AudioToggle() {
     <button
       className={`audio-toggle${playing ? ' active' : ''}${loading ? ' loading' : ''}`}
       onClick={toggle}
-      title={playing ? 'Pausar lo-fi' : 'Tocar lo-fi'}
+      title={playing ? 'Pausar música' : 'Tocar lo-fi'}
     >
       {loading ? (
         <span className="audio-loading" />

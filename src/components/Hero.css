@@ -31,6 +31,34 @@
   pointer-events: none;
 }
 
+/* Silhueta */
+.hero-silhouette {
+  position: absolute;
+  right: 8%;
+  bottom: 0;
+  width: 180px;
+  height: auto;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.6;
+  filter: blur(1px);
+  animation: silhouetteBreathe 6s ease-in-out infinite;
+}
+
+.hero-silhouette svg {
+  width: 100%;
+  height: auto;
+}
+
+@keyframes silhouetteBreathe {
+  0%, 100% { transform: scaleX(1) translateY(0); opacity: 0.6; }
+  50% { transform: scaleX(1.02) translateY(-6px); opacity: 0.45; }
+}
+
+@media (max-width: 768px) {
+  .hero-silhouette { display: none; }
+}
+
 .hero-glow {
   position: absolute;
   border-radius: 50%;
@@ -478,6 +506,63 @@
   backdrop-filter: blur(20px);
   box-shadow: 0 0 40px rgba(0,242,254,0.08), 0 20px 60px rgba(0,0,0,0.5);
   font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  position: relative;
+  transition: box-shadow 0.3s, border-color 0.3s;
+}
+
+.terminal:hover {
+  border-color: rgba(0,242,254,0.4);
+  box-shadow: 0 0 60px rgba(0,242,254,0.15), 0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* Efeito holograma ao hover */
+.terminal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,242,254,0.03) 2px,
+    rgba(0,242,254,0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.terminal:hover::before {
+  opacity: 1;
+  animation: scanlines 4s linear infinite;
+}
+
+.terminal::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, transparent, rgba(0,242,254,0.04), transparent);
+  pointer-events: none;
+  z-index: 11;
+  opacity: 0;
+  transition: opacity 0.3s;
+  animation: scanMove 3s linear infinite;
+}
+
+.terminal:hover::after {
+  opacity: 1;
+}
+
+@keyframes scanlines {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100px; }
+}
+
+@keyframes scanMove {
+  0%   { top: -40px; }
+  100% { top: 100%; }
 }
 
 .terminal-bar {
@@ -540,6 +625,18 @@
 @keyframes enterBlink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
+}
+
+.t-input {
+  background: none;
+  border: none;
+  outline: none;
+  color: rgba(255,255,255,0.9);
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 12px;
+  caret-color: #ff007f;
+  width: 100%;
+  padding: 0;
 }
 
 .t-cursor {
@@ -690,4 +787,12 @@
   .scroll-arrow {
     font-size: 24px;
   }
+
+  .terminal {
+    width: 100%;
+    max-width: 340px;
+  }
+
+  .glow-pink { width: 300px; height: 300px; }
+  .glow-cyan { width: 250px; height: 250px; }
 }

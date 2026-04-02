@@ -215,6 +215,12 @@
 
 @media (max-width: 900px) {
   .contato-inner { padding: 0 24px; }
-  .contato-grid { grid-template-columns: 1fr; }
+  .contato-grid { grid-template-columns: 1fr; gap: 40px; }
   .form-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .contato-grid { gap: 24px; }
+  .contato-info { text-align: center; }
+  .contact-links { align-items: center; }
 }

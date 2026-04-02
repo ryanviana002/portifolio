@@ -36,7 +36,7 @@ export default function ParticleText({ onDone }) {
             y: Math.random() * H,
             color: colors[Math.floor(Math.random() * colors.length)],
             size: Math.random() * 2 + 1,
-            speed: 0.04 + Math.random() * 0.04,
+            speed: 0.06 + Math.random() * 0.05,
           });
         }
       }
@@ -80,7 +80,7 @@ export default function ParticleText({ onDone }) {
 
       if (phase === 'hold') {
         holdTimer++;
-        if (holdTimer > 60) {
+        if (holdTimer > 25) {
           phase = 'explode';
           for (const p of particles) {
             const angle = Math.random() * Math.PI * 2;
@@ -89,7 +89,7 @@ export default function ParticleText({ onDone }) {
             p.vy = Math.sin(angle) * speed - 3;
             p.alpha = 1;
           }
-          setTimeout(() => onDone?.(), 1000);
+          setTimeout(() => onDone?.(), 600);
         }
       }
 

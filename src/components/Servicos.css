@@ -176,3 +176,8 @@
   .serv-body { padding-left: 0 !important; }
   .serv-item.open .serv-body { padding-left: 0 !important; }
 }
+
+@media (max-width: 768px) {
+  .serv-row { flex-direction: column; gap: 12px; }
+  .serv-icon { width: 40px; height: 40px; font-size: 18px; }
+}

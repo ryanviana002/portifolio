@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import './App.css';
 import Navbar from './components/Navbar';
@@ -17,6 +17,7 @@ import SectionNav from './components/SectionNav';
 import ParticleText from './components/ParticleText';
 import MatrixRain from './components/MatrixRain';
 import SleepMode from './components/SleepMode';
+import Portal from './components/Portal';
 import BackToTop from './components/BackToTop';
 import ShakeEaster from './components/ShakeEaster';
 import useReveal from './hooks/useReveal';
@@ -45,49 +46,84 @@ function WaPopup({ onClose }) {
   );
 }
 
-function playWind(duration, vol) {
+function playClick(vol = 0.2) {
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const bufferSize = ctx.sampleRate * duration;
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.setValueAtTime(800, ctx.currentTime);
-    filter.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + duration);
-    filter.Q.value = 0.8;
-
+    if (!window._rdcActx || window._rdcActx.state === 'closed') {
+      window._rdcActx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    const ctx = window._rdcActx;
+    if (ctx.state === 'suspended') ctx.resume();
+    const t = ctx.currentTime;
+    const bufSize = Math.floor(ctx.sampleRate * 0.012);
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufSize);
+    const noise = ctx.createBufferSource();
+    noise.buffer = buf;
+    const hpf = ctx.createBiquadFilter();
+    hpf.type = 'highpass';
+    hpf.frequency.value = 3000;
     const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.0, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + duration * 0.2);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-
-    source.connect(filter);
-    filter.connect(gain);
+    gain.gain.setValueAtTime(vol, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.018);
+    noise.connect(hpf);
+    hpf.connect(gain);
     gain.connect(ctx.destination);
-    source.start();
-    source.stop(ctx.currentTime + duration);
-    source.onended = () => ctx.close();
+    noise.start(t);
+    noise.stop(t + 0.02);
   } catch {}
 }
+
 
 function App() {
   const cursorRef = useRef(null);
   const [waOpen, setWaOpen] = useState(false);
   const [particleDone, setParticleDone] = useState(false);
   const [matrix, setMatrix] = useState(false);
+  const [portal, setPortal] = useState(false);
+  const [scrollPct, setScrollPct] = useState(0);
+  const audioLevelRef = useRef(0);
+  const starsRef = useRef(null);
 
   useEffect(() => {
     const onMatrix = () => setMatrix(true);
+    const onPortal = () => setPortal(true);
     window.addEventListener('rdc:matrix', onMatrix);
-    return () => window.removeEventListener('rdc:matrix', onMatrix);
+    window.addEventListener('rdc:portal', onPortal);
+    return () => {
+      window.removeEventListener('rdc:matrix', onMatrix);
+      window.removeEventListener('rdc:portal', onPortal);
+    };
   }, []);
+
+  // Scroll progress
+  useEffect(() => {
+    const onScroll = () => {
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollPct(total > 0 ? (window.scrollY / total) * 100 : 0);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Fundo reativo ao áudio
+  useEffect(() => {
+    const onLevel = e => {
+      audioLevelRef.current = e.detail;
+      if (starsRef.current) {
+        const scale = 1 + e.detail * 2.5;
+        const opacity = 0.3 + e.detail * 2;
+        starsRef.current.style.transform = `scale(${scale})`;
+        starsRef.current.style.opacity = Math.min(1, opacity);
+      }
+    };
+    window.addEventListener('rdc:audio-level', onLevel);
+    return () => window.removeEventListener('rdc:audio-level', onLevel);
+  }, []);
+
+
   useReveal();
+
 
   // Console easter egg
   useEffect(() => {
@@ -140,11 +176,11 @@ function App() {
       updateCursorColor();
     };
 
-    const onEnter = () => { cursor.classList.add('big'); playWind(0.3, 0.06); };
+    const onEnter = () => { cursor.classList.add('big'); playClick(0.08); };
     const onLeave = () => cursor.classList.remove('big');
-    const onPlayEnter = () => { cursor.classList.add('play'); playWind(0.3, 0.06); };
+    const onPlayEnter = () => { cursor.classList.add('play'); playClick(0.08); };
     const onPlayLeave = () => cursor.classList.remove('play');
-    const onClick = () => playWind(0.6, 0.12);
+    const onClick = () => playClick(0.18);
 
     window.addEventListener('mousemove', onMove);
     window.addEventListener('click', onClick);
@@ -169,10 +205,36 @@ function App() {
     };
   }, []);
 
+  const stars = useMemo(() => Array.from({ length: 80 }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    top: Math.random() * 100,
+    size: Math.random() * 1.5 + 0.5,
+    duration: 15 + Math.random() * 25,
+    delay: Math.random() * 20,
+  })), []);
+
   return (
     <>
       {!particleDone && <ParticleText onDone={() => setParticleDone(true)} />}
       {matrix && <MatrixRain onDone={() => setMatrix(false)} />}
+      {portal && <Portal onDone={() => { setPortal(false); document.getElementById('contato')?.scrollIntoView({ behavior: 'smooth' }); }} />}
+
+      <div className="scroll-progress" style={{ width: `${scrollPct}%` }} />
+
+      <div className="stars-bg" aria-hidden="true" ref={starsRef}>
+        {stars.map(s => (
+          <span key={s.id} className="star" style={{
+            left: `${s.left}%`,
+            top: `${s.top}%`,
+            width: s.size,
+            height: s.size,
+            animationDuration: `${s.duration}s`,
+            animationDelay: `${s.delay}s`,
+          }} />
+        ))}
+      </div>
+
       <SleepMode />
       <BackToTop />
       <ShakeEaster />

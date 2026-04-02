@@ -33,8 +33,11 @@
 .btt-rocket {
   width: 22px;
   height: auto;
+  display: block;
+  margin: 4px auto 0;
   animation: rocketHover 2s ease-in-out infinite;
   filter: drop-shadow(0 0 4px rgba(0,242,254,0.4));
+  transform-origin: center center;
 }
 
 @keyframes rocketHover {
