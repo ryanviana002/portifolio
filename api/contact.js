@@ -15,8 +15,8 @@ export default async function handler(req, res) {
 
   try {
     await resend.emails.send({
-      from: 'Site RDCreator <contato@ryancreator.dev>',
-      to: ['contato@ryancreator.dev'],
+      from: 'Site RDCreator <onboarding@resend.dev>',
+      to: ['ryanviana002@gmail.com'],
       replyTo: email ? email : 'contato@ryancreator.dev',
       subject: `Novo contato: ${nome}${servico ? ` — ${servico}` : ''}`,
       html: `
