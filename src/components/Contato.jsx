@@ -32,12 +32,6 @@ export default function Contato() {
       });
     } catch {}
 
-    // Abre WhatsApp com mensagem pré-preenchida
-    const msg = encodeURIComponent(
-      `Olá Ryan! Me chamo *${form.nome}*.\n\nEmpresa/Projeto: ${form.empresa || '—'}\nServiço: ${form.servico || '—'}\nE-mail: ${form.email || '—'}\n\nObjetivo: ${form.objetivo}`
-    );
-    window.open(`https://wa.me/5519992525515?text=${msg}`, '_blank');
-
     setSending(false);
     setSent(true);
   };
@@ -124,10 +118,10 @@ export default function Contato() {
                   />
                 </div>
                 <button type="submit" className="form-submit" disabled={sending}>
-                  {sending ? 'ENVIANDO...' : 'ENVIAR PELO WHATSAPP'}
+                  {sending ? 'ENVIANDO...' : 'ENVIAR MENSAGEM'}
                 </button>
                 <p className="form-note">
-                  Ao enviar, você será redirecionado ao WhatsApp com sua mensagem pré-preenchida.
+                  Responderei em até 24h no e-mail ou WhatsApp informado.
                 </p>
               </form>
             )}
