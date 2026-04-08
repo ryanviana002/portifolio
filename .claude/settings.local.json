@@ -3,7 +3,9 @@
     "allow": [
       "WebFetch(domain:autoairshop.vercel.app)",
       "Bash(npm run:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "mcp__claude_ai_Canva__list-brand-kits",
+      "Bash(node -e \"require\\('puppeteer'\\)\")"
     ]
   }
 }

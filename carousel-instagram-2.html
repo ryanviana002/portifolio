@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<title>RDCreator — Carrossel Cyberpunk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,300;1,700&display=swap"/>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: #08020f;
+  font-family: 'Space Grotesk', sans-serif;
+  padding: 40px 20px 80px;
+  color: #fff;
+}
+h1 { text-align:center; font-size:12px; color:rgba(255,255,255,0.2); letter-spacing:5px; text-transform:uppercase; margin-bottom:4px; }
+p.hint { text-align:center; font-size:11px; color:rgba(255,255,255,0.1); margin-bottom:48px; }
+
+.slides { display:flex; flex-direction:column; align-items:center; gap:32px; }
+.slide-wrap { display:flex; flex-direction:column; align-items:center; gap:8px; }
+.slide-label { font-size:10px; letter-spacing:3px; color:rgba(255,255,255,0.15); text-transform:uppercase; }
+
+/* Base: 1080x1350 at 50% = 540x675 */
+.slide {
+  width: 540px;
+  height: 675px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  box-shadow: 0 0 80px rgba(120,0,255,0.3), 0 0 0 1px rgba(255,255,255,0.06);
+}
+
+/* ── AURORA LAYERS ── */
+.aurora {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    radial-gradient(ellipse 120% 80% at 20% -10%, rgba(90,0,200,0.7) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 60% at 80% 110%, rgba(180,0,255,0.5) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 50%, rgba(0,50,200,0.3) 0%, transparent 60%);
+}
+.aurora-2 {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    radial-gradient(ellipse 100% 70% at 90% -5%, rgba(160,0,255,0.6) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 10% 110%, rgba(0,150,255,0.4) 0%, transparent 50%);
+}
+.aurora-cta {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(130,0,255,0.8) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255,0,120,0.4) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 30% at 10% 60%, rgba(0,100,255,0.3) 0%, transparent 50%);
+}
+
+/* ── NOISE GRAIN ── */
+.noise {
+  position: absolute; inset: 0; z-index: 3; pointer-events:none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* ── SCAN LINES ── */
+.scan {
+  position: absolute; inset: 0; z-index: 4; pointer-events:none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.08) 3px,
+    rgba(0,0,0,0.08) 4px
+  );
+}
+
+/* ── IG BAR ── */
+.ig-bar {
+  position: absolute; top:20px; left:0; right:0;
+  padding: 0 26px;
+  display: flex; align-items:center; justify-content:space-between;
+  z-index: 30;
+}
+.ig-logo { display:flex; align-items:center; gap:7px; }
+.ig-dot {
+  width: 22px; height: 22px; border-radius:50%;
+  background: linear-gradient(135deg, #ff007f, #9e00ff);
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; font-weight:900; color:#fff;
+  box-shadow: 0 0 12px rgba(255,0,127,0.5);
+}
+.ig-name { font-size:13px; font-weight:700; letter-spacing:2px; color:#fff; text-shadow:0 0 12px rgba(255,255,255,0.3); }
+.ig-icons { display:flex; gap:10px; opacity:0.5; }
+
+/* ── ARRASTE ── */
+.arraste {
+  position: absolute; bottom:26px; left:50%; transform:translateX(-50%);
+  display:flex; align-items:center; gap:10px;
+  padding:10px 24px; border-radius:999px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px);
+  font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase;
+  color:rgba(255,255,255,0.7); white-space:nowrap;
+  z-index: 30;
+}
+.arraste-circle {
+  width:22px; height:22px; border-radius:50%;
+  background:rgba(255,255,255,0.1);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px;
+}
+
+/* ── PERSON SILHOUETTE (SVG inline) ── */
+.person-wrap {
+  position: absolute;
+  bottom: 0; left:50%; transform:translateX(-50%);
+  z-index: 8;
+}
+
+/* ── LIGHT BEAM ── */
+.light-beam {
+  position: absolute; z-index: 5; pointer-events:none;
+  width: 300px; height: 600px;
+  top: -100px;
+  background: linear-gradient(180deg, rgba(180,80,255,0.35) 0%, rgba(100,0,255,0.1) 60%, transparent 100%);
+  clip-path: polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%);
+  filter: blur(8px);
+}
+
+/* ==================
+   SLIDE 1 — CAPA
+=================== */
+.s1 { background: #07010e; }
+
+.s1 .brand-tag {
+  position: absolute; top:72px; left:26px;
+  font-size:10px; font-weight:700; letter-spacing:4px; text-transform:uppercase;
+  color: rgba(255,255,255,0.35); z-index:20;
+  display:flex; align-items:center; gap:8px;
+}
+.s1 .brand-tag::before { content:''; width:16px; height:1px; background:rgba(255,0,127,0.6); }
+
+.s1 .headline-block {
+  position: absolute;
+  top: 110px; left:26px; right:26px;
+  z-index: 20;
+}
+.s1 .h-small {
+  font-size: 18px; font-weight:300; letter-spacing:1px;
+  color:rgba(255,255,255,0.4); display:block; margin-bottom:4px;
+  font-style: italic;
+}
+.s1 .h-big {
+  font-size: 88px; font-weight:900; line-height:0.85;
+  letter-spacing:-4px; display:block;
+}
+.s1 .h-big.pink {
+  background: linear-gradient(135deg, #ff007f 0%, #c900ff 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  filter: drop-shadow(0 0 20px rgba(255,0,127,0.4));
+}
+.s1 .h-big.cyan {
+  background: linear-gradient(135deg, #00d4ff 0%, #9e00ff 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.s1 .h-accent {
+  font-size: 52px; font-weight:900; letter-spacing:-2px; display:block; margin-top:8px;
+  color: rgba(255,255,255,0.9);
+  text-shadow: 0 0 40px rgba(200,100,255,0.4);
+}
+
+.s1 .sub-line {
+  position: absolute; top:350px; left:26px; right:160px;
+  font-size:13px; color:rgba(255,255,255,0.35); line-height:1.6;
+  z-index: 20; font-weight:400;
+}
+
+/* ==================
+   SLIDES 2 & 3 — PANORAMA
+=================== */
+.pano-row { display:flex; gap:3px; }
+.pano-label { font-size:10px; letter-spacing:3px; color:rgba(255,255,255,0.15); text-transform:uppercase; margin-bottom:8px; text-align:center; }
+
+.s2, .s3 {
+  width:540px; height:675px;
+  background: #060010;
+  position:relative; overflow:hidden;
+}
+
+.pano-inner {
+  position:absolute; width:1083px; height:675px; top:0;
+}
+.s2 .pano-inner { left:0; }
+.s3 .pano-inner { left:-543px; }
+
+.pano-aurora {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 50% 70% at 25% 50%, rgba(100,0,255,0.6) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 50% at 75% 30%, rgba(0,100,255,0.4) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(180,0,120,0.3) 0%, transparent 50%);
+}
+
+.pano-connect {
+  position:absolute; top:0; bottom:0; width:1px;
+  background: linear-gradient(to bottom, transparent 0%, rgba(180,80,255,0.5) 40%, rgba(180,80,255,0.5) 60%, transparent 100%);
+  z-index: 20;
+}
+.s2 .pano-connect { right:0; }
+.s3 .pano-connect { left:0; }
+
+/* ==================
+   SLIDE 4 — BENEFÍCIOS
+=================== */
+.s4 { background: #060010; }
+
+.s4 .intro-label {
+  position:absolute; top:72px; left:26px;
+  font-size:10px; font-weight:700; letter-spacing:4px; text-transform:uppercase;
+  color:rgba(255,100,255,0.6); z-index:20;
+  display:flex; align-items:center; gap:8px;
+}
+.s4 .intro-label::before { content:''; width:16px; height:1px; background:rgba(255,100,255,0.6); }
+
+.s4 .s4-headline {
+  position:absolute; top:98px; left:26px; right:26px;
+  font-size:40px; font-weight:900; line-height:1.05; letter-spacing:-1.5px;
+  z-index:20;
+}
+.s4 .s4-headline em {
+  font-style:normal;
+  background: linear-gradient(135deg, #c900ff, #ff007f);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+
+.s4 .benefit-list {
+  position:absolute; top:240px; left:26px; right:26px;
+  z-index:20; display:flex; flex-direction:column; gap:16px;
+}
+
+.benefit-item {
+  display:flex; align-items:center; gap:16px;
+  padding:18px 22px;
+  border-radius:12px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(6px);
+  position:relative; overflow:hidden;
+}
+.benefit-item::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  border-radius:3px 0 0 3px;
+}
+.benefit-item.b1::before { background: linear-gradient(to bottom, #ff007f, #c900ff); }
+.benefit-item.b2::before { background: linear-gradient(to bottom, #c900ff, #9e00ff); }
+.benefit-item.b3::before { background: linear-gradient(to bottom, #00d4ff, #9e00ff); }
+
+.benefit-icon {
+  width:44px; height:44px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; flex-shrink:0;
+}
+.b1 .benefit-icon { background:rgba(255,0,127,0.15); }
+.b2 .benefit-icon { background:rgba(158,0,255,0.15); }
+.b3 .benefit-icon { background:rgba(0,212,255,0.12); }
+
+.benefit-text { flex:1; }
+.benefit-title { font-size:17px; font-weight:700; color:#fff; margin-bottom:3px; }
+.benefit-desc { font-size:11px; color:rgba(255,255,255,0.38); line-height:1.4; }
+
+.benefit-num {
+  font-size:40px; font-weight:900; letter-spacing:-2px;
+  color:rgba(255,255,255,0.04);
+  position:absolute; right:18px; top:50%; transform:translateY(-50%);
+  pointer-events:none;
+}
+
+/* ==================
+   SLIDE 5 — CTA
+=================== */
+.s5 { background: #060010; }
+
+.s5 .beam-left {
+  position:absolute; left:30%; top:0; bottom:0; width:200px; z-index:2;
+  background: linear-gradient(180deg, rgba(160,50,255,0.4) 0%, rgba(80,0,200,0.15) 50%, transparent 100%);
+  clip-path: polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%);
+  filter: blur(12px);
+}
+
+.s5 .cta-eyebrow {
+  position:absolute; top:72px; left:26px;
+  font-size:10px; font-weight:700; letter-spacing:4px; text-transform:uppercase;
+  color:rgba(255,0,127,0.7); z-index:25;
+  display:flex; align-items:center; gap:8px;
+}
+.s5 .cta-eyebrow::before { content:''; width:16px; height:1px; background:rgba(255,0,127,0.7); }
+
+.s5 .cta-headline {
+  position:absolute; top:100px; left:26px; right:26px;
+  z-index:25; line-height:0.9;
+}
+.s5 .cta-headline .word1 {
+  display:block; font-size:100px; font-weight:900; letter-spacing:-5px;
+  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.s5 .cta-headline .word2 {
+  display:block; font-size:100px; font-weight:900; letter-spacing:-5px;
+  background: linear-gradient(135deg, #c900ff 0%, #ff007f 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  filter: drop-shadow(0 0 30px rgba(200,0,255,0.5));
+}
+
+.s5 .cta-divider {
+  position:absolute; top:310px; left:26px; right:26px;
+  height:1px; background:linear-gradient(to right, rgba(255,0,127,0.4), rgba(0,212,255,0.2), transparent);
+  z-index:25;
+}
+
+.s5 .cta-sub {
+  position:absolute; top:324px; left:26px; right:26px;
+  font-size:13px; color:rgba(255,255,255,0.35); line-height:1.6;
+  z-index:25; font-weight:400;
+}
+
+.s5 .contact-pills {
+  position:absolute; top:400px; left:26px; right:26px;
+  z-index:25; display:flex; flex-direction:column; gap:12px;
+}
+.cpill {
+  display:flex; align-items:center; gap:14px;
+  padding:14px 22px; border-radius:999px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.04);
+  font-size:13px; font-weight:600; color:rgba(255,255,255,0.8);
+}
+.cpill.pink { border-color:rgba(255,0,127,0.3); }
+.cpill.blue { border-color:rgba(0,212,255,0.25); }
+.cpill-icon {
+  width:32px; height:32px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;
+}
+.cpill.pink .cpill-icon { background:rgba(255,0,127,0.2); }
+.cpill.blue .cpill-icon { background:rgba(0,212,255,0.15); }
+
+.s5 .site-tag {
+  position:absolute; bottom:72px; left:26px; right:26px;
+  text-align:center; font-size:11px; font-weight:700; letter-spacing:4px; text-transform:uppercase;
+  color:rgba(255,255,255,0.15); z-index:25;
+}
+
+/* PRINT */
+.print-bar { text-align:center; margin-top:60px; }
+.print-btn {
+  background: linear-gradient(135deg, #c900ff, #ff007f);
+  color:#fff; border:none; padding:14px 36px; border-radius:999px;
+  font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700;
+  letter-spacing:2px; cursor:pointer; box-shadow:0 0 40px rgba(200,0,255,0.35);
+}
+</style>
+</head>
+<body>
+
+<h1>RDCreator — Carrossel Cyberpunk</h1>
+<p class="hint">5 slides · 1080×1350px · estilo dark aurora</p>
+
+<div class="slides">
+
+<!-- ===== SLIDE 1 — CAPA ===== -->
+<div class="slide-wrap">
+  <span class="slide-label">Slide 1 — Capa</span>
+  <div class="slide s1">
+    <div class="aurora"></div>
+    <div class="noise"></div>
+    <div class="scan"></div>
+
+    <!-- Light beam behind figure -->
+    <div class="light-beam" style="left:200px;"></div>
+
+    <!-- IG Bar -->
+    <div class="ig-bar">
+      <div class="ig-logo">
+        <div class="ig-dot">R</div>
+        <span class="ig-name">RD<span style="color:#c900ff;">C</span></span>
+      </div>
+      <div class="ig-icons">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </div>
+    </div>
+
+    <!-- Headline -->
+    <div class="s1 headline-block">
+      <span class="h-small">eu crio sua</span>
+      <span class="h-big pink">PRE</span>
+      <span class="h-big cyan">SEN</span>
+      <span class="h-accent">ÇA DIGITAL.</span>
+    </div>
+
+    <div class="s1 brand-tag">RDCreator · Design & Dev</div>
+
+    <div class="s1 sub-line">Design estratégico.<br/>Código que converte.</div>
+
+    <!-- Person silhouette -->
+    <div class="person-wrap" style="bottom:60px;">
+      <svg width="200" height="360" viewBox="0 0 200 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="personGlow" cx="50%" cy="30%" r="50%">
+            <stop offset="0%" stop-color="rgba(200,100,255,0.5)"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </radialGradient>
+          <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(180,80,255,0.9)"/>
+            <stop offset="60%" stop-color="rgba(100,0,200,0.6)"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </linearGradient>
+          <filter id="glow1">
+            <feGaussianBlur stdDeviation="4" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <!-- Body glow -->
+        <ellipse cx="100" cy="180" rx="90" ry="180" fill="url(#personGlow)" opacity="0.4"/>
+        <!-- Silhouette head -->
+        <circle cx="100" cy="55" r="30" fill="url(#bodyGrad)" filter="url(#glow1)"/>
+        <!-- Neck -->
+        <rect x="90" y="80" width="20" height="20" rx="4" fill="url(#bodyGrad)"/>
+        <!-- Body/torso -->
+        <path d="M55 100 Q100 90 145 100 L155 240 Q100 260 45 240 Z" fill="url(#bodyGrad)" filter="url(#glow1)"/>
+        <!-- Legs -->
+        <path d="M70 240 L60 350" stroke="url(#bodyGrad)" stroke-width="22" stroke-linecap="round"/>
+        <path d="M130 240 L140 350" stroke="url(#bodyGrad)" stroke-width="22" stroke-linecap="round"/>
+        <!-- Arms -->
+        <path d="M58 110 L20 200" stroke="url(#bodyGrad)" stroke-width="16" stroke-linecap="round"/>
+        <path d="M142 110 L180 200" stroke="url(#bodyGrad)" stroke-width="16" stroke-linecap="round"/>
+        <!-- Light rim on shoulder -->
+        <path d="M58 108 Q40 150 22 198" stroke="rgba(200,150,255,0.7)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <path d="M142 108 Q160 150 178 198" stroke="rgba(200,150,255,0.5)" stroke-width="1" stroke-linecap="round" fill="none"/>
+      </svg>
+    </div>
+
+    <!-- Decorative corner lines -->
+    <svg style="position:absolute;top:0;left:0;z-index:6;opacity:0.25" width="60" height="60" viewBox="0 0 60 60">
+      <path d="M0 40 L0 0 L40 0" stroke="rgba(200,100,255,0.8)" stroke-width="1.5" fill="none"/>
+    </svg>
+    <svg style="position:absolute;bottom:0;right:0;z-index:6;opacity:0.25" width="60" height="60" viewBox="0 0 60 60">
+      <path d="M60 20 L60 60 L20 60" stroke="rgba(255,0,127,0.8)" stroke-width="1.5" fill="none"/>
+    </svg>
+
+    <!-- Slide number -->
+    <div style="position:absolute;bottom:72px;right:26px;z-index:25;text-align:right;">
+      <div style="font-size:48px;font-weight:900;letter-spacing:-3px;color:rgba(255,255,255,0.04);line-height:1;">01</div>
+      <div style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.12);text-transform:uppercase;">/ 05</div>
+    </div>
+
+    <div class="arraste">
+      <div class="arraste-circle">›</div>
+      ARRASTE PARA O LADO
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDES 2 & 3 — PANORAMA ===== -->
+<div class="slide-wrap">
+  <span class="slide-label">Slides 2 & 3 — Panorama conectado</span>
+  <div class="pano-row">
+
+    <!-- SLIDE 2 -->
+    <div class="s2">
+      <div class="pano-inner">
+        <!-- Background -->
+        <div style="position:absolute;inset:0;background:#060010;"></div>
+        <div class="pano-aurora"></div>
+        <div class="noise"></div>
+        <div class="scan"></div>
+
+        <!-- Big light beam center -->
+        <div style="position:absolute;left:420px;top:-50px;width:240px;height:800px;z-index:3;
+          background:linear-gradient(180deg,rgba(160,60,255,0.5) 0%,rgba(80,0,200,0.2) 50%,transparent 100%);
+          clip-path:polygon(35% 0%,65% 0%,100% 100%,0% 100%);filter:blur(14px);"></div>
+
+        <!-- Person 2 — center panorama -->
+        <div style="position:absolute;bottom:0;left:440px;z-index:8;">
+          <svg width="200" height="400" viewBox="0 0 200 400" fill="none">
+            <defs>
+              <linearGradient id="p2grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(160,60,255,0.95)"/>
+                <stop offset="70%" stop-color="rgba(80,0,160,0.5)"/>
+                <stop offset="100%" stop-color="transparent"/>
+              </linearGradient>
+            </defs>
+            <ellipse cx="100" cy="200" rx="80" ry="200" fill="radial-gradient(circle,rgba(160,60,255,0.3),transparent)" opacity="0.3"/>
+            <circle cx="100" cy="55" r="28" fill="url(#p2grad)"/>
+            <rect x="90" y="78" width="20" height="18" rx="3" fill="url(#p2grad)"/>
+            <path d="M58 96 Q100 86 142 96 L148 230 Q100 248 52 230 Z" fill="url(#p2grad)"/>
+            <path d="M74 230 L66 390" stroke="url(#p2grad)" stroke-width="22" stroke-linecap="round"/>
+            <path d="M126 230 L134 390" stroke="url(#p2grad)" stroke-width="22" stroke-linecap="round"/>
+            <path d="M60 106 L22 190" stroke="url(#p2grad)" stroke-width="14" stroke-linecap="round"/>
+            <path d="M140 106 L178 190" stroke="url(#p2grad)" stroke-width="14" stroke-linecap="round"/>
+            <!-- Rim light -->
+            <path d="M60 104 Q38 148 24 188" stroke="rgba(200,150,255,0.8)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Left side text (visible in slide 2) -->
+        <div style="position:absolute;bottom:100px;left:44px;z-index:20;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:rgba(180,100,255,0.8);margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+            <span style="display:inline-block;width:16px;height:1px;background:rgba(180,100,255,0.8);"></span>
+            Portfólio
+          </div>
+          <div style="font-size:42px;font-weight:900;line-height:0.9;letter-spacing:-2px;">
+            <span style="display:block;color:rgba(255,255,255,0.9);">Projetos</span>
+            <span style="display:block;background:linear-gradient(135deg,#ff007f,#c900ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">que<br/>vendem.</span>
+          </div>
+        </div>
+
+        <!-- Floating project card — left -->
+        <div style="position:absolute;top:80px;left:44px;z-index:20;
+          background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+          border-radius:12px;padding:14px 18px;backdrop-filter:blur(10px);">
+          <div style="width:6px;height:6px;border-radius:50%;background:#ff007f;box-shadow:0 0 8px #ff007f;margin-bottom:8px;"></div>
+          <div style="font-size:12px;font-weight:700;color:#fff;margin-bottom:4px;">Genuína Burger</div>
+          <div style="font-size:9px;font-weight:600;letter-spacing:2px;color:#ff007f;text-transform:uppercase;">Cardápio Digital</div>
+        </div>
+
+        <!-- Floating project card — right side (panorama) -->
+        <div style="position:absolute;top:80px;right:44px;z-index:20;
+          background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+          border-radius:12px;padding:14px 18px;backdrop-filter:blur(10px);">
+          <div style="width:6px;height:6px;border-radius:50%;background:#00d4ff;box-shadow:0 0 8px #00d4ff;margin-bottom:8px;"></div>
+          <div style="font-size:12px;font-weight:700;color:#fff;margin-bottom:4px;">RDCreator Portfolio</div>
+          <div style="font-size:9px;font-weight:600;letter-spacing:2px;color:#00d4ff;text-transform:uppercase;">React + Vite</div>
+        </div>
+      </div>
+
+      <!-- IG Bar -->
+      <div class="ig-bar">
+        <div class="ig-logo">
+          <div class="ig-dot">R</div>
+          <span class="ig-name">RD<span style="color:#c900ff;">C</span></span>
+        </div>
+        <div class="ig-icons">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </div>
+      </div>
+
+      <div class="pano-connect"></div>
+      <div class="arraste">
+        <div class="arraste-circle">›</div>
+        ARRASTE PARA O LADO
+      </div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="s3">
+      <div class="pano-inner">
+        <div style="position:absolute;inset:0;background:#060010;"></div>
+        <div class="pano-aurora"></div>
+        <div class="noise"></div>
+        <div class="scan"></div>
+
+        <div style="position:absolute;left:420px;top:-50px;width:240px;height:800px;z-index:3;
+          background:linear-gradient(180deg,rgba(160,60,255,0.5) 0%,rgba(80,0,200,0.2) 50%,transparent 100%);
+          clip-path:polygon(35% 0%,65% 0%,100% 100%,0% 100%);filter:blur(14px);"></div>
+
+        <div style="position:absolute;bottom:0;left:440px;z-index:8;">
+          <svg width="200" height="400" viewBox="0 0 200 400" fill="none">
+            <defs>
+              <linearGradient id="p2gradB" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(160,60,255,0.95)"/>
+                <stop offset="70%" stop-color="rgba(80,0,160,0.5)"/>
+                <stop offset="100%" stop-color="transparent"/>
+              </linearGradient>
+            </defs>
+            <circle cx="100" cy="55" r="28" fill="url(#p2gradB)"/>
+            <rect x="90" y="78" width="20" height="18" rx="3" fill="url(#p2gradB)"/>
+            <path d="M58 96 Q100 86 142 96 L148 230 Q100 248 52 230 Z" fill="url(#p2gradB)"/>
+            <path d="M74 230 L66 390" stroke="url(#p2gradB)" stroke-width="22" stroke-linecap="round"/>
+            <path d="M126 230 L134 390" stroke="url(#p2gradB)" stroke-width="22" stroke-linecap="round"/>
+            <path d="M60 106 L22 190" stroke="url(#p2gradB)" stroke-width="14" stroke-linecap="round"/>
+            <path d="M140 106 L178 190" stroke="url(#p2gradB)" stroke-width="14" stroke-linecap="round"/>
+            <path d="M60 104 Q38 148 24 188" stroke="rgba(200,150,255,0.8)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Right side text (visible in slide 3) -->
+        <div style="position:absolute;bottom:100px;right:44px;text-align:right;z-index:20;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:rgba(0,212,255,0.8);margin-bottom:8px;display:flex;align-items:center;justify-content:flex-end;gap:8px;">
+            Resultado
+            <span style="display:inline-block;width:16px;height:1px;background:rgba(0,212,255,0.8);"></span>
+          </div>
+          <div style="font-size:42px;font-weight:900;line-height:0.9;letter-spacing:-2px;">
+            <span style="display:block;color:rgba(255,255,255,0.9);">Do layout</span>
+            <span style="display:block;background:linear-gradient(135deg,#00d4ff,#9e00ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">à conversão.</span>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div style="position:absolute;top:100px;right:44px;z-index:20;display:flex;flex-direction:column;gap:16px;text-align:right;">
+          <div>
+            <div style="font-size:40px;font-weight:900;letter-spacing:-2px;background:linear-gradient(135deg,#ff007f,#c900ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;">+30</div>
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);">projetos</div>
+          </div>
+          <div>
+            <div style="font-size:40px;font-weight:900;letter-spacing:-2px;background:linear-gradient(135deg,#00d4ff,#9e00ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;">100%</div>
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);">resultado</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- IG Bar -->
+      <div class="ig-bar">
+        <div class="ig-logo">
+          <div class="ig-dot">R</div>
+          <span class="ig-name">RD<span style="color:#c900ff;">C</span></span>
+        </div>
+        <div class="ig-icons">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </div>
+      </div>
+
+      <div class="pano-connect"></div>
+      <div class="arraste">
+        <div class="arraste-circle">›</div>
+        ARRASTE PARA O LADO
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== SLIDE 4 — BENEFÍCIOS ===== -->
+<div class="slide-wrap">
+  <span class="slide-label">Slide 4 — Benefícios</span>
+  <div class="slide s4">
+    <div class="aurora-2"></div>
+    <div class="noise"></div>
+    <div class="scan"></div>
+
+    <!-- Light beam -->
+    <div style="position:absolute;right:60px;top:-60px;width:180px;height:600px;z-index:2;
+      background:linear-gradient(180deg,rgba(200,0,255,0.4) 0%,rgba(100,0,200,0.15) 50%,transparent 100%);
+      clip-path:polygon(30% 0%,70% 0%,100% 100%,0% 100%);filter:blur(10px);"></div>
+
+    <!-- IG Bar -->
+    <div class="ig-bar">
+      <div class="ig-logo">
+        <div class="ig-dot">R</div>
+        <span class="ig-name">RD<span style="color:#c900ff;">C</span></span>
+      </div>
+      <div class="ig-icons">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </div>
+    </div>
+
+    <div class="s4 intro-label">Por que ter um site</div>
+
+    <div class="s4 s4-headline">
+      Um website bem feito<br/>atua como: <em>↓</em>
+    </div>
+
+    <div class="s4 benefit-list">
+
+      <div class="benefit-item b1">
+        <div class="benefit-icon b1">💰</div>
+        <div class="benefit-text">
+          <div class="benefit-title">Pré Venda</div>
+          <div class="benefit-desc">Convence antes do primeiro contato — apresenta, engaja e qualifica</div>
+        </div>
+        <div class="benefit-num">01</div>
+      </div>
+
+      <div class="benefit-item b2">
+        <div class="benefit-icon b2">👑</div>
+        <div class="benefit-text">
+          <div class="benefit-title">Autoridade</div>
+          <div class="benefit-desc">Projeta profissionalismo e credibilidade para sua marca no digital</div>
+        </div>
+        <div class="benefit-num">02</div>
+      </div>
+
+      <div class="benefit-item b3">
+        <div class="benefit-icon b3">🎯</div>
+        <div class="benefit-text">
+          <div class="benefit-title">Qualificação</div>
+          <div class="benefit-desc">Filtra e atrai o cliente certo, aumentando sua conversão</div>
+        </div>
+        <div class="benefit-num">03</div>
+      </div>
+
+    </div>
+
+    <!-- Corner decorations -->
+    <svg style="position:absolute;top:0;left:0;z-index:6;opacity:0.2" width="60" height="60" viewBox="0 0 60 60">
+      <path d="M0 40 L0 0 L40 0" stroke="rgba(200,100,255,0.8)" stroke-width="1.5" fill="none"/>
+    </svg>
+    <svg style="position:absolute;bottom:0;right:0;z-index:6;opacity:0.2" width="60" height="60" viewBox="0 0 60 60">
+      <path d="M60 20 L60 60 L20 60" stroke="rgba(255,0,127,0.8)" stroke-width="1.5" fill="none"/>
+    </svg>
+
+    <div style="position:absolute;bottom:72px;right:26px;z-index:25;text-align:right;">
+      <div style="font-size:48px;font-weight:900;letter-spacing:-3px;color:rgba(255,255,255,0.04);line-height:1;">04</div>
+      <div style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.12);text-transform:uppercase;">/ 05</div>
+    </div>
+
+    <div class="arraste">
+      <div class="arraste-circle">›</div>
+      ARRASTE PARA O LADO
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 5 — CTA ===== -->
+<div class="slide-wrap">
+  <span class="slide-label">Slide 5 — CTA</span>
+  <div class="slide s5">
+    <div class="aurora-cta"></div>
+    <div class="noise"></div>
+    <div class="scan"></div>
+
+    <!-- Big beam -->
+    <div class="s5 beam-left"></div>
+
+    <!-- Person silhouette CTA -->
+    <div style="position:absolute;bottom:0;right:0;z-index:7;opacity:0.5;">
+      <svg width="260" height="450" viewBox="0 0 200 400" fill="none">
+        <defs>
+          <linearGradient id="p3grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(180,60,255,0.8)"/>
+            <stop offset="60%" stop-color="rgba(100,0,200,0.4)"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </linearGradient>
+        </defs>
+        <circle cx="100" cy="55" r="28" fill="url(#p3grad)"/>
+        <rect x="90" y="78" width="20" height="18" rx="3" fill="url(#p3grad)"/>
+        <path d="M58 96 Q100 86 142 96 L148 230 Q100 248 52 230 Z" fill="url(#p3grad)"/>
+        <path d="M74 230 L66 390" stroke="url(#p3grad)" stroke-width="22" stroke-linecap="round"/>
+        <path d="M126 230 L134 390" stroke="url(#p3grad)" stroke-width="22" stroke-linecap="round"/>
+        <path d="M60 106 L22 190" stroke="url(#p3grad)" stroke-width="14" stroke-linecap="round"/>
+        <path d="M140 106 L178 190" stroke="url(#p3grad)" stroke-width="14" stroke-linecap="round"/>
+        <path d="M60 104 Q38 148 24 188" stroke="rgba(220,160,255,0.9)" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M140 104 Q162 148 176 188" stroke="rgba(220,160,255,0.6)" stroke-width="1" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <!-- IG Bar -->
+    <div class="ig-bar">
+      <div class="ig-logo">
+        <div class="ig-dot">R</div>
+        <span class="ig-name">RD<span style="color:#c900ff;">C</span></span>
+      </div>
+      <div class="ig-icons">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </div>
+    </div>
+
+    <div class="s5 cta-eyebrow">Próximo passo</div>
+
+    <div class="s5 cta-headline">
+      <span class="word1">CONTE-</span>
+      <span class="word2">NOS.</span>
+    </div>
+
+    <div class="s5 cta-divider"></div>
+
+    <div class="s5 cta-sub">
+      Vamos transformar sua ideia<br/>em presença digital de verdade.
+    </div>
+
+    <div class="s5 contact-pills">
+      <div class="cpill pink">
+        <div class="cpill-icon">💬</div>
+        (19) 99252-5515
+      </div>
+      <div class="cpill blue">
+        <div class="cpill-icon">✉</div>
+        ryanviana002@gmail.com
+      </div>
+    </div>
+
+    <div class="s5 site-tag">ryancreator.dev</div>
+
+    <!-- Corner decorations -->
+    <svg style="position:absolute;top:0;left:0;z-index:25;opacity:0.25" width="60" height="60" viewBox="0 0 60 60">
+      <path d="M0 40 L0 0 L40 0" stroke="rgba(200,100,255,0.8)" stroke-width="1.5" fill="none"/>
+    </svg>
+    <svg style="position:absolute;bottom:0;right:0;z-index:25;opacity:0.25" width="60" height="60" viewBox="0 0 60 60">
+      <path d="M60 20 L60 60 L20 60" stroke="rgba(255,0,127,0.8)" stroke-width="1.5" fill="none"/>
+    </svg>
+  </div>
+</div>
+
+</div><!-- /slides -->
+
+<div class="print-bar">
+  <button class="print-btn" onclick="window.print()">Exportar PDF</button>
+</div>
+
+</body>
+</html>
