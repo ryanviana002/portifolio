@@ -10,6 +10,26 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const assinatura = `
+  <div style="margin-top:32px;padding-top:20px;border-top:1px solid #e8e8e8;">
+    <table cellpadding="0" cellspacing="0" style="font-family:Arial,sans-serif;">
+      <tr>
+        <td style="padding-right:16px;border-right:3px solid #ff007f;vertical-align:middle;">
+          <div style="font-size:16px;font-weight:900;color:#0a0a12;letter-spacing:-0.5px;">Ryan Viana</div>
+          <div style="font-size:12px;color:#ff007f;font-weight:600;margin-top:2px;">Desenvolvedor Web · RDCreator</div>
+        </td>
+        <td style="padding-left:16px;vertical-align:middle;">
+          <div style="font-size:12px;color:#555;line-height:1.8;">
+            🌐 <a href="https://ryancreator.dev" style="color:#ff007f;text-decoration:none;">ryancreator.dev</a><br>
+            📩 <a href="mailto:contato@ryancreator.dev" style="color:#555;text-decoration:none;">contato@ryancreator.dev</a><br>
+            📱 <a href="https://wa.me/5519992525515" style="color:#555;text-decoration:none;">(19) 99252-5515</a>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+`;
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -22,10 +42,11 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Email para Ryan com os dados do contato
     await transporter.sendMail({
       from: 'Site RDCreator <contato@ryancreator.dev>',
       to: 'contato@ryancreator.dev',
-      replyTo: email ? email : 'contato@ryancreator.dev',
+      replyTo: email ? email : undefined,
       subject: `Novo contato: ${nome}${servico ? ` — ${servico}` : ''}`,
       html: `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#0a0a12;color:#fff;border-radius:12px;">
@@ -53,7 +74,7 @@ export default async function handler(req, res) {
           </div>
 
           <div style="margin-top:24px;display:flex;gap:12px;">
-            <a href="https://wa.me/5519992525515?text=${encodeURIComponent(`Olá ${nome}!`)}"
+            <a href="https://wa.me/55${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá ${nome}! Vi sua mensagem no site e vim falar com você 😊`)}"
                style="display:inline-block;background:linear-gradient(135deg,#25d366,#1aab52);color:#fff;padding:12px 24px;border-radius:999px;text-decoration:none;font-weight:700;font-size:13px;">
               💬 Responder no WhatsApp
             </a>
@@ -68,6 +89,44 @@ export default async function handler(req, res) {
         </div>
       `,
     });
+
+    // Email automático de confirmação para o cliente (só se tiver email)
+    if (email) {
+      await transporter.sendMail({
+        from: 'Ryan Viana · RDCreator <contato@ryancreator.dev>',
+        to: email,
+        subject: `Olá, ${nome.split(' ')[0]}! Recebi sua mensagem 👋`,
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:40px 32px;background:#ffffff;color:#1a1a1a;">
+
+            <div style="margin-bottom:32px;">
+              <div style="display:inline-block;background:#ff007f;padding:6px 16px;border-radius:999px;font-size:11px;font-weight:700;color:#fff;letter-spacing:2px;text-transform:uppercase;">RDCreator</div>
+            </div>
+
+            <h1 style="font-size:24px;font-weight:900;color:#0a0a12;margin:0 0 8px;">Olá, ${nome.split(' ')[0]}!</h1>
+            <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 24px;">
+              Recebi sua mensagem e em breve entrarei em contato para conversarmos melhor sobre o seu projeto.
+            </p>
+
+            <div style="background:#f8f8f8;border-left:4px solid #ff007f;border-radius:4px;padding:16px 20px;margin-bottom:32px;">
+              <div style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Sua mensagem</div>
+              <p style="font-size:14px;color:#333;line-height:1.7;margin:0;white-space:pre-wrap;">${objetivo}</p>
+            </div>
+
+            <p style="font-size:14px;color:#666;line-height:1.7;margin:0 0 24px;">
+              Enquanto isso, se precisar falar comigo mais rapidamente, pode me chamar pelo WhatsApp:
+            </p>
+
+            <a href="https://wa.me/5519992525515?text=${encodeURIComponent(`Olá Ryan! Acabei de preencher o formulário do seu site.`)}"
+               style="display:inline-block;background:linear-gradient(135deg,#25d366,#1aab52);color:#fff;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:700;font-size:14px;">
+              💬 Falar no WhatsApp
+            </a>
+
+            ${assinatura}
+          </div>
+        `,
+      });
+    }
 
     return res.status(200).json({ ok: true });
   } catch (err) {
