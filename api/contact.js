@@ -1,6 +1,14 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS,
+  },
+});
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -14,9 +22,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    await resend.emails.send({
+    await transporter.sendMail({
       from: 'Site RDCreator <contato@ryancreator.dev>',
-      to: ['ryanviana002@gmail.com'],
+      to: 'ryanviana002@gmail.com',
       replyTo: email ? email : 'contato@ryancreator.dev',
       subject: `Novo contato: ${nome}${servico ? ` — ${servico}` : ''}`,
       html: `
@@ -63,7 +71,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ ok: true });
   } catch (err) {
-    console.error('Resend error:', err);
+    console.error('Mail error:', err);
     return res.status(500).json({ error: 'Falha ao enviar email' });
   }
 }
