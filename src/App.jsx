@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
+import Preview from './pages/Preview';
 import { Analytics } from '@vercel/analytics/react';
 import './App.css';
 import Navbar from './components/Navbar';
@@ -75,7 +76,11 @@ function playClick(vol = 0.2) {
 }
 
 
+// Rota simples sem react-router
+const isPreview = window.location.pathname === '/preview';
+
 function App() {
+  if (isPreview) return <Preview />;
   const cursorRef = useRef(null);
   const [waOpen, setWaOpen] = useState(false);
   const [particleDone, setParticleDone] = useState(false);

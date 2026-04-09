@@ -434,6 +434,30 @@
   opacity: 0.8;
 }
 
+.hero-preview-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 0, 127, 0.08);
+  border: 1px solid rgba(255, 0, 127, 0.35);
+  color: #ff007f;
+  text-decoration: none;
+  padding: 12px 24px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 32px;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.hero-preview-btn:hover {
+  background: rgba(255, 0, 127, 0.15);
+  border-color: #ff007f;
+  transform: translateY(-2px);
+}
+
 .hero-btns {
   display: flex;
   gap: 16px;
