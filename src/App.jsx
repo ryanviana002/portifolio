@@ -77,7 +77,7 @@ function playClick(vol = 0.2) {
 
 
 // Rota simples sem react-router
-const isPreview = window.location.pathname === '/preview';
+const isPreview = window.location.pathname.startsWith('/preview');
 
 function App() {
   if (isPreview) return <Preview />;
