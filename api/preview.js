@@ -9,7 +9,14 @@ async function scrapeGoogleMaps(url) {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
   };
 
-  const res = await fetch(url, { headers });
+  // Expande links encurtados (maps.app.goo.gl, goo.gl, etc)
+  let finalUrl = url;
+  if (url.includes('goo.gl') || url.includes('maps.app')) {
+    const r = await fetch(url, { headers, redirect: 'follow' });
+    finalUrl = r.url;
+  }
+
+  const res = await fetch(finalUrl, { headers });
   const html = await res.text();
 
   // Extrai dados do HTML do Google Maps
