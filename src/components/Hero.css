@@ -450,12 +450,19 @@
   margin-bottom: 32px;
   transition: background 0.2s, border-color 0.2s, transform 0.2s;
   font-family: 'Space Grotesk', sans-serif;
+  animation: previewPulse 2s ease-in-out infinite;
+}
+
+@keyframes previewPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 127, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 0, 127, 0); }
 }
 
 .hero-preview-btn:hover {
   background: rgba(255, 0, 127, 0.15);
   border-color: #ff007f;
   transform: translateY(-2px);
+  animation: none;
 }
 
 .hero-btns {

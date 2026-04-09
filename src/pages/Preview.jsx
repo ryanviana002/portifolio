@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './Preview.css';
 
 export default function Preview() {
@@ -8,6 +8,24 @@ export default function Preview() {
   const [dados, setDados] = useState(null);
   const [error, setError] = useState('');
   const [showPopup, setShowPopup] = useState(false);
+  const cursorRef = useRef(null);
+
+  useEffect(() => {
+    const cursor = cursorRef.current;
+    const onMove = e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    };
+    const onEnter = () => cursor.classList.add('big');
+    const onLeave = () => cursor.classList.remove('big');
+    window.addEventListener('mousemove', onMove);
+    const interactives = document.querySelectorAll('a, button, input');
+    interactives.forEach(el => {
+      el.addEventListener('mouseenter', onEnter);
+      el.addEventListener('mouseleave', onLeave);
+    });
+    return () => window.removeEventListener('mousemove', onMove);
+  }, []);
 
   const gerar = async () => {
     if (!url.trim()) return;
@@ -43,6 +61,7 @@ export default function Preview() {
 
   return (
     <div className="preview-page">
+      <div className="cursor" ref={cursorRef} />
       {/* Header */}
       <div className="preview-header">
         <a href="/" className="preview-logo">
