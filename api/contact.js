@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   try {
     await transporter.sendMail({
       from: 'Site RDCreator <contato@ryancreator.dev>',
-      to: 'ryanviana002@gmail.com',
+      to: 'contato@ryancreator.dev',
       replyTo: email ? email : 'contato@ryancreator.dev',
       subject: `Novo contato: ${nome}${servico ? ` — ${servico}` : ''}`,
       html: `
