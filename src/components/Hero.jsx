@@ -629,7 +629,7 @@ export default function Hero() {
           <p className="hero-sub">
             Design que vende. Código que funciona.
           </p>
-          <a href="/preview" className="hero-preview-btn" target="_blank" rel="noreferrer">
+          <a href="/preview" className="hero-preview-btn">
             Visualizar meu futuro site
           </a>
         </div>
