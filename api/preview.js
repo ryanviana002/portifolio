@@ -1,58 +1,89 @@
 import Anthropic from '@anthropic-ai/sdk';
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const PLACES_KEY = process.env.GOOGLE_PLACES_API_KEY;
 
-async function extractFromMaps(url) {
-  const headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Accept-Language': 'pt-BR,pt;q=0.9',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-  };
-
+async function extractPlaceId(url) {
   // Expande links encurtados
   let finalUrl = url;
   try {
-    const r = await fetch(url, { headers, redirect: 'follow' });
+    const r = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      redirect: 'follow',
+    });
     finalUrl = r.url;
   } catch {}
 
-  // Tenta extrair nome da URL expandida
-  let nome = '';
-  try {
-    const match = finalUrl.match(/place\/([^/@]+)/);
-    if (match) nome = decodeURIComponent(match[1].replace(/\+/g, ' ')).replace(/\+/g, ' ');
-  } catch {}
+  // Tenta extrair place ID da URL
+  const placeIdMatch = finalUrl.match(/place_id=([^&]+)/);
+  if (placeIdMatch) return placeIdMatch[1];
 
-  // Tenta buscar o HTML
-  let html = '';
-  try {
-    const res = await fetch(finalUrl, { headers });
-    html = await res.text();
-  } catch {}
-
-  // Extrai dados do HTML
-  if (!nome) {
-    nome = html.match(/<title>([^<|]+)/)?.[1]?.trim()
-      || html.match(/"name":"([^"]+)"/)?.[1]
-      || 'Meu Negócio';
+  // Tenta extrair o nome do lugar da URL para buscar via Text Search
+  const nameMatch = finalUrl.match(/place\/([^/@]+)/);
+  if (nameMatch) {
+    const nome = decodeURIComponent(nameMatch[1].replace(/\+/g, ' '));
+    return await searchPlaceByName(nome);
   }
 
-  const categoria = html.match(/"category":"([^"]+)"/)?.[1]
-    || html.match(/\\"category\\":\\"([^"]+)\\"/)?.[1]
-    || '';
+  // Tenta extrair coordenadas para busca por nearby
+  const coordMatch = finalUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (coordMatch) {
+    return await searchPlaceByCoords(coordMatch[1], coordMatch[2]);
+  }
 
-  const avaliacao = html.match(/(\d+[.,]\d)\s*\(/)?.[1] || '4.8';
-  const numAvaliacoes = html.match(/\((\d[\d.]*)\s*avalia/i)?.[1]
-    || html.match(/\((\d+)\)/)?.[1]
-    || '0';
+  return null;
+}
 
-  const telefone = html.match(/\+55[\d\s\-\(\)]{10,}/)?.[0]
-    || html.match(/\(?\d{2}\)?\s?\d{4,5}[-\s]?\d{4}/)?.[0]
-    || '';
+async function searchPlaceByName(name) {
+  const res = await fetch(
+    `https://places.googleapis.com/v1/places:searchText`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': PLACES_KEY,
+        'X-Goog-FieldMask': 'places.id',
+      },
+      body: JSON.stringify({ textQuery: name, languageCode: 'pt-BR' }),
+    }
+  );
+  const data = await res.json();
+  return data.places?.[0]?.id || null;
+}
 
-  const endereco = html.match(/"vicinity":"([^"]+)"/)?.[1] || '';
+async function searchPlaceByCoords(lat, lng) {
+  const res = await fetch(
+    `https://places.googleapis.com/v1/places:searchNearby`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': PLACES_KEY,
+        'X-Goog-FieldMask': 'places.id',
+      },
+      body: JSON.stringify({
+        locationRestriction: {
+          circle: { center: { latitude: parseFloat(lat), longitude: parseFloat(lng) }, radius: 50 },
+        },
+        maxResultCount: 1,
+      }),
+    }
+  );
+  const data = await res.json();
+  return data.places?.[0]?.id || null;
+}
 
-  return { nome: nome.replace(/\s*-\s*Google Maps.*/, '').trim(), categoria, avaliacao, numAvaliacoes, telefone, endereco };
+async function getPlaceDetails(placeId) {
+  const res = await fetch(
+    `https://places.googleapis.com/v1/places/${placeId}?languageCode=pt-BR`,
+    {
+      headers: {
+        'X-Goog-Api-Key': PLACES_KEY,
+        'X-Goog-FieldMask': 'displayName,primaryTypeDisplayName,rating,userRatingCount,formattedAddress,nationalPhoneNumber,websiteUri,regularOpeningHours,reviews',
+      },
+    }
+  );
+  return await res.json();
 }
 
 export default async function handler(req, res) {
@@ -62,35 +93,61 @@ export default async function handler(req, res) {
   if (!url) return res.status(400).json({ error: 'URL obrigatória' });
 
   try {
-    const dados = await extractFromMaps(url);
+    // Busca Place ID
+    const placeId = await extractPlaceId(url);
+    if (!placeId) throw new Error('Não foi possível identificar o negócio. Verifique o link do Google Maps.');
 
-    const prompt = `Você é um designer web especialista em criar mockups de sites para pequenas e médias empresas brasileiras.
+    // Busca detalhes do lugar
+    const place = await getPlaceDetails(placeId);
+    if (place.error) throw new Error(place.error.message);
 
-Com base nos dados abaixo, crie um mockup visual completo em HTML de como seria o site profissional desse negócio.
+    const dados = {
+      nome: place.displayName?.text || 'Meu Negócio',
+      categoria: place.primaryTypeDisplayName?.text || 'Empresa local',
+      avaliacao: place.rating?.toFixed(1) || '5.0',
+      numAvaliacoes: place.userRatingCount || 0,
+      telefone: place.nationalPhoneNumber || '',
+      endereco: place.formattedAddress || '',
+      site: place.websiteUri || '',
+      reviews: place.reviews?.slice(0, 3).map(r => ({
+        autor: r.authorAttribution?.displayName || 'Cliente',
+        nota: r.rating,
+        texto: r.text?.text || '',
+      })) || [],
+    };
 
-DADOS DO NEGÓCIO:
+    // Gera mockup com Claude
+    const reviewsText = dados.reviews.length
+      ? dados.reviews.map(r => `- ${r.autor} (${r.nota}⭐): "${r.texto.slice(0, 120)}"`).join('\n')
+      : '';
+
+    const prompt = `Você é um designer web especialista em criar sites profissionais para pequenas e médias empresas brasileiras.
+
+Crie um mockup visual completo em HTML de como seria o site profissional desse negócio real.
+
+DADOS REAIS DO NEGÓCIO (Google Maps):
 - Nome: ${dados.nome}
-- Categoria/Segmento: ${dados.categoria || 'negócio local'}
-- Avaliação Google: ${dados.avaliacao} ⭐ (${dados.numAvaliacoes} avaliações)
+- Segmento: ${dados.categoria}
+- Avaliação: ${dados.avaliacao} ⭐ (${dados.numAvaliacoes} avaliações no Google)
 - Telefone: ${dados.telefone || 'Não informado'}
 - Endereço: ${dados.endereco || 'Não informado'}
+${reviewsText ? `\nAVALIAÇÕES REAIS:\n${reviewsText}` : ''}
 
-INSTRUÇÕES OBRIGATÓRIAS:
-1. Crie um HTML completo com CSS embutido em <style>
-2. Use Google Fonts (Inter ou Poppins) via @import
-3. Escolha uma paleta de cores que combine com o segmento do negócio
-4. Inclua estas seções em ordem:
-   - Banner topo: "🎨 PRÉVIA DO SEU FUTURO SITE — criado por RDCreator | ryancreator.dev"
-   - Navbar com logo e menu
-   - Hero com headline impactante e CTA WhatsApp
-   - Sobre a empresa (3 diferenciais com ícones emoji)
-   - Serviços/Produtos (3-4 cards)
-   - Avaliações Google (mostre a nota ${dados.avaliacao} ⭐ com ${dados.numAvaliacoes} avaliações)
+INSTRUÇÕES:
+1. HTML completo com CSS em <style> e Google Fonts (@import Inter ou Poppins)
+2. Paleta de cores adequada ao segmento: ${dados.categoria}
+3. Seções obrigatórias:
+   - Banner topo rosa: "🎨 PRÉVIA DO SEU FUTURO SITE — RDCreator | ryancreator.dev"
+   - Navbar com nome da empresa
+   - Hero impactante com headline relacionada ao segmento e botão WhatsApp verde
+   - Sobre (3 diferenciais com emojis)
+   - Serviços (4 cards com ícones emojis, baseados no segmento)
+   - Avaliações Google (use as avaliações reais se disponíveis, senão crie 3 fictícias realistas)
    - CTA final com botão WhatsApp
-   - Footer com contato
-5. Design moderno, responsivo, profissional
-6. Botões WhatsApp verdes (#25d366)
-7. Retorne APENAS o HTML completo, sem explicações, sem markdown`;
+   - Footer com endereço e telefone reais
+4. Design moderno, responsivo (mobile-first)
+5. Botões WhatsApp: background #25d366, cor branca
+6. Retorne APENAS o HTML, sem markdown, sem explicações`;
 
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
