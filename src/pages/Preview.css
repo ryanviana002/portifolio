@@ -244,7 +244,7 @@
 }
 
 /* Result */
-.preview-result { width: 100%; }
+.preview-result { width: 100%; padding-top: 72px; }
 
 .preview-info-bar {
   display: flex;
