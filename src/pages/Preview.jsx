@@ -41,6 +41,7 @@ export default function Preview() {
   const [dados, setDados] = useState(null);
   const [error, setError] = useState('');
   const [showPopup, setShowPopup] = useState(false);
+  const [savingLink, setSavingLink] = useState(false);
   const cursorRef = useRef(null);
   const iframeRef = useRef(null);
 
@@ -401,9 +402,33 @@ export default function Preview() {
               <span className="preview-popup-from">a partir de</span>
               <span className="preview-popup-val">R$ 997</span>
             </div>
-            <a href="/#contato" className="preview-popup-btn">EU QUERO ESSE SITE! →</a>
+            <button
+              className="preview-popup-btn"
+              disabled={savingLink}
+              onClick={async () => {
+                setSavingLink(true);
+                try {
+                  const res = await fetch('/api/preview-save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ html, nome: dados?.nome, categoria: dados?.categoria }),
+                  });
+                  const data = await res.json();
+                  const link = data.url || 'https://ryancreator.dev/preview';
+                  const nome = dados?.nome || 'meu negócio';
+                  const msg = encodeURIComponent(`Olá Ryan! Vi a prévia do site de *${nome}* e quero contratar!\n\nVeja a prévia: ${link}`);
+                  window.open(`https://wa.me/5519992525515?text=${msg}`, '_blank');
+                } catch {
+                  window.open('https://wa.me/5519992525515?text=Olá%20Ryan!%20Vi%20a%20prévia%20do%20meu%20site%20e%20quero%20contratar!', '_blank');
+                } finally {
+                  setSavingLink(false);
+                }
+              }}
+            >
+              {savingLink ? 'GERANDO LINK...' : 'EU QUERO ESSE SITE! →'}
+            </button>
             <a href="https://wa.me/5519992525515?text=Olá%20Ryan!%20Vi%20a%20prévia%20do%20meu%20site%20e%20quero%20contratar!" className="preview-popup-wa" target="_blank" rel="noreferrer">
-              Falar no WhatsApp
+              Só tirar dúvidas no WhatsApp
             </a>
           </div>
         </div>

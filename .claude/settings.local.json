@@ -7,7 +7,8 @@
       "mcp__claude_ai_Canva__list-brand-kits",
       "Bash(node -e \"require\\('puppeteer'\\)\")",
       "Bash(python3 -c ':*)",
-      "Bash(python3)"
+      "Bash(python3)",
+      "Read(//c/Users/Ryan.Santos/Desktop/Arquivos/Projetos Claude/delega/**)"
     ]
   }
 }
