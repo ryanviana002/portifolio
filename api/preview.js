@@ -150,34 +150,72 @@ export default async function handler(req, res) {
     const paletaSugerida = Object.entries(paletasPorSegmento).find(([k]) => categoriaLower.includes(k))?.[1]
       || 'cores modernas e profissionais adequadas ao segmento';
 
-    const prompt = `Você é um designer web especialista em criar sites profissionais para pequenas e médias empresas brasileiras.
+    const prompt = `Você é um designer web expert em criar sites profissionais de alto nível para empresas brasileiras.
 
-Crie um mockup visual completo em HTML de como seria o site profissional desse negócio real.
+Crie um site HTML completo e sofisticado para esse negócio real, no mesmo nível de qualidade de um site desenvolvido por um profissional.
 
-DADOS REAIS DO NEGÓCIO (Google Maps):
+DADOS REAIS DO NEGÓCIO:
 - Nome: ${dados.nome}
 - Segmento: ${dados.categoria}
-- Avaliação: ${dados.avaliacao} ⭐ (${dados.numAvaliacoes} avaliações no Google)
+- Avaliação: ${dados.avaliacao} ⭐ (${dados.numAvaliacoes} avaliações)
 - Telefone: ${dados.telefone || 'Não informado'}
 - Endereço: ${dados.endereco || 'Não informado'}
-${logo ? `\nLOGO/IMAGEM PRINCIPAL DO NEGÓCIO: ${logo}\n(Use esta imagem como logo na navbar e como imagem hero de fundo ou destaque)` : ''}
+${logo ? `- Logo/foto principal: ${logo}` : ''}
 ${reviewsText ? `\nAVALIAÇÕES REAIS:\n${reviewsText}` : ''}${galeriaText}
 
-INSTRUÇÕES:
-1. HTML completo com CSS em <style> e Google Fonts (@import Inter ou Poppins)
-2. Paleta de cores: ${paletaSugerida} — use tons consistentes em todo o site
-3. Seções obrigatórias:
-   - Navbar com nome da empresa${logo ? ` e logo (<img src="${logo}" style="height:50px;object-fit:contain">)` : ''}
-   - Hero impactante com headline relacionada ao segmento, fundo gradiente ou cor sólida escura (NÃO use foto como fundo do hero), botão WhatsApp verde
-   - Sobre (3 diferenciais com emojis baseados no segmento real)
-   - Serviços (4 cards com ícones emojis, baseados no segmento ${dados.categoria})
-   - Galeria de fotos (use as fotos reais da galeria se disponíveis, com object-fit:cover, altura 250px)
-   - Avaliações Google (use as avaliações reais se disponíveis, senão crie 3 fictícias realistas para ${dados.categoria})
-   - CTA final com botão WhatsApp
-   - Footer com endereço e telefone reais
-4. Design moderno, responsivo (mobile-first)
-5. Botões WhatsApp: background #25d366, cor branca
-6. Retorne APENAS o HTML, sem markdown, sem explicações`;
+PALETA DE CORES: ${paletaSugerida}
+
+ESTRUTURA OBRIGATÓRIA (nesta ordem):
+
+1. NAVBAR fixa no topo
+   - Logo à esquerda${logo ? ` usando <img src="${logo}" style="height:48px;object-fit:contain">` : ` com nome da empresa`}
+   - Links de navegação: Início, Sobre, Serviços, Galeria, Depoimentos, Contato
+   - Botão CTA "Fale Conosco" à direita
+   - Ao rolar: fundo branco/escuro com sombra
+   - Hamburger no mobile
+
+2. HERO (100vh, fundo gradiente escuro com a paleta do segmento)
+   - Grid 2 colunas: texto à esquerda, logo/imagem à direita${logo ? ` (<img src="${logo}" com float animation)` : ''}
+   - Badge com nome da empresa em letras maiúsculas
+   - H1 impactante em maiúsculas com palavra destaque colorida
+   - Subtítulo descrevendo o negócio
+   - 2 botões: "AGENDAR" (primário) + "VER SERVIÇOS" (outline branco)
+   - 3 stats embaixo: número de clientes, anos de experiência, satisfação
+   - Grid pattern sutil no fundo (linhas finas)
+
+3. SOBRE (fundo branco)
+   - Faixa de números com fundo da cor primária
+   - 2 colunas: texto + 4 diferenciais com ícone SVG
+   - Título, 2 parágrafos de descrição, telefone clicável
+
+4. SERVIÇOS (fundo cinza claro)
+   - Lista clicável à esquerda (6-8 serviços com número e chevron)
+   - Painel de detalhe à direita (ícone SVG, título, descrição, botão agendar)
+   - Texto de fundo grande "SERVIÇOS" em opacidade baixa
+
+5. GALERIA (fundo branco)
+   - Grid de fotos${galeria.length ? ` usando as fotos reais: ${galeria.join(', ')}` : ' com placeholders de cor sólida'}
+   - object-fit: cover, altura 260px, border-radius 12px
+
+6. DEPOIMENTOS (fundo cor primária)
+   - 3 cards com avaliação, texto e nome${dados.reviews.length ? ' (use as avaliações reais)' : ' (crie depoimentos realistas para o segmento)'}
+   - Estrelas ⭐, aspas decorativas
+
+7. CTA FINAL (fundo escuro)
+   - Headline chamativa
+   - Botão WhatsApp grande verde (#25d366)
+
+8. FOOTER (fundo muito escuro)
+   - Logo, endereço, telefone, links
+
+REQUISITOS TÉCNICOS:
+- Google Fonts: @import Montserrat (títulos, 700/900) + Open Sans (corpo)
+- CSS completo em <style>, responsivo com media queries
+- Animações suaves (transitions, hover effects)
+- Ícones em SVG inline (sem bibliotecas externas)
+- Botão WhatsApp flutuante fixo no canto inferior direito
+- NÃO use foto como fundo do hero — use gradiente
+- Retorne APENAS o HTML completo, sem markdown, sem explicações`;
 
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
