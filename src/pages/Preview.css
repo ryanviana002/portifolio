@@ -7,9 +7,8 @@
   font-family: 'Space Grotesk', sans-serif;
 }
 
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #0a0a12; }
-::-webkit-scrollbar-thumb { background: #ff007f; border-radius: 2px; }
+::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; }
 
 
 /* Topbar */

@@ -200,6 +200,9 @@ export default function Preview() {
   #rdc-corner span{color:#ff007f;}
   html,body{scroll-behavior:smooth;}
   nav,header,[class*="navbar"],[class*="nav-"]{top:36px!important;}
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-track{background:#0a0a12;}
+  ::-webkit-scrollbar-thumb{background:#ff007f;border-radius:2px;}
 </style>
 <div id="rdc-banner">🎨 PRÉVIA — <a href="https://ryancreator.dev" target="_blank">ryancreator.dev</a> | Este site ainda não existe. Quer criar o seu?</div>
 <div id="rdc-corner">por <span>RDCreator</span></div>
