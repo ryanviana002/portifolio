@@ -79,7 +79,7 @@ async function getPlaceDetails(placeId) {
     {
       headers: {
         'X-Goog-Api-Key': PLACES_KEY,
-        'X-Goog-FieldMask': 'displayName,primaryTypeDisplayName,rating,userRatingCount,formattedAddress,nationalPhoneNumber,websiteUri,regularOpeningHours,reviews',
+        'X-Goog-FieldMask': 'displayName,primaryTypeDisplayName,rating,userRatingCount,formattedAddress,nationalPhoneNumber,websiteUri,reviews,photos',
       },
     }
   );
@@ -114,11 +114,18 @@ export default async function handler(req, res) {
         nota: r.rating,
         texto: r.text?.text || '',
       })) || [],
+      fotos: place.photos?.slice(0, 3).map(p =>
+        `https://places.googleapis.com/v1/${p.name}/media?maxWidthPx=800&key=${PLACES_KEY}`
+      ) || [],
     };
 
     // Gera mockup com Claude
     const reviewsText = dados.reviews.length
       ? dados.reviews.map(r => `- ${r.autor} (${r.nota}⭐): "${r.texto.slice(0, 120)}"`).join('\n')
+      : '';
+
+    const fotosText = dados.fotos.length
+      ? `\nFOTOS REAIS (use como src das imagens):\n${dados.fotos.map((f, i) => `Foto ${i + 1}: ${f}`).join('\n')}`
       : '';
 
     const prompt = `Você é um designer web especialista em criar sites profissionais para pequenas e médias empresas brasileiras.
@@ -131,7 +138,7 @@ DADOS REAIS DO NEGÓCIO (Google Maps):
 - Avaliação: ${dados.avaliacao} ⭐ (${dados.numAvaliacoes} avaliações no Google)
 - Telefone: ${dados.telefone || 'Não informado'}
 - Endereço: ${dados.endereco || 'Não informado'}
-${reviewsText ? `\nAVALIAÇÕES REAIS:\n${reviewsText}` : ''}
+${reviewsText ? `\nAVALIAÇÕES REAIS:\n${reviewsText}` : ''}${fotosText}
 
 INSTRUÇÕES:
 1. HTML completo com CSS em <style> e Google Fonts (@import Inter ou Poppins)
@@ -142,6 +149,7 @@ INSTRUÇÕES:
    - Hero impactante com headline relacionada ao segmento e botão WhatsApp verde
    - Sobre (3 diferenciais com emojis)
    - Serviços (4 cards com ícones emojis, baseados no segmento)
+   - Galeria de fotos (use as fotos reais se disponíveis, com object-fit:cover, altura 250px)
    - Avaliações Google (use as avaliações reais se disponíveis, senão crie 3 fictícias realistas)
    - CTA final com botão WhatsApp
    - Footer com endereço e telefone reais
@@ -151,7 +159,7 @@ INSTRUÇÕES:
 
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 4096,
+      max_tokens: 8096,
       messages: [{ role: 'user', content: prompt }],
     });
 
