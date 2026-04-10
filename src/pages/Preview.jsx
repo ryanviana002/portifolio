@@ -288,10 +288,6 @@ export default function Preview() {
                 <span className="preview-info-label">Avaliação Google</span>
                 <span className="preview-info-val">⭐ {dados.avaliacao} ({dados.numAvaliacoes} avaliações)</span>
               </div>
-              <div className="preview-info-actions">
-                <button className="preview-pdf-btn" onClick={gerarPDF}>Salvar como PDF</button>
-                <button className="preview-new-btn" onClick={() => { setHtml(''); setUrl(''); setDados(null); setShowPopup(false); }}>← Nova prévia</button>
-              </div>
             </div>
           )}
           <iframe
