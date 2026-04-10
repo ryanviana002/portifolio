@@ -37,6 +37,7 @@ export default function Preview() {
   const [progress, setProgress] = useState(0);
   const [progressMsg, setProgressMsg] = useState('');
   const [html, setHtml] = useState('');
+  const [iframeReady, setIframeReady] = useState(false);
   const [dados, setDados] = useState(null);
   const [error, setError] = useState('');
   const [showPopup, setShowPopup] = useState(false);
@@ -159,6 +160,7 @@ export default function Preview() {
     setLoading(true);
     setProgress(0);
     setHtml('');
+    setIframeReady(false);
     setDados(null);
     setShowPopup(false);
 
@@ -192,14 +194,14 @@ export default function Preview() {
       if (!res.ok) throw new Error(data.error);
       const watermark = `
 <style>
-  #rdc-banner{position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#ff007f,#d12c96);color:#fff;text-align:center;padding:10px 16px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;box-shadow:0 2px 20px rgba(255,0,127,0.4);}
+  #rdc-banner{position:fixed;top:0;left:0;right:0;z-index:999999;background:linear-gradient(135deg,#ff007f,#d12c96);color:#fff;text-align:center;padding:8px 16px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;}
   #rdc-banner a{color:#fff;text-decoration:underline;}
-  #rdc-corner{position:fixed;bottom:20px;right:20px;z-index:99999;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);border:1px solid rgba(255,0,127,0.4);color:#fff;padding:8px 14px;border-radius:999px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;}
+  #rdc-corner{position:fixed;bottom:80px;right:20px;z-index:999999;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);border:1px solid rgba(255,0,127,0.4);color:#fff;padding:6px 12px;border-radius:999px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;}
   #rdc-corner span{color:#ff007f;}
-  body{padding-top:42px!important;}
-  ::-webkit-scrollbar{display:none}body{scrollbar-width:none;-ms-overflow-style:none}
+  html,body{scroll-behavior:smooth;}
+  nav,header,[class*="navbar"],[class*="nav-"]{top:36px!important;}
 </style>
-<div id="rdc-banner">🎨 PRÉVIA DO SEU FUTURO SITE — <a href="https://ryancreator.dev" target="_blank">ryancreator.dev</a> | Este site ainda não existe. Quer criar o seu?</div>
+<div id="rdc-banner">🎨 PRÉVIA — <a href="https://ryancreator.dev" target="_blank">ryancreator.dev</a> | Este site ainda não existe. Quer criar o seu?</div>
 <div id="rdc-corner">por <span>RDCreator</span></div>
 `;
       setHtml(watermark + data.html);
@@ -318,6 +320,12 @@ export default function Preview() {
               </div>
             </div>
           )}
+          {!iframeReady && (
+            <div className="preview-iframe-loading">
+              <div className="preview-loading-ring" />
+              <p className="preview-loading-msg">Renderizando prévia...</p>
+            </div>
+          )}
           <iframe
             id="preview-frame"
             ref={iframeRef}
@@ -326,6 +334,10 @@ export default function Preview() {
             title="Prévia do site"
             sandbox="allow-same-origin allow-scripts"
             scrolling="yes"
+            onLoad={() => setIframeReady(true)}
+            onMouseEnter={() => { if(cursorRef.current) cursorRef.current.style.display='none'; document.body.style.cursor='auto'; }}
+            onMouseLeave={() => { if(cursorRef.current) cursorRef.current.style.display=''; document.body.style.cursor='none'; }}
+            style={{ opacity: iframeReady ? 1 : 0, transition: 'opacity 0.4s ease' }}
           />
         </div>
       )}
