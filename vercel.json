@@ -2,6 +2,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "functions": {
+    "api/preview.js": { "maxDuration": 60 },
+    "api/preview-check.js": { "maxDuration": 30 }
+  },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/preview", "destination": "/index.html" },
