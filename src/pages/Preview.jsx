@@ -31,6 +31,8 @@ function playClick(vol = 0.15) {
 
 export default function Preview() {
   const [url, setUrl] = useState('');
+  const [checking, setChecking] = useState(false);
+  const [confirmData, setConfirmData] = useState(null); // dados para popup de confirmação
   const [loading, setLoading] = useState(false);
   const [html, setHtml] = useState('');
   const [dados, setDados] = useState(null);
@@ -129,12 +131,34 @@ export default function Preview() {
     };
   }, [html]);
 
-  const gerar = async () => {
+  // Passo 1: valida o link e busca dados para confirmação
+  const verificar = async () => {
     if (!url.trim()) return;
+    setChecking(true);
+    setError('');
+    try {
+      const res = await fetch('/api/preview-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setConfirmData(data);
+    } catch (e) {
+      setError(e.message || 'Link inválido. Cole o link do Google Maps do seu negócio.');
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  // Passo 2: gera o mockup após confirmação
+  const gerar = async () => {
+    if (!confirmData) return;
+    setConfirmData(null);
     setLoading(true);
     setHtml('');
     setDados(null);
-    setError('');
     setShowPopup(false);
     try {
       const res = await fetch('/api/preview', {
@@ -207,10 +231,10 @@ export default function Preview() {
                 placeholder="Cole aqui o link do seu Google Maps..."
                 value={url}
                 onChange={e => setUrl(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && gerar()}
+                onKeyDown={e => e.key === 'Enter' && verificar()}
               />
-              <button className="preview-btn" onClick={gerar} disabled={!url.trim()}>
-                GERAR PRÉVIA →
+              <button className="preview-btn" onClick={verificar} disabled={!url.trim() || checking}>
+                {checking ? 'VERIFICANDO...' : 'GERAR PRÉVIA →'}
               </button>
             </div>
 
@@ -268,6 +292,34 @@ export default function Preview() {
             sandbox="allow-same-origin allow-scripts"
             scrolling="yes"
           />
+        </div>
+      )}
+
+      {/* Popup de confirmação do negócio */}
+      {confirmData && (
+        <div className="preview-popup-overlay" onClick={() => setConfirmData(null)}>
+          <div className="preview-popup preview-confirm-popup" onClick={e => e.stopPropagation()}>
+            <button className="preview-popup-close" onClick={() => setConfirmData(null)}>✕</button>
+            <div className="preview-popup-tag">ENCONTRAMOS SEU NEGÓCIO</div>
+            {confirmData.foto && (
+              <img src={confirmData.foto} alt={confirmData.nome} className="preview-confirm-foto" />
+            )}
+            <h2 className="preview-confirm-nome">{confirmData.nome}</h2>
+            <p className="preview-confirm-cat">{confirmData.categoria}</p>
+            {confirmData.avaliacao && (
+              <p className="preview-confirm-av">⭐ {confirmData.avaliacao} ({confirmData.numAvaliacoes} avaliações)</p>
+            )}
+            {confirmData.endereco && (
+              <p className="preview-confirm-end">📍 {confirmData.endereco}</p>
+            )}
+            <p className="preview-confirm-ask">Essa é sua empresa?</p>
+            <button className="preview-popup-btn preview-confirm-sim" onClick={gerar}>
+              SIM, GERAR PRÉVIA →
+            </button>
+            <button className="preview-confirm-nao" onClick={() => setConfirmData(null)}>
+              Não, quero corrigir o link
+            </button>
+          </div>
         </div>
       )}
 
