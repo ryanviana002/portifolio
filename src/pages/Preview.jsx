@@ -9,7 +9,9 @@ export default function Preview() {
   const [error, setError] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const cursorRef = useRef(null);
+  const iframeRef = useRef(null);
 
+  // Cursor customizado
   useEffect(() => {
     const cursor = cursorRef.current;
     const onMove = e => {
@@ -27,12 +29,63 @@ export default function Preview() {
     return () => window.removeEventListener('mousemove', onMove);
   }, []);
 
+  // Proteção: desabilita botão direito e F12
+  useEffect(() => {
+    const onContext = e => e.preventDefault();
+    const onKey = e => {
+      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) || (e.ctrlKey && e.key === 'U')) {
+        e.preventDefault();
+      }
+    };
+    document.addEventListener('contextmenu', onContext);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('contextmenu', onContext);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, []);
+
+  // Popup ao terminar de rolar o iframe
+  useEffect(() => {
+    if (!html) return;
+
+    // Popup por tempo (8s após gerar)
+    const timer = setTimeout(() => setShowPopup(true), 8000);
+
+    // Popup ao rolar até o fim do iframe
+    const iframe = iframeRef.current;
+    const handleScroll = () => {
+      if (!iframe?.contentWindow) return;
+      const win = iframe.contentWindow;
+      const doc = win.document.documentElement;
+      const scrolled = win.scrollY + win.innerHeight;
+      const total = doc.scrollHeight;
+      if (scrolled >= total - 100) {
+        setShowPopup(true);
+      }
+    };
+
+    const attachScroll = () => {
+      try {
+        iframe?.contentWindow?.addEventListener('scroll', handleScroll);
+      } catch {}
+    };
+
+    iframe?.addEventListener('load', attachScroll);
+
+    return () => {
+      clearTimeout(timer);
+      try { iframe?.contentWindow?.removeEventListener('scroll', handleScroll); } catch {}
+    };
+  }, [html]);
+
   const gerar = async () => {
     if (!url.trim()) return;
     setLoading(true);
     setHtml('');
     setDados(null);
     setError('');
+    setShowPopup(false);
 
     try {
       const res = await fetch('/api/preview', {
@@ -44,7 +97,6 @@ export default function Preview() {
       if (!res.ok) throw new Error(data.error);
       setHtml(data.html);
       setDados(data.dados);
-      setTimeout(() => setShowPopup(true), 3000);
     } catch (e) {
       setError('Não foi possível gerar o preview. Verifique o link e tente novamente.');
     } finally {
@@ -53,15 +105,21 @@ export default function Preview() {
   };
 
   const gerarPDF = () => {
-    const iframe = document.getElementById('preview-frame');
-    if (!iframe) return;
-    const win = iframe.contentWindow;
-    win.print();
+    if (!html) return;
+    // Abre o HTML em nova aba e aciona o print
+    const blob = new Blob([html], { type: 'text/html' });
+    const blobUrl = URL.createObjectURL(blob);
+    const win = window.open(blobUrl, '_blank');
+    win.onload = () => {
+      win.print();
+      URL.revokeObjectURL(blobUrl);
+    };
   };
 
   return (
     <div className="preview-page">
       <div className="cursor" ref={cursorRef} />
+
       {/* Header */}
       <div className="preview-header">
         <a href="/" className="preview-logo">
@@ -72,7 +130,7 @@ export default function Preview() {
       </div>
 
       {/* Hero da página */}
-      {!html && (
+      {!html && !loading && (
         <div className="preview-hero">
           <div className="preview-hero-tag">✨ POWERED BY IA</div>
           <h1 className="preview-hero-title">
@@ -97,11 +155,7 @@ export default function Preview() {
               onClick={gerar}
               disabled={loading || !url.trim()}
             >
-              {loading ? (
-                <span className="preview-loading-text">
-                  <span className="preview-spinner" /> Gerando...
-                </span>
-              ) : 'GERAR PRÉVIA →'}
+              GERAR PRÉVIA →
             </button>
           </div>
 
@@ -161,6 +215,7 @@ export default function Preview() {
 
           <iframe
             id="preview-frame"
+            ref={iframeRef}
             className="preview-frame"
             srcDoc={html}
             title="Prévia do site"
