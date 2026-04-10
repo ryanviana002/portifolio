@@ -243,6 +243,22 @@
   margin: 0;
 }
 
+.preview-progress-wrap {
+  width: 280px;
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  margin: 16px 0 8px;
+  overflow: hidden;
+}
+
+.preview-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ff007f, #00f2fe);
+  border-radius: 2px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Result */
 .preview-result { width: 100%; padding-top: 72px; }
 

@@ -32,8 +32,10 @@ function playClick(vol = 0.15) {
 export default function Preview() {
   const [url, setUrl] = useState('');
   const [checking, setChecking] = useState(false);
-  const [confirmData, setConfirmData] = useState(null); // dados para popup de confirmação
+  const [confirmData, setConfirmData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressMsg, setProgressMsg] = useState('');
   const [html, setHtml] = useState('');
   const [dados, setDados] = useState(null);
   const [error, setError] = useState('');
@@ -155,9 +157,28 @@ export default function Preview() {
     if (!confirmData) return;
     setConfirmData(null);
     setLoading(true);
+    setProgress(0);
     setHtml('');
     setDados(null);
     setShowPopup(false);
+
+    // Progresso simulado com etapas realistas
+    const etapas = [
+      { pct: 10, msg: 'Buscando dados do negócio...' },
+      { pct: 25, msg: 'Analisando segmento e concorrência...' },
+      { pct: 45, msg: 'Definindo paleta de cores e layout...' },
+      { pct: 65, msg: 'Gerando estrutura do site...' },
+      { pct: 80, msg: 'Criando seções e conteúdo...' },
+      { pct: 92, msg: 'Finalizando detalhes visuais...' },
+    ];
+    let etapaIdx = 0;
+    const progressInterval = setInterval(() => {
+      if (etapaIdx < etapas.length) {
+        setProgress(etapas[etapaIdx].pct);
+        setProgressMsg(etapas[etapaIdx].msg);
+        etapaIdx++;
+      }
+    }, 1800);
     try {
       const res = await fetch('/api/preview', {
         method: 'POST',
@@ -165,6 +186,9 @@ export default function Preview() {
         body: JSON.stringify({ url: url.trim() }),
       });
       const data = await res.json();
+      clearInterval(progressInterval);
+      setProgress(100);
+      setProgressMsg('Prévia pronta!');
       if (!res.ok) throw new Error(data.error);
       const watermark = `
 <style>
@@ -181,9 +205,12 @@ export default function Preview() {
       setHtml(watermark + data.html);
       setDados(data.dados);
     } catch (e) {
-      setError('Não foi possível gerar a prévia. Verifique o link e tente novamente.');
+      clearInterval(progressInterval);
+      setError(e.message || 'Não foi possível gerar a prévia. Verifique o link e tente novamente.');
     } finally {
       setLoading(false);
+      setProgress(0);
+      setProgressMsg('');
     }
   };
 
@@ -264,8 +291,11 @@ export default function Preview() {
       {loading && (
         <div className="preview-loading">
           <div className="preview-loading-ring" />
-          <p className="preview-loading-msg">Nossos agentes estão analisando seu negócio e criando a prévia...</p>
-          <p className="preview-loading-sub">Isso pode levar alguns segundos</p>
+          <p className="preview-loading-msg">{progressMsg || 'Iniciando...'}</p>
+          <div className="preview-progress-wrap">
+            <div className="preview-progress-bar" style={{ width: `${progress}%` }} />
+          </div>
+          <p className="preview-loading-sub">{progress}% concluído</p>
         </div>
       )}
 
