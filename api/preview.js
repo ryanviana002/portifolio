@@ -114,19 +114,41 @@ export default async function handler(req, res) {
         nota: r.rating,
         texto: r.text?.text || '',
       })) || [],
-      fotos: place.photos?.slice(0, 3).map(p =>
+      fotos: place.photos?.slice(0, 5).map(p =>
         `https://places.googleapis.com/v1/${p.name}/media?maxWidthPx=800&key=${PLACES_KEY}`
       ) || [],
     };
+
+    const logo = dados.fotos[0] || null;
+    const galeria = dados.fotos.slice(1);
 
     // Gera mockup com Claude
     const reviewsText = dados.reviews.length
       ? dados.reviews.map(r => `- ${r.autor} (${r.nota}⭐): "${r.texto.slice(0, 120)}"`).join('\n')
       : '';
 
-    const fotosText = dados.fotos.length
-      ? `\nFOTOS REAIS (use como src das imagens):\n${dados.fotos.map((f, i) => `Foto ${i + 1}: ${f}`).join('\n')}`
+    const galeriaText = galeria.length
+      ? `\nFOTOS PARA GALERIA (use como src):\n${galeria.map((f, i) => `Foto ${i + 1}: ${f}`).join('\n')}`
       : '';
+
+    const paletasPorSegmento = {
+      'concessionária': 'preto, cinza escuro e vermelho — elegante e premium',
+      'restaurante': 'tons quentes, laranja e marrom — acolhedor e apetitoso',
+      'lanchonete': 'vermelho e amarelo vibrante — energético e apetitoso',
+      'pizzaria': 'vermelho e verde — italiano e tradicional',
+      'salão de beleza': 'rosa e dourado — feminino e sofisticado',
+      'barbearia': 'preto e dourado — masculino e premium',
+      'academia': 'preto e laranja neon — energia e força',
+      'clínica': 'azul claro e branco — clean e confiável',
+      'farmácia': 'verde e branco — saúde e confiança',
+      'advocacia': 'azul marinho e dourado — sério e profissional',
+      'imobiliária': 'azul e cinza — confiável e moderno',
+      'pet shop': 'verde e amarelo — divertido e amigável',
+      'padaria': 'marrom e bege — quente e artesanal',
+    };
+    const categoriaLower = dados.categoria.toLowerCase();
+    const paletaSugerida = Object.entries(paletasPorSegmento).find(([k]) => categoriaLower.includes(k))?.[1]
+      || 'cores modernas e profissionais adequadas ao segmento';
 
     const prompt = `Você é um designer web especialista em criar sites profissionais para pequenas e médias empresas brasileiras.
 
@@ -138,18 +160,19 @@ DADOS REAIS DO NEGÓCIO (Google Maps):
 - Avaliação: ${dados.avaliacao} ⭐ (${dados.numAvaliacoes} avaliações no Google)
 - Telefone: ${dados.telefone || 'Não informado'}
 - Endereço: ${dados.endereco || 'Não informado'}
-${reviewsText ? `\nAVALIAÇÕES REAIS:\n${reviewsText}` : ''}${fotosText}
+${logo ? `\nLOGO/IMAGEM PRINCIPAL DO NEGÓCIO: ${logo}\n(Use esta imagem como logo na navbar e como imagem hero de fundo ou destaque)` : ''}
+${reviewsText ? `\nAVALIAÇÕES REAIS:\n${reviewsText}` : ''}${galeriaText}
 
 INSTRUÇÕES:
 1. HTML completo com CSS em <style> e Google Fonts (@import Inter ou Poppins)
-2. Paleta de cores adequada ao segmento: ${dados.categoria}
+2. Paleta de cores: ${paletaSugerida} — use tons consistentes em todo o site
 3. Seções obrigatórias:
-   - Navbar com nome da empresa
-   - Hero impactante com headline relacionada ao segmento e botão WhatsApp verde
-   - Sobre (3 diferenciais com emojis)
-   - Serviços (4 cards com ícones emojis, baseados no segmento)
-   - Galeria de fotos (use as fotos reais se disponíveis, com object-fit:cover, altura 250px)
-   - Avaliações Google (use as avaliações reais se disponíveis, senão crie 3 fictícias realistas)
+   - Navbar com nome da empresa${logo ? ` e logo (<img src="${logo}" style="height:50px;object-fit:contain">)` : ''}
+   - Hero impactante com headline relacionada ao segmento${logo ? `, imagem de fundo ou destaque usando a logo/foto real` : ''} e botão WhatsApp verde
+   - Sobre (3 diferenciais com emojis baseados no segmento real)
+   - Serviços (4 cards com ícones emojis, baseados no segmento ${dados.categoria})
+   - Galeria de fotos (use as fotos reais da galeria se disponíveis, com object-fit:cover, altura 250px)
+   - Avaliações Google (use as avaliações reais se disponíveis, senão crie 3 fictícias realistas para ${dados.categoria})
    - CTA final com botão WhatsApp
    - Footer com endereço e telefone reais
 4. Design moderno, responsivo (mobile-first)
