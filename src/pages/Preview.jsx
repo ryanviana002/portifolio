@@ -196,7 +196,7 @@ export default function Preview() {
 <style>
   #rdc-banner{position:fixed;top:0;left:0;right:0;z-index:999999;background:linear-gradient(135deg,#ff007f,#d12c96);color:#fff;text-align:center;padding:8px 16px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;}
   #rdc-banner a{color:#fff;text-decoration:underline;}
-  #rdc-corner{position:fixed;bottom:80px;right:20px;z-index:999999;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);border:1px solid rgba(255,0,127,0.4);color:#fff;padding:6px 12px;border-radius:999px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;}
+  #rdc-corner{position:fixed;bottom:80px;left:20px;z-index:999999;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);border:1px solid rgba(255,0,127,0.4);color:#fff;padding:6px 12px;border-radius:999px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;}
   #rdc-corner span{color:#ff007f;}
   html,body{scroll-behavior:smooth;}
   nav,header,[class*="navbar"],[class*="nav-"]{top:36px!important;}
