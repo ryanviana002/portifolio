@@ -160,7 +160,6 @@ DADOS REAIS DO NEGÓCIO:
 - Avaliação: ${dados.avaliacao} ⭐ (${dados.numAvaliacoes} avaliações)
 - Telefone: ${dados.telefone || 'Não informado'}
 - Endereço: ${dados.endereco || 'Não informado'}
-${logo ? `- Foto principal do negócio (use APENAS dentro das seções, nunca solta fora de container): ${logo}` : ''}
 ${reviewsText ? `\nAVALIAÇÕES REAIS:\n${reviewsText}` : ''}${galeriaText}
 
 PALETA DE CORES: ${paletaSugerida}
@@ -168,14 +167,14 @@ PALETA DE CORES: ${paletaSugerida}
 ESTRUTURA OBRIGATÓRIA (nesta ordem):
 
 1. NAVBAR fixa no topo
-   - Logo à esquerda${logo ? ` usando <img src="${logo}" style="height:48px;object-fit:contain">` : ` com nome da empresa`}
+   - Nome da empresa à esquerda em texto (fonte bold, cor primária ou branca)
    - Links de navegação: Início, Sobre, Serviços, Galeria, Depoimentos, Contato
    - Botão CTA "Fale Conosco" à direita
    - Ao rolar: fundo branco/escuro com sombra
    - Hamburger no mobile
 
 2. HERO (100vh, fundo gradiente escuro com a paleta do segmento)
-   - Grid 2 colunas: texto à esquerda, logo/imagem à direita${logo ? ` (<img src="${logo}" com float animation)` : ''}
+   - Grid 2 colunas: texto à esquerda (maior), elemento decorativo à direita (ícone SVG grande ou shape geométrico da área do negócio)
    - Badge com nome da empresa em letras maiúsculas
    - H1 impactante em maiúsculas com palavra destaque colorida
    - Subtítulo descrevendo o negócio
@@ -214,9 +213,8 @@ REQUISITOS TÉCNICOS:
 - Animações suaves (transitions, hover effects)
 - Ícones em SVG inline (sem bibliotecas externas)
 - Botão WhatsApp flutuante fixo no canto inferior direito
-- NÃO use foto como fundo do hero — use gradiente
+- NÃO use fotos no hero nem na navbar — use apenas texto e SVGs
 - NÃO coloque imagens soltas fora de containers ou seções
-- A foto principal só pode aparecer: como logo na navbar OU como imagem dentro do hero (lado direito, dentro de uma div)
 - O HTML deve ser COMPLETO — todas as 8 seções devem estar presentes
 - Retorne APENAS o HTML completo, sem markdown, sem explicações`;
 
