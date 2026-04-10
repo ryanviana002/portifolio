@@ -109,10 +109,11 @@ async function getPlaceDetails(placeId) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
-  if (!checkRateLimit(ip)) {
-    return res.status(429).json({ error: 'Limite de 3 prévias por dia atingido. Volte amanhã ou fale com a gente pelo WhatsApp!' });
-  }
+  // Rate limit desativado para testes
+  // const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
+  // if (!checkRateLimit(ip)) {
+  //   return res.status(429).json({ error: 'Limite de 3 prévias por dia atingido. Volte amanhã ou fale com a gente pelo WhatsApp!' });
+  // }
 
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: 'URL obrigatória' });
