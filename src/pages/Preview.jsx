@@ -338,6 +338,23 @@ export default function Preview() {
                 <span className="preview-info-label">Avaliação Google</span>
                 <span className="preview-info-val">⭐ {dados.avaliacao} ({dados.numAvaliacoes} avaliações)</span>
               </div>
+              <button className="preview-pdf-btn" onClick={() => {
+                const printCss = `<style>
+                  @media print {
+                    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                    body { margin: 0; }
+                    nav, header { position: relative !important; }
+                    #rdc-banner, #rdc-corner { display: none !important; }
+                  }
+                </style>`;
+                const htmlComPrint = html.replace('</head>', printCss + '</head>');
+                const blob = new Blob([htmlComPrint], { type: 'text/html' });
+                const blobUrl = URL.createObjectURL(blob);
+                const win = window.open(blobUrl, '_blank');
+                win.onload = () => { setTimeout(() => { win.print(); URL.revokeObjectURL(blobUrl); }, 500); };
+              }}>
+                Salvar PDF
+              </button>
             </div>
           )}
           {!iframeReady && (
