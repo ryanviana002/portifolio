@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   const { id } = req.query;
   if (!id) return res.status(400).json({ error: 'ID obrigatório' });
 
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/previews?id=eq.${id}&select=html,nome,categoria`, {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/previews?id=eq.${id}&select=html,nome,categoria,expires_at`, {
     headers: {
       'apikey': SUPABASE_ANON_KEY,
       'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
@@ -17,5 +17,10 @@ export default async function handler(req, res) {
   const data = await r.json();
   if (!data?.length) return res.status(404).json({ error: 'Prévia não encontrada' });
 
-  return res.status(200).json(data[0]);
+  const preview = data[0];
+  if (preview.expires_at && new Date(preview.expires_at) < new Date()) {
+    return res.status(410).json({ error: 'Prévia expirada. Gere uma nova em ryancreator.dev/preview' });
+  }
+
+  return res.status(200).json(preview);
 }

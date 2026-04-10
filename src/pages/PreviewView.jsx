@@ -27,8 +27,16 @@ export default function PreviewView() {
   );
 
   if (error) return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', background:'#0a0a12', color:'#ff007f', fontFamily:'Space Grotesk,sans-serif', fontSize:18 }}>
-      Prévia não encontrada.
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', background:'#0a0a12', color:'#fff', fontFamily:'Space Grotesk,sans-serif', flexDirection:'column', gap:16, textAlign:'center', padding:32 }}>
+      <div style={{ fontSize:48 }}>⏰</div>
+      <h2 style={{ color:'#ff007f', fontSize:24, fontWeight:900 }}>Prévia expirada</h2>
+      <p style={{ color:'rgba(255,255,255,0.5)', fontSize:15, maxWidth:360 }}>Esta prévia ficou disponível por 24h e expirou. Gere uma nova gratuitamente.</p>
+      <a href="/preview" style={{ background:'linear-gradient(135deg,#ff007f,#d12c96)', color:'#fff', padding:'14px 32px', borderRadius:8, fontWeight:700, fontSize:13, letterSpacing:1, textDecoration:'none', marginTop:8 }}>
+        GERAR NOVA PRÉVIA →
+      </a>
+      <a href="https://wa.me/5519992525515" target="_blank" rel="noreferrer" style={{ color:'rgba(255,255,255,0.3)', fontSize:13, marginTop:4 }}>
+        ou fale conosco no WhatsApp
+      </a>
     </div>
   );
 
