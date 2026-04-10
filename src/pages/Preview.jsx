@@ -153,9 +153,24 @@ export default function Preview() {
     }
   };
 
+  // Verifica limite local (localStorage)
+  const checkLocalLimit = () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const key = `rdc_preview_${today}`;
+    const count = parseInt(localStorage.getItem(key) || '0');
+    if (count >= 3) return false;
+    localStorage.setItem(key, count + 1);
+    return true;
+  };
+
   // Passo 2: gera o mockup após confirmação
   const gerar = async () => {
     if (!confirmData) return;
+    if (!checkLocalLimit()) {
+      setConfirmData(null);
+      setError('Limite de 3 prévias por dia atingido. Volte amanhã ou fale conosco pelo WhatsApp!');
+      return;
+    }
     setConfirmData(null);
     setLoading(true);
     setProgress(0);
