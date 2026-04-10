@@ -160,7 +160,7 @@ DADOS REAIS DO NEGÓCIO:
 - Avaliação: ${dados.avaliacao} ⭐ (${dados.numAvaliacoes} avaliações)
 - Telefone: ${dados.telefone || 'Não informado'}
 - Endereço: ${dados.endereco || 'Não informado'}
-${logo ? `- Logo/foto principal: ${logo}` : ''}
+${logo ? `- Foto principal do negócio (use APENAS dentro das seções, nunca solta fora de container): ${logo}` : ''}
 ${reviewsText ? `\nAVALIAÇÕES REAIS:\n${reviewsText}` : ''}${galeriaText}
 
 PALETA DE CORES: ${paletaSugerida}
@@ -215,11 +215,14 @@ REQUISITOS TÉCNICOS:
 - Ícones em SVG inline (sem bibliotecas externas)
 - Botão WhatsApp flutuante fixo no canto inferior direito
 - NÃO use foto como fundo do hero — use gradiente
+- NÃO coloque imagens soltas fora de containers ou seções
+- A foto principal só pode aparecer: como logo na navbar OU como imagem dentro do hero (lado direito, dentro de uma div)
+- O HTML deve ser COMPLETO — todas as 8 seções devem estar presentes
 - Retorne APENAS o HTML completo, sem markdown, sem explicações`;
 
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 8096,
+      max_tokens: 16000,
       messages: [{ role: 'user', content: prompt }],
     });
 
