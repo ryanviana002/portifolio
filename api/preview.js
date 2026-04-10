@@ -3,6 +3,26 @@ import Anthropic from '@anthropic-ai/sdk';
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const PLACES_KEY = process.env.GOOGLE_PLACES_API_KEY;
 
+// Rate limit: 3 gerações por IP por dia
+const rateLimitMap = new Map();
+const LIMIT = 3;
+
+function checkRateLimit(ip) {
+  const today = new Date().toISOString().slice(0, 10); // "2026-04-09"
+  const key = `${ip}:${today}`;
+  const count = rateLimitMap.get(key) || 0;
+  if (count >= LIMIT) return false;
+  rateLimitMap.set(key, count + 1);
+  // Limpa entradas antigas (evita memory leak)
+  if (rateLimitMap.size > 5000) {
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    for (const k of rateLimitMap.keys()) {
+      if (k.includes(yesterday)) rateLimitMap.delete(k);
+    }
+  }
+  return true;
+}
+
 async function extractPlaceId(url) {
   // Expande links encurtados
   let finalUrl = url;
@@ -89,6 +109,11 @@ async function getPlaceDetails(placeId) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
+  if (!checkRateLimit(ip)) {
+    return res.status(429).json({ error: 'Limite de 3 prévias por dia atingido. Volte amanhã ou fale com a gente pelo WhatsApp!' });
+  }
+
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: 'URL obrigatória' });
 
@@ -150,77 +175,34 @@ export default async function handler(req, res) {
     const paletaSugerida = Object.entries(paletasPorSegmento).find(([k]) => categoriaLower.includes(k))?.[1]
       || 'cores modernas e profissionais adequadas ao segmento';
 
-    const prompt = `Você é um designer web expert em criar sites profissionais de alto nível para empresas brasileiras.
+    const prompt = `Crie um site HTML de apresentação para este negócio. Seja CONCISO no código — use CSS compacto e sem repetições.
 
-Crie um site HTML completo e sofisticado para esse negócio real, no mesmo nível de qualidade de um site desenvolvido por um profissional.
+NEGÓCIO: ${dados.nome} | ${dados.categoria} | ⭐${dados.avaliacao} (${dados.numAvaliacoes} avaliações)
+TELEFONE: ${dados.telefone || ''} | ENDEREÇO: ${dados.endereco || ''}
+CORES: ${paletaSugerida}
+${reviewsText ? `DEPOIMENTOS REAIS: ${reviewsText}` : ''}
+${galeria.length ? `FOTOS GALERIA: ${galeria.slice(0,3).join(' | ')}` : ''}
 
-DADOS REAIS DO NEGÓCIO:
-- Nome: ${dados.nome}
-- Segmento: ${dados.categoria}
-- Avaliação: ${dados.avaliacao} ⭐ (${dados.numAvaliacoes} avaliações)
-- Telefone: ${dados.telefone || 'Não informado'}
-- Endereço: ${dados.endereco || 'Não informado'}
-${reviewsText ? `\nAVALIAÇÕES REAIS:\n${reviewsText}` : ''}${galeriaText}
+SEÇÕES (todas obrigatórias, código enxuto):
+1. NAVBAR: nome da empresa + links (Sobre, Serviços, Galeria, Depoimentos) + botão WhatsApp
+2. HERO: fundo gradiente escuro, título em maiúsculas impactante, subtítulo, botão WhatsApp verde, 3 stats (clientes/anos/satisfação)
+3. SOBRE: 2 colunas — texto da empresa + 3 diferenciais com emoji
+4. SERVIÇOS: 4 cards em grid com emoji, nome e descrição curta (baseado no segmento ${dados.categoria})
+5. GALERIA: grid 3 colunas com ${galeria.length ? 'as fotos reais' : 'placeholders coloridos'}, height 200px, object-fit cover
+6. DEPOIMENTOS: 3 cards com ⭐ e texto${dados.reviews.length ? ' (use os reais)' : ''}
+7. FOOTER: nome, endereço, telefone, "Site criado por RDCreator"
 
-PALETA DE CORES: ${paletaSugerida}
-
-ESTRUTURA OBRIGATÓRIA (nesta ordem):
-
-1. NAVBAR fixa no topo
-   - Nome da empresa à esquerda em texto (fonte bold, cor primária ou branca)
-   - Links de navegação: Início, Sobre, Serviços, Galeria, Depoimentos, Contato
-   - Botão CTA "Fale Conosco" à direita
-   - Ao rolar: fundo branco/escuro com sombra
-   - Hamburger no mobile
-
-2. HERO (100vh, fundo gradiente escuro com a paleta do segmento)
-   - Grid 2 colunas: texto à esquerda (maior), elemento decorativo à direita (ícone SVG grande ou shape geométrico da área do negócio)
-   - Badge com nome da empresa em letras maiúsculas
-   - H1 impactante em maiúsculas com palavra destaque colorida
-   - Subtítulo descrevendo o negócio
-   - 2 botões: "AGENDAR" (primário) + "VER SERVIÇOS" (outline branco)
-   - 3 stats embaixo: número de clientes, anos de experiência, satisfação
-   - Grid pattern sutil no fundo (linhas finas)
-
-3. SOBRE (fundo branco)
-   - Faixa de números com fundo da cor primária
-   - 2 colunas: texto + 4 diferenciais com ícone SVG
-   - Título, 2 parágrafos de descrição, telefone clicável
-
-4. SERVIÇOS (fundo cinza claro)
-   - Lista clicável à esquerda (6-8 serviços com número e chevron)
-   - Painel de detalhe à direita (ícone SVG, título, descrição, botão agendar)
-   - Texto de fundo grande "SERVIÇOS" em opacidade baixa
-
-5. GALERIA (fundo branco)
-   - Grid de fotos${galeria.length ? ` usando as fotos reais: ${galeria.join(', ')}` : ' com placeholders de cor sólida'}
-   - object-fit: cover, altura 260px, border-radius 12px
-
-6. DEPOIMENTOS (fundo cor primária)
-   - 3 cards com avaliação, texto e nome${dados.reviews.length ? ' (use as avaliações reais)' : ' (crie depoimentos realistas para o segmento)'}
-   - Estrelas ⭐, aspas decorativas
-
-7. CTA FINAL (fundo escuro)
-   - Headline chamativa
-   - Botão WhatsApp grande verde (#25d366)
-
-8. FOOTER (fundo muito escuro)
-   - Logo, endereço, telefone, links
-
-REQUISITOS TÉCNICOS:
-- Google Fonts: @import Montserrat (títulos, 700/900) + Open Sans (corpo)
-- CSS completo em <style>, responsivo com media queries
-- Animações suaves (transitions, hover effects)
-- Ícones em SVG inline (sem bibliotecas externas)
-- Botão WhatsApp flutuante fixo no canto inferior direito
-- NÃO use fotos no hero nem na navbar — use apenas texto e SVGs
-- NÃO coloque imagens soltas fora de containers ou seções
-- O HTML deve ser COMPLETO — todas as 8 seções devem estar presentes
-- Retorne APENAS o HTML completo, sem markdown, sem explicações`;
+REGRAS:
+- Google Fonts: Montserrat+Open Sans em uma linha de @import
+- Botão WhatsApp flutuante fixo (#25d366)
+- Responsivo com 1 media query no final
+- SEM JavaScript (exceto navbar scroll simples se necessário)
+- SEM imagens no hero — apenas texto e gradiente
+- Retorne APENAS o HTML, sem explicações`;
 
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 16000,
+      max_tokens: 8096,
       messages: [{ role: 'user', content: prompt }],
     });
 
