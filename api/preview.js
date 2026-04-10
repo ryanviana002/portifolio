@@ -168,7 +168,7 @@ INSTRUÇÕES:
 2. Paleta de cores: ${paletaSugerida} — use tons consistentes em todo o site
 3. Seções obrigatórias:
    - Navbar com nome da empresa${logo ? ` e logo (<img src="${logo}" style="height:50px;object-fit:contain">)` : ''}
-   - Hero impactante com headline relacionada ao segmento${logo ? `, imagem de fundo ou destaque usando a logo/foto real` : ''} e botão WhatsApp verde
+   - Hero impactante com headline relacionada ao segmento, fundo gradiente ou cor sólida escura (NÃO use foto como fundo do hero), botão WhatsApp verde
    - Sobre (3 diferenciais com emojis baseados no segmento real)
    - Serviços (4 cards com ícones emojis, baseados no segmento ${dados.categoria})
    - Galeria de fotos (use as fotos reais da galeria se disponíveis, com object-fit:cover, altura 250px)

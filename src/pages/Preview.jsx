@@ -54,7 +54,7 @@ export default function Preview() {
   useEffect(() => {
     const style = document.createElement('style');
     style.id = 'preview-scrollbar-hide';
-    style.textContent = '::-webkit-scrollbar { display: none !important; } body { scrollbar-width: none !important; overflow-x: hidden; }';
+    style.textContent = '::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: #0a0a12; } ::-webkit-scrollbar-thumb { background: #ff007f; border-radius: 2px; } body { overflow-x: hidden; }';
     document.head.appendChild(style);
     return () => document.getElementById('preview-scrollbar-hide')?.remove();
   }, []);
@@ -108,10 +108,9 @@ export default function Preview() {
   // Proteção: desabilita botão direito e F12 (desativado temporariamente para debug)
   // useEffect(() => { ... }, []);
 
-  // Popup ao terminar de rolar o iframe ou após 8s
+  // Popup apenas ao chegar no fim do scroll do iframe
   useEffect(() => {
     if (!html) return;
-    const timer = setTimeout(() => setShowPopup(true), 8000);
     const iframe = iframeRef.current;
     const handleScroll = () => {
       if (!iframe?.contentWindow) return;
@@ -126,7 +125,6 @@ export default function Preview() {
     };
     iframe?.addEventListener('load', attachScroll);
     return () => {
-      clearTimeout(timer);
       try { iframe?.contentWindow?.removeEventListener('scroll', handleScroll); } catch {}
     };
   }, [html]);
