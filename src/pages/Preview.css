@@ -443,6 +443,8 @@
 
 .preview-popup-btn {
   display: block;
+  width: 100%;
+  text-align: center;
   background: linear-gradient(135deg, #ff007f, #d12c96);
   color: #fff;
   text-decoration: none;
