@@ -144,7 +144,6 @@ INSTRUÇÕES:
 1. HTML completo com CSS em <style> e Google Fonts (@import Inter ou Poppins)
 2. Paleta de cores adequada ao segmento: ${dados.categoria}
 3. Seções obrigatórias:
-   - Banner topo rosa: "🎨 PRÉVIA DO SEU FUTURO SITE — RDCreator | ryancreator.dev"
    - Navbar com nome da empresa
    - Hero impactante com headline relacionada ao segmento e botão WhatsApp verde
    - Sobre (3 diferenciais com emojis)
