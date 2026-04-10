@@ -301,6 +301,7 @@ export default function Preview() {
             <div className="preview-progress-bar" style={{ width: `${progress}%` }} />
           </div>
           <p className="preview-loading-sub">{progress}% concluído</p>
+          <p className="preview-loading-hint">Isso pode levar alguns minutos...</p>
         </div>
       )}
 
