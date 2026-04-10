@@ -78,6 +78,11 @@ function playClick(vol = 0.2) {
 function App() {
   const cursorRef = useRef(null);
   const [waOpen, setWaOpen] = useState(false);
+
+  useEffect(() => {
+    document.body.classList.add('has-sidebar');
+    return () => document.body.classList.remove('has-sidebar');
+  }, []);
   const [particleDone, setParticleDone] = useState(false);
   const [matrix, setMatrix] = useState(false);
   const [portal, setPortal] = useState(false);

@@ -177,14 +177,14 @@
 [data-theme="light"] .sidebar-links li a:hover { color: #000; background: rgba(0,0,0,0.05); }
 [data-theme="light"] .theme-toggle { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.15); color: #000; }
 
-/* Push body */
-body { padding-left: 68px; padding-top: 0; padding-bottom: 0; }
+/* Push body — só quando tem sidebar */
+.has-sidebar { padding-left: 68px; }
 
 /* Mobile */
 @media (max-width: 768px) {
   .sidebar { width: 48px; }
   .sidebar.expanded { width: 200px; }
-  body { padding-left: 48px; }
+  .has-sidebar { padding-left: 48px; }
   .sidebar-logo-img { height: 36px; }
   .sidebar.expanded .sidebar-logo-img { height: 52px; }
 }

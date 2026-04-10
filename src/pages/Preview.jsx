@@ -1,6 +1,34 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import './Preview.css';
 
+function playClick(vol = 0.15) {
+  try {
+    if (!window._rdcActx || window._rdcActx.state === 'closed') {
+      window._rdcActx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    const ctx = window._rdcActx;
+    if (ctx.state === 'suspended') ctx.resume();
+    const t = ctx.currentTime;
+    const bufSize = Math.floor(ctx.sampleRate * 0.012);
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufSize);
+    const noise = ctx.createBufferSource();
+    noise.buffer = buf;
+    const hpf = ctx.createBiquadFilter();
+    hpf.type = 'highpass';
+    hpf.frequency.value = 3000;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(vol, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.018);
+    noise.connect(hpf);
+    hpf.connect(gain);
+    gain.connect(ctx.destination);
+    noise.start(t);
+    noise.stop(t + 0.02);
+  } catch {}
+}
+
 export default function Preview() {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,22 +57,50 @@ export default function Preview() {
     return () => document.getElementById('preview-scrollbar-hide')?.remove();
   }, []);
 
-  // Cursor customizado
+  // Cursor customizado + som nos cliques/hover
   useEffect(() => {
     const cursor = cursorRef.current;
     const onMove = e => {
       cursor.style.left = e.clientX + 'px';
       cursor.style.top = e.clientY + 'px';
     };
-    const onEnter = () => cursor.classList.add('big');
+    const onEnter = () => { cursor.classList.add('big'); playClick(0.08); };
     const onLeave = () => cursor.classList.remove('big');
+    const onClick = () => playClick(0.18);
     window.addEventListener('mousemove', onMove);
+    window.addEventListener('click', onClick);
     const interactives = document.querySelectorAll('a, button, input');
     interactives.forEach(el => {
       el.addEventListener('mouseenter', onEnter);
       el.addEventListener('mouseleave', onLeave);
     });
-    return () => window.removeEventListener('mousemove', onMove);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('click', onClick);
+    };
+  }, []);
+
+  // Relâmpago a cada 15s
+  useEffect(() => {
+    const flash = () => {
+      const el = document.querySelector('.preview-page');
+      if (!el) return;
+      el.style.transition = 'none';
+      el.style.filter = 'brightness(3) saturate(2)';
+      setTimeout(() => {
+        el.style.filter = 'brightness(1.4)';
+        el.style.transition = 'filter 0.15s ease';
+        setTimeout(() => {
+          el.style.filter = 'brightness(2)';
+          setTimeout(() => {
+            el.style.filter = '';
+            el.style.transition = 'filter 0.3s ease';
+          }, 80);
+        }, 60);
+      }, 40);
+    };
+    const id = setInterval(flash, 15000);
+    return () => clearInterval(id);
   }, []);
 
   // Proteção: desabilita botão direito e F12 (desativado temporariamente para debug)
@@ -110,12 +166,12 @@ export default function Preview() {
     <div className="preview-page">
       <div className="cursor" ref={cursorRef} />
 
-      {/* Header */}
-      <div className="preview-header">
-        <a href="/" className="preview-logo-link">
-          <img src="/logo-rdc.png" alt="RDCreator" className="preview-logo-img" />
+      {/* Header fixo */}
+      <div className="preview-topbar">
+        <a href="/" className="preview-topbar-logo">
+          <img src="/logo-rdc.png" alt="RDC" />
         </a>
-        <span className="preview-badge">Criador de Site</span>
+        <a href="/" className="preview-back-btn" title="Voltar ao site">← Voltar</a>
       </div>
 
       {/* Hero */}
