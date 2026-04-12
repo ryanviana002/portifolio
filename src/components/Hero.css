@@ -792,6 +792,14 @@
     margin-bottom: 24px;
   }
 
+  .hero-preview-btn {
+    max-width: 100%;
+    justify-content: center;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+  }
+
   .hero-btns {
     justify-content: center;
   }

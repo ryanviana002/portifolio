@@ -347,8 +347,12 @@ export default function Preview() {
                     #rdc-banner, #rdc-corner { display: none !important; }
                   }
                 </style>`;
-                const htmlComPrint = html.replace('</head>', printCss + '</head>');
-                const blob = new Blob([htmlComPrint], { type: 'text/html' });
+                let htmlComPrint = html;
+                if (!htmlComPrint.includes('charset')) {
+                  htmlComPrint = htmlComPrint.replace('<head>', '<head><meta charset="utf-8">');
+                }
+                htmlComPrint = htmlComPrint.replace('</head>', printCss + '</head>');
+                const blob = new Blob([htmlComPrint], { type: 'text/html;charset=utf-8' });
                 const blobUrl = URL.createObjectURL(blob);
                 const win = window.open(blobUrl, '_blank');
                 win.onload = () => { setTimeout(() => { win.print(); URL.revokeObjectURL(blobUrl); }, 500); };
