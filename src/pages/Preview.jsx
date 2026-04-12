@@ -45,6 +45,14 @@ export default function Preview() {
   const cursorRef = useRef(null);
   const iframeRef = useRef(null);
 
+  // Detecta ?admin=dani na URL e salva no localStorage
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('admin') === 'dani') {
+      localStorage.setItem('rdc_owner', '1');
+    }
+  }, []);
+
   const stars = useMemo(() => Array.from({ length: 60 }, (_, i) => ({
     id: i,
     left: Math.random() * 100,
@@ -154,8 +162,9 @@ export default function Preview() {
     }
   };
 
-  // Verifica limite local (localStorage)
+  // Verifica limite local (localStorage) — sem limite para o dono
   const checkLocalLimit = () => {
+    if (localStorage.getItem('rdc_owner') === '1') return true;
     const today = new Date().toISOString().slice(0, 10);
     const key = `rdc_preview_${today}`;
     const count = parseInt(localStorage.getItem(key) || '0');
