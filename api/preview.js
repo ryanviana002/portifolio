@@ -182,7 +182,7 @@ export default async function handler(req, res) {
 ${ctx}
 
 Gere exatamente estas seções com CSS inline no <style>:
-1. <!DOCTYPE html><html><head> com @import Montserrat+Open Sans, reset CSS, variáveis de cor
+1. <!DOCTYPE html><html lang="pt-BR"><head> com <meta charset="UTF-8">, @import Montserrat+Open Sans, reset CSS, variáveis de cor
 2. NAVBAR fixa: nome da empresa bold à esquerda + links (Sobre,Serviços,Galeria,Depoimentos) + botão WhatsApp verde
 3. HERO: fundo gradiente escuro, h1 maiúsculas impactante com palavra colorida, subtítulo, botão WhatsApp verde, 3 stats (clientes/anos/satisfação)
 4. SOBRE: 2 colunas — parágrafo sobre a empresa + 3 diferenciais com emoji e texto curto
@@ -222,8 +222,14 @@ CSS das novas seções no <style> no início desta parte. Retorne APENAS o HTML 
     const parte1 = msg1.content[0].text.replace(/^```html\n?/, '').replace(/\n?```$/, '');
     const parte2 = msg2.content[0].text.replace(/^```html\n?/, '').replace(/\n?```$/, '');
 
+    // Garante charset UTF-8 (evita encoding quebrado em pt-BR)
+    const parte1WithCharset = parte1.replace(
+      /<head([^>]*)>/i,
+      '<head$1><meta charset="UTF-8">'
+    );
+
     // Remove o fechamento </body></html> da parte1 se existir, e junta
-    const parte1Clean = parte1.replace(/<\/body>\s*<\/html>\s*$/i, '');
+    const parte1Clean = parte1WithCharset.replace(/<\/body>\s*<\/html>\s*$/i, '');
     const mockupHtml = parte1Clean + '\n' + parte2;
 
     return res.status(200).json({ html: mockupHtml, dados });
