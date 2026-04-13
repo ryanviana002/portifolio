@@ -5,6 +5,7 @@ import './index.css'
 import App from './App.jsx'
 import Preview from './pages/Preview.jsx'
 import PreviewView from './pages/PreviewView.jsx'
+import Admin from './pages/Admin.jsx'
 import NotFound from './components/NotFound.jsx'
 
 createRoot(document.getElementById('root')).render(
@@ -14,6 +15,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/" element={<App />} />
         <Route path="/preview" element={<Preview />} />
         <Route path="/r/:id" element={<PreviewView />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

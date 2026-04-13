@@ -10,15 +10,31 @@ async function extractPlaceId(url) {
     finalUrl = r.url;
   } catch {}
 
-  // Valida se é Google Maps
-  if (!finalUrl.includes('google.com/maps') && !finalUrl.includes('maps.app.goo.gl') && !finalUrl.includes('goo.gl/maps')) {
+  // Valida se é Google Maps (aceita links mobile, share, short links)
+  const isMaps =
+    finalUrl.includes('google.com/maps') ||
+    finalUrl.includes('maps.google.com') ||
+    finalUrl.includes('maps.app.goo.gl') ||
+    finalUrl.includes('goo.gl/maps') ||
+    finalUrl.includes('g.co/kgs') ||
+    url.includes('g.co/kgs') ||
+    url.includes('maps.app.goo.gl') ||
+    url.includes('goo.gl/maps');
+  if (!isMaps) {
     return { error: 'not_maps' };
   }
 
   const placeIdMatch = finalUrl.match(/place_id=([^&]+)/);
   if (placeIdMatch) return { placeId: placeIdMatch[1] };
 
-  const nameMatch = finalUrl.match(/place\/([^/@]+)/);
+  // CID (Google Share links: ?cid=XXXXX)
+  const cidMatch = finalUrl.match(/[?&]cid=(\d+)/);
+  if (cidMatch) {
+    const placeId = await searchPlaceByCid(cidMatch[1]);
+    return placeId ? { placeId } : { error: 'not_found' };
+  }
+
+  const nameMatch = finalUrl.match(/place\/([^/@?]+)/);
   if (nameMatch) {
     const nome = decodeURIComponent(nameMatch[1].replace(/\+/g, ' '));
     const placeId = await searchPlaceByName(nome);
@@ -32,6 +48,21 @@ async function extractPlaceId(url) {
   }
 
   return { error: 'not_found' };
+}
+
+async function searchPlaceByCid(cid) {
+  // Busca por CID usando Places API text search
+  const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': PLACES_KEY,
+      'X-Goog-FieldMask': 'places.id',
+    },
+    body: JSON.stringify({ textQuery: `cid:${cid}`, languageCode: 'pt-BR' }),
+  });
+  const data = await res.json();
+  return data.places?.[0]?.id || null;
 }
 
 async function searchPlaceByName(name) {
