@@ -17,9 +17,11 @@ async function extractPlaceId(url) {
     finalUrl.includes('maps.app.goo.gl') ||
     finalUrl.includes('goo.gl/maps') ||
     finalUrl.includes('g.co/kgs') ||
+    finalUrl.includes('share.google') ||
     url.includes('g.co/kgs') ||
     url.includes('maps.app.goo.gl') ||
-    url.includes('goo.gl/maps');
+    url.includes('goo.gl/maps') ||
+    url.includes('share.google');
   if (!isMaps) {
     return { error: 'not_maps' };
   }
