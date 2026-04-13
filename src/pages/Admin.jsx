@@ -13,11 +13,7 @@ function novaLinha() {
 }
 
 function msgWa(nome, link) {
-  const smile   = '\u{1F60A}';      // 😊
-  const hand    = '\u{1F447}\u{1F3FD}'; // 👇🏽
-  const free    = '\u{1F193}';      // 🆓
-  const salute  = '\u{1FAE1}';      // 🫡
-  return `Olá, tudo bem? ${smile}\n\nAqui é o Ryan, da RDCreator.\n\nEstava analisando a *${nome}*, no Google Maps, mas não encontrei um site do seu negócio, vi que tinha muito potencial e montei um modelo de site baseado no que vocês fazem ${hand}\n\n${link}\n\n${free} É um preview demonstrativo (não é o site final), mas já mostra como vocês podem se posicionar melhor online e atrair mais clientes.\n\nDeixei disponível por 24h ${salute}\n\nQuero te ouvir — o que achou?`;
+  return `Olá, tudo bem?\n\nAqui é o Ryan, da RDCreator.\n\nEstava analisando a *${nome}*, no Google Maps, mas não encontrei um site do seu negócio, vi que tinha muito potencial e montei um modelo de site baseado no que vocês fazem\n\n${link}\n\nÉ um preview demonstrativo (não é o site final), mas já mostra como vocês podem se posicionar melhor online e atrair mais clientes.\n\nDeixei disponível por 24h\n\nQuero te ouvir — o que achou?`;
 }
 
 const statusLabel = {
@@ -189,17 +185,16 @@ export default function Admin() {
                     <a href={linha.link} target="_blank" rel="noreferrer" className="admin-row-link">{linha.link}</a>
                     <div className="admin-row-btns">
                       <button className="admin-mini-btn" onClick={() => navigator.clipboard.writeText(linha.link)}>Copiar link</button>
-                      {linha.waNum ? (
+                      {linha.waNum && (
                         <button className="admin-mini-btn admin-mini-wa" onClick={() => {
                           const msg = encodeURIComponent(msgWa(linha.nome, linha.link));
                           window.open(`https://wa.me/${linha.waNum}?text=${msg}`, '_blank');
                         }}>WA cliente</button>
-                      ) : (
-                        <button className="admin-mini-btn admin-mini-wa" onClick={() => {
-                          const msg = encodeURIComponent(msgWa(linha.nome, linha.link));
-                          window.open(`https://wa.me/${WA_RYAN}?text=${msg}`, '_blank');
-                        }}>WA pra mim</button>
                       )}
+                      <button className="admin-mini-btn admin-mini-wa-ryan" onClick={() => {
+                        const msg = encodeURIComponent(msgWa(linha.nome, linha.link));
+                        window.open(`https://wa.me/${WA_RYAN}?text=${msg}`, '_blank');
+                      }}>WA Ryan</button>
                     </div>
                   </div>
                 )}
