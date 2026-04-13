@@ -13,7 +13,7 @@ function novaLinha() {
 }
 
 function msgWa(nome, link) {
-  return `Olá, tudo bem?\n\nAqui é o Ryan, da RDCreator.\n\nEstava analisando a *${nome}*, no Google Maps, mas não encontrei um site do seu negócio, vi que tinha muito potencial e montei um modelo de site baseado no que vocês fazem\n\n${link}\n\nÉ um preview demonstrativo (não é o site final), mas já mostra como vocês podem se posicionar melhor online e atrair mais clientes.\n\nDeixei disponível por 24h\n\nQuero te ouvir — o que achou?`;
+  return `Olá, tudo bem?\n\nAqui é o Ryan, da RDCreator.\n\nEstava analisando a *${nome}*, no Google Maps, mas não encontrei um site do seu negócio. Vi que tinha muito potencial e montei um modelo baseado no que vocês fazem:\n\n${link}\n\nÉ um preview demonstrativo (não é o site final), mas já mostra como vocês podem se posicionar melhor online e atrair mais clientes.\n\nDeixei disponível por 24h\n\nQuero te ouvir — o que achou?`;
 }
 
 const statusLabel = {
