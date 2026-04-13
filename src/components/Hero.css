@@ -753,15 +753,17 @@
 @media (max-width: 768px) {
   .hero {
     min-height: 100svh;
-    justify-content: flex-start;
-    padding-top: 100px;
+    justify-content: center;
+    padding-top: 70px;
+    padding-bottom: 32px;
   }
 
   .hero-layout {
-    flex-direction: column-reverse;
+    flex-direction: column;
     padding: 0 24px;
-    gap: 24px;
+    gap: 0;
     align-items: center;
+    justify-content: center;
   }
 
   .hero-content {
@@ -776,9 +778,10 @@
   }
 
   .hero-title {
-    font-size: clamp(38px, 11vw, 60px);
+    font-size: clamp(36px, 10.5vw, 58px);
     letter-spacing: -1px;
     align-items: center;
+    margin-bottom: 16px;
   }
 
   .line1, .line2, .line3 {
@@ -786,24 +789,21 @@
   }
 
   .hero-sub {
-    font-size: 14px;
+    font-size: 13px;
     white-space: normal;
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
 
   .hero-preview-btn {
     display: flex;
     box-sizing: border-box;
-    width: 100%;
-    max-width: 100%;
+    width: auto;
     justify-content: center;
     text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding-left: 16px;
-    padding-right: 16px;
+    white-space: normal;
+    padding-left: 20px;
+    padding-right: 20px;
   }
 
   .hero-btns {
@@ -834,8 +834,7 @@
   }
 
   .terminal {
-    width: 100%;
-    max-width: 340px;
+    display: none;
   }
 
   .glow-pink { width: 300px; height: 300px; }
