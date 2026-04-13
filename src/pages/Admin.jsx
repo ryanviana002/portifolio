@@ -6,12 +6,18 @@ function gerarId() {
   return Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
 }
 
+const WA_RYAN = '5519992525515';
+
 function novaLinha() {
-  return { id: gerarId(), url: '', status: 'idle', nome: '', categoria: '', link: '', erro: '' };
+  return { id: gerarId(), url: '', status: 'idle', nome: '', categoria: '', link: '', erro: '', waNum: null };
 }
 
 function msgWa(nome, link) {
-  return `Olá, tudo bem? 😊\n\nAqui é o Ryan, da RDCreator.\n\nEstava analisando a *${nome}*, no Google Maps, mas não encontrei um site do seu negócio, vi que tinha muito potencial e montei um modelo de site baseado no que vocês fazem 👇🏽\n\n${link}\n\n🆓 É um preview demonstrativo (não é o site final), mas já mostra como vocês podem se posicionar melhor online e atrair mais clientes.\n\nDeixei disponível por 24h 🫡\n\nQuero te ouvir — o que achou?`;
+  const smile   = '\u{1F60A}';      // 😊
+  const hand    = '\u{1F447}\u{1F3FD}'; // 👇🏽
+  const free    = '\u{1F193}';      // 🆓
+  const salute  = '\u{1FAE1}';      // 🫡
+  return `Olá, tudo bem? ${smile}\n\nAqui é o Ryan, da RDCreator.\n\nEstava analisando a *${nome}*, no Google Maps, mas não encontrei um site do seu negócio, vi que tinha muito potencial e montei um modelo de site baseado no que vocês fazem ${hand}\n\n${link}\n\n${free} É um preview demonstrativo (não é o site final), mas já mostra como vocês podem se posicionar melhor online e atrair mais clientes.\n\nDeixei disponível por 24h ${salute}\n\nQuero te ouvir — o que achou?`;
 }
 
 const statusLabel = {
@@ -26,7 +32,7 @@ const statusLabel = {
 export default function Admin() {
   const navigate = useNavigate();
   const [authed, setAuthed] = useState(false);
-  const [linhas, setLinhas] = useState([novaLinha()]);
+  const [linhas, setLinhas] = useState(() => Array.from({ length: 10 }, novaLinha));
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -56,7 +62,7 @@ export default function Admin() {
       const checkData = await checkRes.json();
       if (!checkRes.ok) throw new Error(checkData.error);
 
-      update(id, { status: 'gerando', nome: checkData.nome, categoria: checkData.categoria });
+      update(id, { status: 'gerando', nome: checkData.nome, categoria: checkData.categoria, waNum: checkData.waNum || null });
 
       const genRes = await fetch('/api/preview', {
         method: 'POST',
@@ -81,17 +87,64 @@ export default function Admin() {
       const saveData = await saveRes.json();
       if (!saveRes.ok) throw new Error(saveData.error);
 
+      const waNumFinal = linhas.find(l => l.id === id)?.waNum || null;
       update(id, { status: 'pronto', link: saveData.url, nome });
 
       // Abre WhatsApp com mensagem pronta
       const msg = encodeURIComponent(msgWa(nome, saveData.url));
-      window.open(`https://wa.me/?text=${msg}`, '_blank');
+      const waTarget = waNumFinal || WA_RYAN;
+      window.open(`https://wa.me/${waTarget}?text=${msg}`, '_blank');
     } catch (e) {
       update(id, { status: 'erro', erro: e.message || 'Erro desconhecido' });
     }
   };
 
-  const adicionarLinha = () => setLinhas(prev => [...prev, novaLinha()]);
+  const handleGerarTodos = async () => {
+    const preenchidas = linhas.filter(l => l.url.trim() && !isProcessando(l.status));
+    if (!preenchidas.length) return;
+    const CONC = 3;
+    let idx = 0;
+    const workers = Array.from({ length: Math.min(CONC, preenchidas.length) }, async () => {
+      while (idx < preenchidas.length) {
+        const item = preenchidas[idx++];
+        await gerarItemSemWa(item.id, item.url);
+      }
+    });
+    await Promise.all(workers);
+  };
+
+  const gerarItemSemWa = async (id, urlOverride) => {
+    const linha = linhas.find(l => l.id === id);
+    const url = urlOverride || linha?.url || '';
+    if (!url.trim()) return;
+    update(id, { status: 'checando', erro: '', nome: '', link: '' });
+    try {
+      const checkRes = await fetch('/api/preview-check', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url.trim() }),
+      });
+      const checkData = await checkRes.json();
+      if (!checkRes.ok) throw new Error(checkData.error);
+      update(id, { status: 'gerando', nome: checkData.nome, categoria: checkData.categoria, waNum: checkData.waNum || null });
+      const genRes = await fetch('/api/preview', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url.trim() }),
+      });
+      const genData = await genRes.json();
+      if (!genRes.ok) throw new Error(genData.error);
+      const nome = genData.dados?.nome || checkData.nome;
+      update(id, { status: 'salvando', nome });
+      const saveRes = await fetch('/api/preview-save', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ html: genData.html, nome, categoria: genData.dados?.categoria || checkData.categoria }),
+      });
+      const saveData = await saveRes.json();
+      if (!saveRes.ok) throw new Error(saveData.error);
+      update(id, { status: 'pronto', link: saveData.url, nome });
+    } catch (e) {
+      update(id, { status: 'erro', erro: e.message || 'Erro desconhecido' });
+    }
+  };
 
   const removerLinha = (id) => setLinhas(prev => prev.filter(l => l.id !== id));
 
@@ -104,6 +157,13 @@ export default function Admin() {
       <div className="admin-header">
         <a href="/" className="admin-back">← Voltar</a>
         <div className="admin-title">Painel RDCreator</div>
+        <button
+          className="admin-gerar-todos-btn"
+          onClick={handleGerarTodos}
+          disabled={!linhas.some(l => l.url.trim() && !isProcessando(l.status))}
+        >
+          Gerar todos
+        </button>
         <div className="admin-tag">ADMIN</div>
       </div>
 
@@ -129,10 +189,17 @@ export default function Admin() {
                     <a href={linha.link} target="_blank" rel="noreferrer" className="admin-row-link">{linha.link}</a>
                     <div className="admin-row-btns">
                       <button className="admin-mini-btn" onClick={() => navigator.clipboard.writeText(linha.link)}>Copiar link</button>
-                      <button className="admin-mini-btn admin-mini-wa" onClick={() => {
-                        const msg = encodeURIComponent(msgWa(linha.nome, linha.link));
-                        window.open(`https://wa.me/?text=${msg}`, '_blank');
-                      }}>Abrir WA</button>
+                      {linha.waNum ? (
+                        <button className="admin-mini-btn admin-mini-wa" onClick={() => {
+                          const msg = encodeURIComponent(msgWa(linha.nome, linha.link));
+                          window.open(`https://wa.me/${linha.waNum}?text=${msg}`, '_blank');
+                        }}>WA cliente</button>
+                      ) : (
+                        <button className="admin-mini-btn admin-mini-wa" onClick={() => {
+                          const msg = encodeURIComponent(msgWa(linha.nome, linha.link));
+                          window.open(`https://wa.me/${WA_RYAN}?text=${msg}`, '_blank');
+                        }}>WA pra mim</button>
+                      )}
                     </div>
                   </div>
                 )}
@@ -166,7 +233,6 @@ export default function Admin() {
           ))}
         </div>
 
-        <button className="admin-add-btn" onClick={adicionarLinha}>+ Adicionar link</button>
       </div>
     </div>
   );

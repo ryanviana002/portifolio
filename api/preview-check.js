@@ -121,7 +121,7 @@ export default async function handler(req, res) {
       {
         headers: {
           'X-Goog-Api-Key': PLACES_KEY,
-          'X-Goog-FieldMask': 'displayName,primaryTypeDisplayName,rating,userRatingCount,formattedAddress,photos',
+          'X-Goog-FieldMask': 'displayName,primaryTypeDisplayName,rating,userRatingCount,formattedAddress,photos,nationalPhoneNumber',
         },
       }
     );
@@ -132,6 +132,14 @@ export default async function handler(req, res) {
       ? `https://places.googleapis.com/v1/${place.photos[0].name}/media?maxWidthPx=400&key=${PLACES_KEY}`
       : null;
 
+    // Extrai e valida telefone
+    const rawPhone = place.nationalPhoneNumber || '';
+    const digits = rawPhone.replace(/\D/g, ''); // só dígitos
+    // Formato BR: DDD (2 dígitos) + número. Celular começa com 9 e tem 9 dígitos após DDD
+    const semDDD = digits.slice(2);
+    const isMobile = digits.length === 11 && semDDD.startsWith('9');
+    const waNum = isMobile ? `55${digits}` : null;
+
     return res.status(200).json({
       placeId: result.placeId,
       nome: place.displayName?.text || 'Meu Negócio',
@@ -140,6 +148,8 @@ export default async function handler(req, res) {
       numAvaliacoes: place.userRatingCount || 0,
       endereco: place.formattedAddress || '',
       foto,
+      telefone: rawPhone || null,
+      waNum, // ex: "5519999999999" se celular, null se fixo/ausente
     });
   } catch (err) {
     console.error('Preview-check error:', err);

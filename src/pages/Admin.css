@@ -3,6 +3,13 @@
   background: #0a0a12;
   color: #fff;
   font-family: 'Space Grotesk', sans-serif;
+  cursor: auto;
+}
+.admin-page * {
+  cursor: auto;
+}
+.admin-page button, .admin-page a {
+  cursor: pointer;
 }
 
 .admin-header {
@@ -27,6 +34,23 @@
   font-weight: 700;
   flex: 1;
 }
+
+.admin-gerar-todos-btn {
+  background: linear-gradient(135deg, #ff007f, #d12c96);
+  border: none;
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 8px 18px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+.admin-gerar-todos-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.admin-gerar-todos-btn:not(:disabled):hover { opacity: 0.85; }
 
 .admin-tag {
   background: linear-gradient(135deg, #ff007f, #d12c96);
