@@ -42,8 +42,12 @@ export default function Preview() {
   const [error, setError] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [savingLink, setSavingLink] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [countdown, setCountdown] = useState('');
   const cursorRef = useRef(null);
   const iframeRef = useRef(null);
+  const popupTimerRef = useRef(null);
+  const expiryRef = useRef(null);
 
   // Detecta ?admin=dani na URL e salva no localStorage
   useEffect(() => {
@@ -120,7 +124,7 @@ export default function Preview() {
   // Proteção: desabilita botão direito e F12 (desativado temporariamente para debug)
   // useEffect(() => { ... }, []);
 
-  // Popup apenas ao chegar no fim do scroll do iframe
+  // Popup ao chegar no fim do scroll + após 30s
   useEffect(() => {
     if (!html) return;
     const iframe = iframeRef.current;
@@ -136,9 +140,31 @@ export default function Preview() {
       try { iframe?.contentWindow?.addEventListener('scroll', handleScroll); } catch {}
     };
     iframe?.addEventListener('load', attachScroll);
+
+    // Popup automático após 30s
+    popupTimerRef.current = setTimeout(() => setShowPopup(true), 30000);
+
     return () => {
       try { iframe?.contentWindow?.removeEventListener('scroll', handleScroll); } catch {}
+      clearTimeout(popupTimerRef.current);
     };
+  }, [html]);
+
+  // Countdown 24h a partir da geração
+  useEffect(() => {
+    if (!html) return;
+    const expiry = Date.now() + 24 * 60 * 60 * 1000;
+    const tick = () => {
+      const diff = expiry - Date.now();
+      if (diff <= 0) { setCountdown('Expirado'); clearInterval(expiryRef.current); return; }
+      const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+      const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+      const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+      setCountdown(`${h}:${m}:${s}`);
+    };
+    tick();
+    expiryRef.current = setInterval(tick, 1000);
+    return () => clearInterval(expiryRef.current);
   }, [html]);
 
   // Passo 1: valida o link e busca dados para confirmação
@@ -261,6 +287,7 @@ export default function Preview() {
         <a href="/" className="preview-topbar-logo">
           <img src="/logo-rdc.png" alt="RDC" />
         </a>
+        {dados?.nome && <span className="preview-topbar-nome">{dados.nome}</span>}
         <a href="/" className="preview-back-btn" title="Voltar ao site">← Voltar</a>
       </div>
 
@@ -290,6 +317,8 @@ export default function Preview() {
               Cole o link do seu Google Maps abaixo. Nossos agentes analisam seu negócio e geram uma prévia profissional do seu futuro site em segundos.
             </p>
 
+            <div className="preview-counter">+200 prévias geradas</div>
+
             <div className="preview-input-wrap">
               <input
                 className="preview-input"
@@ -303,6 +332,7 @@ export default function Preview() {
                 {checking ? 'VERIFICANDO...' : 'GERAR PRÉVIA →'}
               </button>
             </div>
+            <p className="preview-time-hint">Leva ~2 minutos para gerar</p>
 
             {error && <p className="preview-error">{error}</p>}
 
@@ -347,6 +377,15 @@ export default function Preview() {
                 <span className="preview-info-label">Avaliação Google</span>
                 <span className="preview-info-val">⭐ {dados.avaliacao} ({dados.numAvaliacoes} avaliações)</span>
               </div>
+              {countdown && (
+                <div className="preview-expiry">
+                  <span className="preview-expiry-label">Expira em</span>
+                  <span className="preview-expiry-val">{countdown}</span>
+                </div>
+              )}
+              <button className="preview-fullscreen-btn" onClick={() => setIsFullscreen(f => !f)} title="Tela cheia">
+                {isFullscreen ? '⊠' : '⊡'}
+              </button>
               <button className="preview-pdf-btn" onClick={() => {
                 const printCss = `<style>
                   @media print {
@@ -379,7 +418,7 @@ export default function Preview() {
           <iframe
             id="preview-frame"
             ref={iframeRef}
-            className="preview-frame"
+            className={`preview-frame${isFullscreen ? ' preview-frame--fullscreen' : ''}`}
             srcDoc={html}
             title="Prévia do site"
             sandbox="allow-same-origin allow-scripts"
@@ -389,6 +428,16 @@ export default function Preview() {
             onMouseLeave={() => { if(cursorRef.current) cursorRef.current.style.display=''; document.body.style.cursor='none'; }}
             style={{ opacity: iframeReady ? 1 : 0, transition: 'opacity 0.4s ease' }}
           />
+
+          {/* Botão CTA fixo */}
+          {iframeReady && (
+            <div className="preview-cta-bar">
+              <span className="preview-cta-txt">Gostou da prévia?</span>
+              <button className="preview-cta-btn" onClick={() => setShowPopup(true)}>
+                EU QUERO ESSE SITE →
+              </button>
+            </div>
+          )}
         </div>
       )}
 

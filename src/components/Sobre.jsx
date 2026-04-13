@@ -127,7 +127,54 @@ function CountUp({ to, duration = 1800, prefix = '', suffix = '' }) {
   return <span ref={ref}>{prefix}{val}{suffix}</span>;
 }
 
+function MatrixGlitch({ active }) {
+  const canvasRef = useRef(null);
+  const animRef = useRef(null);
+
+  useEffect(() => {
+    if (!active) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width = canvas.offsetWidth;
+    const H = canvas.height = canvas.offsetHeight;
+    const cols = Math.floor(W / 10);
+    const drops = Array.from({ length: cols }, () => Math.random() * H / 10);
+    const chars = 'ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ01'.split('');
+
+    const draw = () => {
+      ctx.fillStyle = 'rgba(0,0,0,0.08)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.font = '10px monospace';
+      drops.forEach((y, i) => {
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        const bright = Math.random() > 0.9;
+        ctx.fillStyle = bright ? '#fff' : '#00ff41';
+        ctx.fillText(char, i * 10, y * 10);
+        if (y * 10 > H && Math.random() > 0.975) drops[i] = 0;
+        else drops[i] += 0.5;
+      });
+      animRef.current = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => cancelAnimationFrame(animRef.current);
+  }, [active]);
+
+  if (!active) return null;
+  return <canvas ref={canvasRef} className="sobre-matrix-canvas" />;
+}
+
 export default function Sobre() {
+  const [glitching, setGlitching] = useState(false);
+  const glitchTimer = useRef(null);
+
+  const triggerGlitch = () => {
+    if (glitching) return;
+    setGlitching(true);
+    clearTimeout(glitchTimer.current);
+    glitchTimer.current = setTimeout(() => setGlitching(false), 2000);
+  };
+
   return (
     <section id="sobre" className="sobre">
       <div className="sobre-inner">
@@ -139,8 +186,8 @@ export default function Sobre() {
         <div className="sobre-grid">
           {/* Coluna esquerda — foto + skills */}
           <div className="sobre-left">
-            <div className="sobre-foto-wrap">
-              <div className="sobre-foto">
+            <div className="sobre-foto-wrap" onClick={triggerGlitch} style={{ cursor: 'pointer' }}>
+              <div className={`sobre-foto${glitching ? ' sobre-foto--glitch' : ''}`}>
                 <img src="/foto-ryan.png" alt="Ryan Viana" className="sobre-foto-img"
                   onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
                 />
@@ -148,6 +195,7 @@ export default function Sobre() {
                   <span>RV</span>
                   <p>Foto em breve</p>
                 </div>
+                <MatrixGlitch active={glitching} />
               </div>
               <div className="sobre-foto-badge">
                 <span className="badge-num">+5</span>
