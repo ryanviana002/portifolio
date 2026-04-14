@@ -261,7 +261,7 @@ export default function Admin() {
       const checkData = await retryFetch(async () => {
         const r = await fetch('/api/preview-check', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: prospect.mapsUrl }),
+          body: JSON.stringify({ url: prospect.mapsUrl, placeId: prospect.id }),
         });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error);
@@ -271,7 +271,7 @@ export default function Admin() {
       const genData = await retryFetch(async () => {
         const r = await fetch('/api/preview', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: prospect.mapsUrl, prompt: '', modelo, origem: 'admin' }),
+          body: JSON.stringify({ url: prospect.mapsUrl, placeId: prospect.id, prompt: '', modelo, origem: 'admin' }),
         });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error);

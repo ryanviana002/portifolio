@@ -133,7 +133,7 @@ async function getPlaceDetails(placeId) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { url, prompt: customPrompt, modelo, origem } = req.body;
+  const { url, placeId: directPlaceId, prompt: customPrompt, modelo, origem } = req.body;
 
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
   if (origem !== 'admin' && !await checkRateLimit(ip)) {
@@ -145,7 +145,7 @@ export default async function handler(req, res) {
 
   try {
     // Busca Place ID
-    const placeId = await extractPlaceId(url);
+    const placeId = directPlaceId || await extractPlaceId(url);
     if (!placeId) throw new Error('Não foi possível identificar o negócio. Verifique o link do Google Maps.');
 
     // Busca detalhes do lugar

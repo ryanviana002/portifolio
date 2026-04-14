@@ -103,21 +103,25 @@ async function searchPlaceByCoords(lat, lng) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { url } = req.body;
-  if (!url) return res.status(400).json({ error: 'URL obrigatória' });
+  const { url, placeId: directPlaceId } = req.body;
+  if (!url && !directPlaceId) return res.status(400).json({ error: 'URL obrigatória' });
 
   try {
-    const result = await extractPlaceId(url);
+    let placeIdFinal = directPlaceId;
 
-    if (result.error === 'not_maps') {
-      return res.status(400).json({ error: 'Link inválido. Cole o link do Google Maps do seu negócio.' });
-    }
-    if (result.error === 'not_found') {
-      return res.status(400).json({ error: 'Negócio não encontrado. Verifique o link e tente novamente.' });
+    if (!placeIdFinal) {
+      const result = await extractPlaceId(url);
+      if (result.error === 'not_maps') {
+        return res.status(400).json({ error: 'Link inválido. Cole o link do Google Maps do seu negócio.' });
+      }
+      if (result.error === 'not_found') {
+        return res.status(400).json({ error: 'Negócio não encontrado. Verifique o link e tente novamente.' });
+      }
+      placeIdFinal = result.placeId;
     }
 
     const placeRes = await fetch(
-      `https://places.googleapis.com/v1/places/${result.placeId}?languageCode=pt-BR`,
+      `https://places.googleapis.com/v1/places/${placeIdFinal}?languageCode=pt-BR`,
       {
         headers: {
           'X-Goog-Api-Key': PLACES_KEY,
@@ -141,7 +145,7 @@ export default async function handler(req, res) {
     const waNum = isMobile ? `55${digits}` : null;
 
     return res.status(200).json({
-      placeId: result.placeId,
+      placeId: placeIdFinal,
       nome: place.displayName?.text || 'Meu Negócio',
       categoria: place.primaryTypeDisplayName?.text || 'Empresa local',
       avaliacao: place.rating?.toFixed(1) || null,
