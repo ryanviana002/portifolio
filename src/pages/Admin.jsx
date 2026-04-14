@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Admin.css';
 
@@ -7,6 +7,8 @@ function gerarId() {
 }
 
 const WA_RYAN = '5519992525515';
+const HISTORICO_KEY = 'rdc_historico_previews';
+const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24h
 
 function novaLinha() {
   return { id: gerarId(), url: '', status: 'idle', nome: '', categoria: '', link: '', erro: '', waNum: null, prompt: '', promptOpen: false };
@@ -25,68 +27,114 @@ const statusLabel = {
   erro: 'Erro',
 };
 
+function lerHistorico() {
+  try { return JSON.parse(localStorage.getItem(HISTORICO_KEY) || '[]'); } catch { return []; }
+}
+
+function salvarHistorico(item) {
+  const hist = lerHistorico().filter(h => h.previewId !== item.previewId);
+  hist.unshift(item);
+  localStorage.setItem(HISTORICO_KEY, JSON.stringify(hist.slice(0, 100)));
+}
+
+async function retryFetch(fn, tentativas = 2) {
+  for (let i = 0; i <= tentativas; i++) {
+    try { return await fn(); }
+    catch (e) {
+      if (i === tentativas) throw e;
+      await new Promise(r => setTimeout(r, 1500 * (i + 1)));
+    }
+  }
+}
+
 export default function Admin() {
   const navigate = useNavigate();
   const [authed, setAuthed] = useState(false);
   const [linhas, setLinhas] = useState(() => Array.from({ length: 10 }, novaLinha));
+  const [historico, setHistorico] = useState([]);
+  const [views, setViews] = useState({});
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('admin') === 'dani') localStorage.setItem('rdc_owner', '1');
     if (localStorage.getItem('rdc_owner') === '1') {
       setAuthed(true);
+      setHistorico(lerHistorico());
     } else {
       navigate('/');
     }
   }, []);
 
+  // Busca views dos previews no histórico
+  useEffect(() => {
+    const hist = lerHistorico();
+    if (!hist.length) return;
+    const ids = hist.map(h => h.previewId).join(',');
+    fetch(`/api/preview-stats?ids=${ids}`)
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const map = {};
+          data.forEach(d => { map[d.id] = d.views || 0; });
+          setViews(map);
+        }
+      })
+      .catch(() => {});
+  }, [historico.length]);
+
   const update = (id, patch) =>
     setLinhas(prev => prev.map(l => l.id === id ? { ...l, ...patch } : l));
+
+  const salvarEAtualizar = (previewId, nome, categoria, link, createdAt) => {
+    const item = { previewId, nome, categoria, link, createdAt };
+    salvarHistorico(item);
+    setHistorico(lerHistorico());
+  };
 
   const handleGerar = async (id) => {
     const linha = linhas.find(l => l.id === id);
     if (!linha?.url.trim()) return;
-
     update(id, { status: 'checando', erro: '', nome: '', link: '' });
-
     try {
-      const checkRes = await fetch('/api/preview-check', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: linha.url.trim() }),
+      const checkData = await retryFetch(async () => {
+        const r = await fetch('/api/preview-check', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: linha.url.trim() }),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+        return d;
       });
-      const checkData = await checkRes.json();
-      if (!checkRes.ok) throw new Error(checkData.error);
 
       update(id, { status: 'gerando', nome: checkData.nome, categoria: checkData.categoria, waNum: checkData.waNum || null });
 
-      const genRes = await fetch('/api/preview', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: linha.url.trim(), prompt: linha.prompt?.trim() || '' }),
+      const genData = await retryFetch(async () => {
+        const r = await fetch('/api/preview', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: linha.url.trim(), prompt: linha.prompt?.trim() || '' }),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+        return d;
       });
-      const genData = await genRes.json();
-      if (!genRes.ok) throw new Error(genData.error);
 
       const nome = genData.dados?.nome || checkData.nome;
       update(id, { status: 'salvando', nome });
 
-      const saveRes = await fetch('/api/preview-save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          html: genData.html,
-          nome,
-          categoria: genData.dados?.categoria || checkData.categoria,
-        }),
+      const saveData = await retryFetch(async () => {
+        const r = await fetch('/api/preview-save', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ html: genData.html, nome, categoria: genData.dados?.categoria || checkData.categoria }),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+        return d;
       });
-      const saveData = await saveRes.json();
-      if (!saveRes.ok) throw new Error(saveData.error);
 
       const waNumFinal = linhas.find(l => l.id === id)?.waNum || null;
       update(id, { status: 'pronto', link: saveData.url, nome });
+      salvarEAtualizar(saveData.id || saveData.url.split('/').pop(), nome, genData.dados?.categoria || checkData.categoria, saveData.url, Date.now());
 
-      // Abre WhatsApp com mensagem pronta
       const msg = encodeURIComponent(msgWa(nome, saveData.url));
       const waTarget = waNumFinal || WA_RYAN;
       window.open(`https://wa.me/${waTarget}?text=${msg}`, '_blank');
@@ -115,36 +163,61 @@ export default function Admin() {
     if (!url.trim()) return;
     update(id, { status: 'checando', erro: '', nome: '', link: '' });
     try {
-      const checkRes = await fetch('/api/preview-check', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url.trim() }),
+      const checkData = await retryFetch(async () => {
+        const r = await fetch('/api/preview-check', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: url.trim() }),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+        return d;
       });
-      const checkData = await checkRes.json();
-      if (!checkRes.ok) throw new Error(checkData.error);
+
       update(id, { status: 'gerando', nome: checkData.nome, categoria: checkData.categoria, waNum: checkData.waNum || null });
-      const genRes = await fetch('/api/preview', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url.trim(), prompt: linha?.prompt?.trim() || '' }),
+
+      const genData = await retryFetch(async () => {
+        const r = await fetch('/api/preview', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: url.trim(), prompt: linha?.prompt?.trim() || '' }),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+        return d;
       });
-      const genData = await genRes.json();
-      if (!genRes.ok) throw new Error(genData.error);
+
       const nome = genData.dados?.nome || checkData.nome;
       update(id, { status: 'salvando', nome });
-      const saveRes = await fetch('/api/preview-save', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ html: genData.html, nome, categoria: genData.dados?.categoria || checkData.categoria }),
+
+      const saveData = await retryFetch(async () => {
+        const r = await fetch('/api/preview-save', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ html: genData.html, nome, categoria: genData.dados?.categoria || checkData.categoria }),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+        return d;
       });
-      const saveData = await saveRes.json();
-      if (!saveRes.ok) throw new Error(saveData.error);
+
       update(id, { status: 'pronto', link: saveData.url, nome });
+      salvarEAtualizar(saveData.id || saveData.url.split('/').pop(), nome, genData.dados?.categoria || checkData.categoria, saveData.url, Date.now());
     } catch (e) {
       update(id, { status: 'erro', erro: e.message || 'Erro desconhecido' });
     }
   };
 
   const removerLinha = (id) => setLinhas(prev => prev.filter(l => l.id !== id));
+  const removerHistorico = (previewId) => {
+    const hist = lerHistorico().filter(h => h.previewId !== previewId);
+    localStorage.setItem(HISTORICO_KEY, JSON.stringify(hist));
+    setHistorico(hist);
+  };
+  const limparHistorico = () => {
+    localStorage.removeItem(HISTORICO_KEY);
+    setHistorico([]);
+  };
 
   const isProcessando = (status) => ['checando', 'gerando', 'salvando'].includes(status);
+  const isExpirado = (createdAt) => Date.now() - createdAt > EXPIRY_MS;
 
   if (!authed) return null;
 
@@ -200,6 +273,7 @@ export default function Admin() {
                     <span className="admin-row-nome">{linha.nome}</span>
                     <a href={linha.link} target="_blank" rel="noreferrer" className="admin-row-link">{linha.link}</a>
                     <div className="admin-row-btns">
+                      <button className="admin-mini-btn admin-mini-preview" onClick={() => window.open(linha.link, '_blank')}>Ver preview</button>
                       <button className="admin-mini-btn" onClick={() => navigator.clipboard.writeText(linha.link)}>Copiar link</button>
                       {linha.waNum && (
                         <button className="admin-mini-btn admin-mini-wa" onClick={() => {
@@ -244,6 +318,41 @@ export default function Admin() {
           ))}
         </div>
 
+        {historico.length > 0 && (
+          <div className="admin-historico">
+            <div className="admin-historico-header">
+              <h3 className="admin-historico-title">Histórico</h3>
+              <button className="admin-historico-limpar" onClick={limparHistorico}>Limpar tudo</button>
+            </div>
+            <div className="admin-historico-lista">
+              {historico.map(h => {
+                const expirado = isExpirado(h.createdAt);
+                const v = views[h.previewId];
+                return (
+                  <div key={h.previewId} className={`admin-hist-row${expirado ? ' expirado' : ''}`}>
+                    <div className="admin-hist-info">
+                      <span className="admin-hist-nome">{h.nome}</span>
+                      <span className="admin-hist-cat">{h.categoria}</span>
+                      <span className="admin-hist-data">{new Date(h.createdAt).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}</span>
+                    </div>
+                    <div className="admin-hist-right">
+                      {v !== undefined && <span className="admin-hist-views">{v} view{v !== 1 ? 's' : ''}</span>}
+                      {expirado
+                        ? <span className="admin-hist-expirado">expirado</span>
+                        : <a href={h.link} target="_blank" rel="noreferrer" className="admin-mini-btn admin-mini-preview">Ver</a>
+                      }
+                      <button className="admin-hist-wa" onClick={() => {
+                        const msg = encodeURIComponent(msgWa(h.nome, h.link));
+                        window.open(`https://wa.me/${WA_RYAN}?text=${msg}`, '_blank');
+                      }} title="Reenviar WA">WA</button>
+                      <button className="admin-hist-del" onClick={() => removerHistorico(h.previewId)} title="Remover">✕</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

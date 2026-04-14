@@ -3,6 +3,10 @@ import Anthropic from '@anthropic-ai/sdk';
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const PLACES_KEY = process.env.GOOGLE_PLACES_API_KEY;
 
+// Cache de Place Details (evita chamadas duplicadas à API do Google)
+const placeCache = new Map();
+const CACHE_TTL = 10 * 60 * 1000; // 10 min
+
 // Rate limit: 3 gerações por IP por dia
 const rateLimitMap = new Map();
 const LIMIT = 3;
@@ -94,6 +98,9 @@ async function searchPlaceByCoords(lat, lng) {
 }
 
 async function getPlaceDetails(placeId) {
+  const cached = placeCache.get(placeId);
+  if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data;
+
   const res = await fetch(
     `https://places.googleapis.com/v1/places/${placeId}?languageCode=pt-BR`,
     {
@@ -103,7 +110,13 @@ async function getPlaceDetails(placeId) {
       },
     }
   );
-  return await res.json();
+  const data = await res.json();
+  placeCache.set(placeId, { data, ts: Date.now() });
+  if (placeCache.size > 200) {
+    const oldest = [...placeCache.entries()].sort((a, b) => a[1].ts - b[1].ts)[0][0];
+    placeCache.delete(oldest);
+  }
+  return data;
 }
 
 export default async function handler(req, res) {
@@ -213,12 +226,12 @@ CSS das novas seções no <style> no início desta parte. Retorne APENAS o HTML 
     // Executa as 2 chamadas em paralelo
     const [msg1, msg2] = await Promise.all([
       client.messages.create({
-        model: 'claude-haiku-4-5-20251001',
+        model: 'claude-sonnet-4-6',
         max_tokens: 4096,
         messages: [{ role: 'user', content: prompt1 }],
       }),
       client.messages.create({
-        model: 'claude-haiku-4-5-20251001',
+        model: 'claude-sonnet-4-6',
         max_tokens: 4096,
         messages: [{ role: 'user', content: prompt2 }],
       }),
@@ -236,6 +249,11 @@ CSS das novas seções no <style> no início desta parte. Retorne APENAS o HTML 
     // Remove o fechamento </body></html> da parte1 se existir, e junta
     const parte1Clean = parte1WithCharset.replace(/<\/body>\s*<\/html>\s*$/i, '');
     const mockupHtml = parte1Clean + '\n' + parte2;
+
+    // Valida se o HTML gerado está completo
+    if (!/<\/html>/i.test(mockupHtml)) {
+      throw new Error('HTML gerado incompleto. Tente novamente.');
+    }
 
     return res.status(200).json({ html: mockupHtml, dados });
   } catch (err) {

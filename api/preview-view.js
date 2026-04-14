@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   const { id } = req.query;
   if (!id) return res.status(400).json({ error: 'ID obrigatório' });
 
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/previews?id=eq.${id}&select=html,nome,categoria,expires_at`, {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/previews?id=eq.${id}&select=html,nome,categoria,expires_at,views`, {
     headers: {
       'apikey': SUPABASE_ANON_KEY,
       'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
@@ -21,6 +21,18 @@ export default async function handler(req, res) {
   if (preview.expires_at && new Date(preview.expires_at) < new Date()) {
     return res.status(410).json({ error: 'Prévia expirada. Gere uma nova em ryancreator.dev/preview' });
   }
+
+  // Incrementa views (silencioso se coluna não existir)
+  fetch(`${SUPABASE_URL}/rest/v1/previews?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Prefer': 'return=minimal',
+    },
+    body: JSON.stringify({ views: (preview.views || 0) + 1 }),
+  }).catch(() => {});
 
   return res.status(200).json(preview);
 }

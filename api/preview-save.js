@@ -21,7 +21,7 @@ export default async function handler(req, res) {
       'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
       'Prefer': 'return=minimal',
     },
-    body: JSON.stringify({ id, html, nome, categoria }),
+    body: JSON.stringify({ id, html, nome, categoria, views: 0 }),
   });
 
   if (!r.ok) {
