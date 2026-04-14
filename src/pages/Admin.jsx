@@ -9,7 +9,7 @@ function gerarId() {
 const WA_RYAN = '5519992525515';
 
 function novaLinha() {
-  return { id: gerarId(), url: '', status: 'idle', nome: '', categoria: '', link: '', erro: '', waNum: null };
+  return { id: gerarId(), url: '', status: 'idle', nome: '', categoria: '', link: '', erro: '', waNum: null, prompt: '', promptOpen: false };
 }
 
 function msgWa(nome, link) {
@@ -63,7 +63,7 @@ export default function Admin() {
       const genRes = await fetch('/api/preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: linha.url.trim() }),
+        body: JSON.stringify({ url: linha.url.trim(), prompt: linha.prompt?.trim() || '' }),
       });
       const genData = await genRes.json();
       if (!genRes.ok) throw new Error(genData.error);
@@ -124,7 +124,7 @@ export default function Admin() {
       update(id, { status: 'gerando', nome: checkData.nome, categoria: checkData.categoria, waNum: checkData.waNum || null });
       const genRes = await fetch('/api/preview', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url.trim() }),
+        body: JSON.stringify({ url: url.trim(), prompt: linha?.prompt?.trim() || '' }),
       });
       const genData = await genRes.json();
       if (!genRes.ok) throw new Error(genData.error);
@@ -178,6 +178,22 @@ export default function Admin() {
                   disabled={isProcessando(linha.status)}
                   onKeyDown={e => e.key === 'Enter' && handleGerar(linha.id)}
                 />
+                <button
+                  className={`admin-prompt-toggle${linha.promptOpen ? ' active' : ''}${linha.prompt?.trim() ? ' has-value' : ''}`}
+                  onClick={() => update(linha.id, { promptOpen: !linha.promptOpen })}
+                  disabled={isProcessando(linha.status)}
+                  title="Personalizar prompt"
+                >⚙ prompt{linha.prompt?.trim() ? ' •' : ''}</button>
+                {linha.promptOpen && (
+                  <textarea
+                    className="admin-prompt-input"
+                    placeholder="Ex: use cores azul e dourado, site voltado para casamentos, destaque o pacote premium..."
+                    value={linha.prompt}
+                    onChange={e => update(linha.id, { prompt: e.target.value })}
+                    disabled={isProcessando(linha.status)}
+                    rows={3}
+                  />
+                )}
 
                 {linha.status === 'pronto' && linha.nome && (
                   <div className="admin-row-result">

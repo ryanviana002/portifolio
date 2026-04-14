@@ -114,7 +114,7 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'Limite de 3 prévias por dia atingido. Volte amanhã ou fale conosco pelo WhatsApp!' });
   }
 
-  const { url } = req.body;
+  const { url, prompt: customPrompt } = req.body;
   if (!url) return res.status(400).json({ error: 'URL obrigatória' });
 
   try {
@@ -177,10 +177,14 @@ export default async function handler(req, res) {
 
     const ctx = `NEGÓCIO: ${dados.nome} | ${dados.categoria} | ⭐${dados.avaliacao} (${dados.numAvaliacoes} avaliações) | TEL: ${dados.telefone || ''} | END: ${dados.endereco || ''} | CORES: ${paletaSugerida}`;
 
+    const extraInstructions = customPrompt?.trim()
+      ? `\nINSTRUÇÕES EXTRAS DO CLIENTE:\n${customPrompt.trim()}\n`
+      : '';
+
     const prompt1 = `Você é um dev web. Gere APENAS a primeira metade de um site HTML para este negócio.
 
 ${ctx}
-
+${extraInstructions}
 Gere exatamente estas seções com CSS inline no <style>:
 1. <!DOCTYPE html><html lang="pt-BR"><head> com <meta charset="UTF-8">, @import Montserrat+Open Sans, reset CSS, variáveis de cor
 2. NAVBAR fixa: nome da empresa bold à esquerda + links (Sobre,Serviços,Galeria,Depoimentos) + botão WhatsApp verde
@@ -192,6 +196,7 @@ IMPORTANTE: Termine em </section> após o Sobre. NÃO feche </body> nem </html>.
     const prompt2 = `Você é um dev web. Gere APENAS a segunda metade de um site HTML para este negócio.
 
 ${ctx}
+${extraInstructions}
 ${reviewsText ? `DEPOIMENTOS REAIS: ${reviewsText}` : ''}
 ${galeria.length ? `FOTOS: ${galeria.slice(0,3).join(' | ')}` : ''}
 

@@ -124,6 +124,41 @@
 .admin-url-input::placeholder { color: rgba(255,255,255,0.2); }
 .admin-url-input:disabled { opacity: 0.5; }
 
+.admin-prompt-toggle {
+  align-self: flex-start;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.35);
+  font-size: 11px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.admin-prompt-toggle:hover { border-color: rgba(255,0,127,0.4); color: rgba(255,255,255,0.6); }
+.admin-prompt-toggle.active { border-color: rgba(255,0,127,0.5); color: #ff007f; }
+.admin-prompt-toggle.has-value { border-color: rgba(0,242,254,0.5); color: #00f2fe; }
+.admin-prompt-toggle:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.admin-prompt-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255,0,127,0.04);
+  border: 1px solid rgba(255,0,127,0.2);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.8);
+  font-size: 12px;
+  font-family: inherit;
+  padding: 8px 12px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.admin-prompt-input:focus { border-color: rgba(255,0,127,0.5); }
+.admin-prompt-input::placeholder { color: rgba(255,255,255,0.2); }
+.admin-prompt-input:disabled { opacity: 0.5; }
+
 .admin-row-result {
   display: flex;
   flex-direction: column;
