@@ -29,8 +29,8 @@ const COMMANDS = {
     '  use: ryancreator.dev/portfolio',
   ],
   contact: [
-    '  📧 ryanviana002@gmail.com',
-    '  💬 wa.me/5519992525515',
+    '  📧 contato@ryancreator.dev',
+    '  💬 wa.me/5519994175385',
     '  🌐 ryancreator.dev',
   ],
   skills: [

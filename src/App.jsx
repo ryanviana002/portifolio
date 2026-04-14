@@ -38,7 +38,7 @@ function WaPopup({ onClose }) {
         <div className="wa-popup-icon"><WaIcon /></div>
         <h3 className="wa-popup-title">Fale comigo no WhatsApp</h3>
         <p className="wa-popup-desc">Tire suas dúvidas, solicite um orçamento ou inicie seu projeto agora mesmo.</p>
-        <a href="https://wa.me/5519992525515" target="_blank" rel="noreferrer" className="wa-popup-btn" onClick={onClose}>
+        <a href="https://wa.me/5519994175385" target="_blank" rel="noreferrer" className="wa-popup-btn" onClick={onClose}>
           ABRIR WHATSAPP
         </a>
       </div>
@@ -136,7 +136,7 @@ function App() {
     const botPatterns = ['firecrawl', 'scrapy', 'wget', 'curl', 'python-requests', 'go-http', 'headlesschrome', 'phantomjs', 'selenium'];
     const isBot = botPatterns.some(p => ua.includes(p)) || navigator.webdriver;
     if (isBot) {
-      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#020204;color:#ff007f;font-family:monospace;font-size:18px;text-align:center;padding:40px;">Acesso não autorizado.<br/>Entre em contato: ryanviana002@gmail.com</div>';
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#020204;color:#ff007f;font-family:monospace;font-size:18px;text-align:center;padding:40px;">Acesso não autorizado.<br/>Entre em contato: contato@ryancreator.dev</div>';
       return;
     }
 
@@ -164,7 +164,7 @@ function App() {
     console.log('%c\n👀 Oi, dev curioso!', style2);
     console.log('%cVocê inspecionou o site certo — bom olho.', style3);
     console.log('%cEste portfólio foi construído com React + Vite, CSS puro e muito café.', style3);
-    console.log('%c\n📩 Quer trabalhar junto? ryanviana002@gmail.com', style2);
+    console.log('%c\n📩 Quer trabalhar junto? contato@ryancreator.dev', style2);
     console.log('%chttps://ryancreator.dev', style4);
   }, []);
 

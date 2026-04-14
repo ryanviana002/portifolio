@@ -41,7 +41,7 @@ export default async function handler(req, res) {
     const key = process.env.CALLMEBOT_KEY;
     if (key) {
       const msg = encodeURIComponent(`👀 Preview aberto!\n*${preview.nome || 'Negócio'}* acabou de ver o site.\nhttps://ryancreator.dev/r/${id}`);
-      fetch(`https://api.callmebot.com/whatsapp.php?phone=5519992525515&text=${msg}&apikey=${key}`)
+      fetch(`https://api.callmebot.com/whatsapp.php?phone=5519994175385&text=${msg}&apikey=${key}`)
         .catch(() => {});
     }
   }

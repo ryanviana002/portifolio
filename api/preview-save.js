@@ -44,7 +44,7 @@ async function notificarWA(nome, categoria, link) {
   const key = process.env.CALLMEBOT_KEY;
   if (!key) return;
   const msg = encodeURIComponent(`🚀 Preview gerado!\n*${nome}* (${categoria})\n${link}`);
-  fetch(`https://api.callmebot.com/whatsapp.php?phone=5519992525515&text=${msg}&apikey=${key}`)
+  fetch(`https://api.callmebot.com/whatsapp.php?phone=5519994175385&text=${msg}&apikey=${key}`)
     .catch(() => {});
 }
 

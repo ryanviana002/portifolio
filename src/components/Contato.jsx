@@ -61,12 +61,20 @@ export default function Contato() {
               <li><span className="check">✓</span> Entrega no prazo combinado</li>
             </ul>
             <a
-              href="https://wa.me/5519992525515"
+              href="https://wa.me/5519994175385"
               target="_blank"
               rel="noreferrer"
               className="whatsapp-btn"
             >
               <span className="wa-icon">💬</span> CHAMAR NO WHATSAPP
+            </a>
+            <a
+              href="https://www.instagram.com/rdevcreator"
+              target="_blank"
+              rel="noreferrer"
+              className="instagram-btn"
+            >
+              <span className="ig-icon">📸</span> @rdevcreator
             </a>
           </div>
 

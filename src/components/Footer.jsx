@@ -25,7 +25,7 @@ export default function Footer() {
             Criação de sites, sistemas e design para marcas que querem se destacar.
           </p>
           <a
-            href="https://wa.me/5519992525515"
+            href="https://wa.me/5519994175385"
             target="_blank"
             rel="noreferrer"
             className="footer-wa"
@@ -58,8 +58,9 @@ export default function Footer() {
         <div className="footer-col">
           <h4>Contato</h4>
           <ul>
-            <li><span className="footer-contact-label">WhatsApp:</span> (19) 99252-5515</li>
-            <li><span className="footer-contact-label">E-mail:</span> ryanviana002@gmail.com</li>
+            <li><span className="footer-contact-label">WhatsApp:</span> (19) 99417-5385</li>
+            <li><span className="footer-contact-label">E-mail:</span> contato@ryancreator.dev</li>
+            <li><a href="https://www.instagram.com/rdevcreator" target="_blank" rel="noreferrer" style={{color: '#e1306c'}}>Instagram</a></li>
             <li><a href="https://www.linkedin.com/in/ryanvrvianas/" target="_blank" rel="noreferrer" style={{color: '#0ea5e9'}}>LinkedIn</a></li>
             <li><a href="https://github.com/ryanviana002" target="_blank" rel="noreferrer" style={{color: 'rgba(255,255,255,0.4)'}}>GitHub</a></li>
             <li><span className="footer-contact-label">Local:</span> Brasil (100% remoto)</li>

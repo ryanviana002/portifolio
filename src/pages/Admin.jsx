@@ -6,7 +6,7 @@ function gerarId() {
   return Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
 }
 
-const WA_RYAN = '5519992525515';
+const WA_RYAN = '5519994175385';
 const HISTORICO_KEY = 'rdc_historico_previews';
 const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24h
 

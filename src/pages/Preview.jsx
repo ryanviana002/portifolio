@@ -496,9 +496,9 @@ export default function Preview() {
                   const link = data.url || 'https://ryancreator.dev/preview';
                   const nome = dados?.nome || 'meu negócio';
                   const msg = encodeURIComponent(`Olá Ryan! Vi a prévia do site de *${nome}* e quero contratar!\n\nVeja a prévia: ${link}`);
-                  window.open(`https://wa.me/5519992525515?text=${msg}`, '_blank');
+                  window.open(`https://wa.me/5519994175385?text=${msg}`, '_blank');
                 } catch {
-                  window.open('https://wa.me/5519992525515?text=Olá%20Ryan!%20Vi%20a%20prévia%20do%20meu%20site%20e%20quero%20contratar!', '_blank');
+                  window.open('https://wa.me/5519994175385?text=Olá%20Ryan!%20Vi%20a%20prévia%20do%20meu%20site%20e%20quero%20contratar!', '_blank');
                 } finally {
                   setSavingLink(false);
                 }
@@ -506,7 +506,7 @@ export default function Preview() {
             >
               {savingLink ? 'GERANDO LINK...' : 'EU QUERO ESSE SITE! →'}
             </button>
-            <a href="https://wa.me/5519992525515?text=Olá%20Ryan!%20Vi%20a%20prévia%20do%20meu%20site%20e%20quero%20contratar!" className="preview-popup-wa" target="_blank" rel="noreferrer">
+            <a href="https://wa.me/5519994175385?text=Olá%20Ryan!%20Vi%20a%20prévia%20do%20meu%20site%20e%20quero%20contratar!" className="preview-popup-wa" target="_blank" rel="noreferrer">
               Só tirar dúvidas no WhatsApp
             </a>
           </div>

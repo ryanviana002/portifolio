@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-const WA_RYAN = '5519992525515';
+const WA_RYAN = '5519994175385';
 
 export default function PreviewView() {
   const { id } = useParams();
@@ -39,7 +39,7 @@ export default function PreviewView() {
       <a href="/preview" style={{ background:'linear-gradient(135deg,#ff007f,#d12c96)', color:'#fff', padding:'14px 32px', borderRadius:8, fontWeight:700, fontSize:13, letterSpacing:1, textDecoration:'none', marginTop:8 }}>
         GERAR NOVA PRÉVIA →
       </a>
-      <a href="https://wa.me/5519992525515" target="_blank" rel="noreferrer" style={{ color:'rgba(255,255,255,0.3)', fontSize:13, marginTop:4 }}>
+      <a href="https://wa.me/5519994175385" target="_blank" rel="noreferrer" style={{ color:'rgba(255,255,255,0.3)', fontSize:13, marginTop:4 }}>
         ou fale conosco no WhatsApp
       </a>
     </div>

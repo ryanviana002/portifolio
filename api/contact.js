@@ -22,7 +22,7 @@ const assinatura = `
           <div style="font-size:12px;color:#555;line-height:1.8;">
             🌐 <a href="https://ryancreator.dev" style="color:#ff007f;text-decoration:none;">ryancreator.dev</a><br>
             📩 <a href="mailto:contato@ryancreator.dev" style="color:#555;text-decoration:none;">contato@ryancreator.dev</a><br>
-            📱 <a href="https://wa.me/5519992525515" style="color:#555;text-decoration:none;">(19) 99252-5515</a>
+            📱 <a href="https://wa.me/5519994175385" style="color:#555;text-decoration:none;">(19) 99417-5385</a>
           </div>
         </td>
       </tr>
@@ -117,7 +117,7 @@ export default async function handler(req, res) {
               Enquanto isso, se precisar falar comigo mais rapidamente, pode me chamar pelo WhatsApp:
             </p>
 
-            <a href="https://wa.me/5519992525515?text=${encodeURIComponent(`Olá Ryan! Acabei de preencher o formulário do seu site.`)}"
+            <a href="https://wa.me/5519994175385?text=${encodeURIComponent(`Olá Ryan! Acabei de preencher o formulário do seu site.`)}"
                style="display:inline-block;background:linear-gradient(135deg,#25d366,#1aab52);color:#fff;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:700;font-size:14px;">
               💬 Falar no WhatsApp
             </a>
