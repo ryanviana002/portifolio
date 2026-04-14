@@ -4,7 +4,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { id } = req.query;
+  const { id, skip } = req.query;
   if (!id) return res.status(400).json({ error: 'ID obrigatório' });
 
   const r = await fetch(`${SUPABASE_URL}/rest/v1/previews?id=eq.${id}&select=html,nome,categoria,expires_at,views`, {
@@ -36,8 +36,8 @@ export default async function handler(req, res) {
     body: JSON.stringify({ views: novasViews }),
   }).catch(() => {});
 
-  // Notifica Ryan no WA na 1ª visualização
-  if (novasViews === 1) {
+  // Notifica Ryan no WA na 1ª visualização (não notifica se for o admin)
+  if (novasViews === 1 && !skip) {
     const key = process.env.CALLMEBOT_KEY;
     if (key) {
       const msg = encodeURIComponent(`👀 Preview aberto!\n*${preview.nome || 'Negócio'}* acabou de ver o site.\nhttps://ryancreator.dev/r/${id}`);

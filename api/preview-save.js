@@ -40,6 +40,14 @@ function injetarMarcaDagua(html) {
   return html + badge;
 }
 
+async function notificarWA(nome, categoria, link) {
+  const key = process.env.CALLMEBOT_KEY;
+  if (!key) return;
+  const msg = encodeURIComponent(`🚀 Preview gerado!\n*${nome}* (${categoria})\n${link}`);
+  fetch(`https://api.callmebot.com/whatsapp.php?phone=5519992525515&text=${msg}&apikey=${key}`)
+    .catch(() => {});
+}
+
 async function notificarSheets(nome, categoria, link) {
   const webhookUrl = process.env.SHEETS_WEBHOOK;
   if (!webhookUrl) return;
@@ -50,18 +58,11 @@ async function notificarSheets(nome, categoria, link) {
   }).catch(() => {});
 }
 
-async function notificarWA(nome, categoria, link) {
-  const key = process.env.CALLMEBOT_KEY;
-  if (!key) return;
-  const msg = encodeURIComponent(`🚀 Preview gerado!\n*${nome}* (${categoria})\n${link}`);
-  fetch(`https://api.callmebot.com/whatsapp.php?phone=5519992525515&text=${msg}&apikey=${key}`)
-    .catch(() => {});
-}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { html, nome, categoria } = req.body;
+  const { html, nome, categoria, origem } = req.body;
   if (!html) return res.status(400).json({ error: 'HTML obrigatório' });
 
   const id = gerarId();
@@ -84,9 +85,9 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Erro ao salvar prévia: ' + err });
   }
 
-  // Fire-and-forget: Sheets + WA
+  // Fire-and-forget: Sheets + WA (só se não for admin)
   notificarSheets(nome, categoria, url);
-  notificarWA(nome, categoria, url);
+  if (origem !== 'admin') notificarWA(nome, categoria, url);
 
   return res.status(200).json({ id, url });
 }

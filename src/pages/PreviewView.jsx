@@ -11,7 +11,8 @@ export default function PreviewView() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/preview-view?id=${id}`)
+    const skip = new URLSearchParams(window.location.search).get('skip');
+    fetch(`/api/preview-view?id=${id}${skip ? '&skip=1' : ''}`)
       .then(r => r.json())
       .then(data => {
         if (data.error) throw new Error(data.error);

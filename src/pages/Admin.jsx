@@ -125,7 +125,7 @@ export default function Admin() {
       const saveData = await retryFetch(async () => {
         const r = await fetch('/api/preview-save', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ html: genData.html, nome, categoria: genData.dados?.categoria || checkData.categoria }),
+          body: JSON.stringify({ html: genData.html, nome, categoria: genData.dados?.categoria || checkData.categoria, origem: 'admin' }),
         });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error);
@@ -192,7 +192,7 @@ export default function Admin() {
       const saveData = await retryFetch(async () => {
         const r = await fetch('/api/preview-save', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ html: genData.html, nome, categoria: genData.dados?.categoria || checkData.categoria }),
+          body: JSON.stringify({ html: genData.html, nome, categoria: genData.dados?.categoria || checkData.categoria, origem: 'admin' }),
         });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error);
@@ -286,7 +286,7 @@ export default function Admin() {
                     <span className="admin-row-nome">{linha.nome}</span>
                     <a href={linha.link} target="_blank" rel="noreferrer" className="admin-row-link">{linha.link}</a>
                     <div className="admin-row-btns">
-                      <button className="admin-mini-btn admin-mini-preview" onClick={() => window.open(linha.link, '_blank')}>Ver preview</button>
+                      <button className="admin-mini-btn admin-mini-preview" onClick={() => window.open(linha.link + '?skip=1', '_blank')}>Ver preview</button>
                       <button className="admin-mini-btn" onClick={() => navigator.clipboard.writeText(linha.link)}>Copiar link</button>
                       {linha.waNum && (
                         <button className="admin-mini-btn admin-mini-wa" onClick={() => {
@@ -352,7 +352,7 @@ export default function Admin() {
                       {v !== undefined && <span className="admin-hist-views">{v} view{v !== 1 ? 's' : ''}</span>}
                       {expirado
                         ? <span className="admin-hist-expirado">expirado</span>
-                        : <a href={h.link} target="_blank" rel="noreferrer" className="admin-mini-btn admin-mini-preview">Ver</a>
+                        : <a href={h.link + '?skip=1'} target="_blank" rel="noreferrer" className="admin-mini-btn admin-mini-preview">Ver</a>
                       }
                       <button className="admin-hist-wa" onClick={() => {
                         const msg = encodeURIComponent(msgWa(h.nome, h.link));
