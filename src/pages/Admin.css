@@ -300,6 +300,35 @@
 }
 .admin-add-btn:hover { border-color: #ff007f; color: #ff007f; }
 
+.admin-modelo-toggle {
+  display: flex;
+  gap: 2px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 3px;
+}
+.admin-modelo-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.4);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.admin-modelo-btn.active {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+.admin-modelo-btn.active.sonnet {
+  background: rgba(158,158,255,0.15);
+  color: #9e9eff;
+}
+
 /* Histórico */
 .admin-historico {
   margin-top: 40px;

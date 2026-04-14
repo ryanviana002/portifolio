@@ -53,6 +53,7 @@ export default function Admin() {
   const [linhas, setLinhas] = useState(() => Array.from({ length: 10 }, novaLinha));
   const [historico, setHistorico] = useState([]);
   const [views, setViews] = useState({});
+  const [modelo, setModelo] = useState(() => localStorage.getItem('rdc_modelo') || 'haiku');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -111,7 +112,7 @@ export default function Admin() {
       const genData = await retryFetch(async () => {
         const r = await fetch('/api/preview', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: linha.url.trim(), prompt: linha.prompt?.trim() || '' }),
+          body: JSON.stringify({ url: linha.url.trim(), prompt: linha.prompt?.trim() || '', modelo }),
         });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error);
@@ -178,7 +179,7 @@ export default function Admin() {
       const genData = await retryFetch(async () => {
         const r = await fetch('/api/preview', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: url.trim(), prompt: linha?.prompt?.trim() || '' }),
+          body: JSON.stringify({ url: url.trim(), prompt: linha?.prompt?.trim() || '', modelo }),
         });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error);
@@ -226,6 +227,18 @@ export default function Admin() {
       <div className="admin-header">
         <a href="/" className="admin-back">← Voltar</a>
         <div className="admin-title">Painel RDCreator</div>
+        <div className="admin-modelo-toggle">
+          <button
+            className={`admin-modelo-btn${modelo === 'haiku' ? ' active' : ''}`}
+            onClick={() => { setModelo('haiku'); localStorage.setItem('rdc_modelo', 'haiku'); }}
+            title="Mais rápido e barato (~250 gerações/$5)"
+          >Haiku</button>
+          <button
+            className={`admin-modelo-btn${modelo === 'sonnet' ? ' active sonnet' : ''}`}
+            onClick={() => { setModelo('sonnet'); localStorage.setItem('rdc_modelo', 'sonnet'); }}
+            title="Melhor qualidade (~25 gerações/$5)"
+          >Sonnet</button>
+        </div>
         <button
           className="admin-gerar-todos-btn"
           onClick={handleGerarTodos}

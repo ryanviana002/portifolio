@@ -127,8 +127,10 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'Limite de 3 prévias por dia atingido. Volte amanhã ou fale conosco pelo WhatsApp!' });
   }
 
-  const { url, prompt: customPrompt } = req.body;
+  const { url, prompt: customPrompt, modelo } = req.body;
   if (!url) return res.status(400).json({ error: 'URL obrigatória' });
+
+  const modelId = modelo === 'sonnet' ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001';
 
   try {
     // Busca Place ID
@@ -226,12 +228,12 @@ CSS das novas seções no <style> no início desta parte. Retorne APENAS o HTML 
     // Executa as 2 chamadas em paralelo
     const [msg1, msg2] = await Promise.all([
       client.messages.create({
-        model: 'claude-sonnet-4-6',
+        model: modelId,
         max_tokens: 4096,
         messages: [{ role: 'user', content: prompt1 }],
       }),
       client.messages.create({
-        model: 'claude-sonnet-4-6',
+        model: modelId,
         max_tokens: 4096,
         messages: [{ role: 'user', content: prompt2 }],
       }),
