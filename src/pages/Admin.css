@@ -473,12 +473,18 @@
 
 .admin-prospect-row {
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.15s;
+}
+
+.admin-prospect-row-top {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  transition: background 0.15s;
 }
 .admin-prospect-row:last-child { border-bottom: none; }
 .admin-prospect-row:hover { background: rgba(255,255,255,0.03); }
@@ -522,10 +528,35 @@
   color: rgba(0,242,254,0.6);
 }
 
+.admin-cores-wrap {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.admin-cor-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--cor);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.admin-cor-btn:hover { transform: scale(1.2); }
+.admin-cor-btn.selected {
+  border-color: #fff;
+  transform: scale(1.15);
+  box-shadow: 0 0 8px var(--cor);
+}
+
 .admin-prospect-btns {
   display: flex;
   gap: 6px;
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .admin-prospects-vazio {

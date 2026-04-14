@@ -271,7 +271,7 @@ export default function Admin() {
       const genData = await retryFetch(async () => {
         const r = await fetch('/api/preview', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: prospect.mapsUrl, placeId: prospect.id, prompt: '', modelo, origem: 'admin' }),
+          body: JSON.stringify({ url: prospect.mapsUrl, placeId: prospect.id, prompt: prospectStatus[prospect.id]?.prompt?.trim() || '', modelo, origem: 'admin' }),
         });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error);
@@ -401,6 +401,7 @@ export default function Admin() {
                     const processando = ['checando','gerando','salvando'].includes(ps.status);
                     return (
                       <div key={p.id} className={`admin-prospect-row${ps.status === 'pronto' ? ' pronto' : ''}`}>
+                        <div className="admin-prospect-row-top">
                         <div className="admin-prospect-info">
                           <span className="admin-prospect-nome">{p.nome}</span>
                           <span className="admin-prospect-cat">{p.categoria}</span>
@@ -408,15 +409,50 @@ export default function Admin() {
                           <span className="admin-prospect-end">{p.endereco}</span>
                           {p.telefone && <span className="admin-prospect-tel">{p.telefone}</span>}
                         </div>
+                        {!processando && ps.status !== 'pronto' && (
+                          <div className="admin-cores-wrap">
+                            {[
+                              { label: 'Azul', value: 'azul', hex: '#1e40af' },
+                              { label: 'Verde', value: 'verde', hex: '#16a34a' },
+                              { label: 'Vermelho', value: 'vermelho', hex: '#dc2626' },
+                              { label: 'Laranja', value: 'laranja', hex: '#ea580c' },
+                              { label: 'Amarelo', value: 'amarelo', hex: '#ca8a04' },
+                              { label: 'Rosa', value: 'rosa', hex: '#db2777' },
+                              { label: 'Roxo', value: 'roxo', hex: '#7c3aed' },
+                              { label: 'Dourado', value: 'dourado', hex: '#b45309' },
+                              { label: 'Marrom', value: 'marrom', hex: '#78350f' },
+                              { label: 'Cinza', value: 'cinza', hex: '#4b5563' },
+                              { label: 'Preto', value: 'preto', hex: '#111827' },
+                              { label: 'Branco', value: 'branco', hex: '#e5e7eb' },
+                            ].map(cor => (
+                              <button
+                                key={cor.value}
+                                className={`admin-cor-btn${ps.cor === cor.value ? ' selected' : ''}`}
+                                style={{ '--cor': cor.hex }}
+                                onClick={() => updateProspect(p.id, {
+                                  cor: ps.cor === cor.value ? '' : cor.value,
+                                  prompt: ps.cor === cor.value ? '' : `use ${cor.label.toLowerCase()} como cor predominante do site`,
+                                })}
+                                title={cor.label}
+                              />
+                            ))}
+                          </div>
+                        )}
                         <div className="admin-prospect-btns">
                           {ps.status === 'pronto' ? (
                             <>
                               <button className="admin-mini-btn admin-mini-preview" onClick={() => window.open(ps.link + '?skip=1', '_blank')}>Ver</button>
                               <button className="admin-mini-btn" onClick={() => navigator.clipboard.writeText(ps.link)}>Copiar</button>
-                              <button className="admin-mini-btn admin-mini-wa" onClick={() => {
+                              {ps.waNum && (
+                                <button className="admin-mini-btn admin-mini-wa" onClick={() => {
+                                  const msg = encodeURIComponent(msgWa(ps.nome, ps.link));
+                                  window.open(`https://wa.me/${ps.waNum}?text=${msg}`, '_blank');
+                                }}>WA cliente</button>
+                              )}
+                              <button className="admin-mini-btn admin-mini-wa-ryan" onClick={() => {
                                 const msg = encodeURIComponent(msgWa(ps.nome, ps.link));
-                                window.open(`https://wa.me/${ps.waNum || WA_RYAN}?text=${msg}`, '_blank');
-                              }}>WA</button>
+                                window.open(`https://wa.me/${WA_RYAN}?text=${msg}`, '_blank');
+                              }}>WA Ryan</button>
                             </>
                           ) : processando ? (
                             <div className="admin-row-status">
@@ -432,6 +468,7 @@ export default function Admin() {
                             </>
                           )}
                         </div>
+                        </div>{/* fecha row-top */}
                         {ps.status === 'erro' && <p className="admin-row-erro">{ps.erro}</p>}
                       </div>
                     );
