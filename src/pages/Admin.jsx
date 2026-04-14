@@ -230,7 +230,7 @@ export default function Admin() {
   const isExpirado = (createdAt) => Date.now() - createdAt > EXPIRY_MS;
 
   if (!authed) return (
-    <div style={{ minHeight:'100vh', background:'#0a0a12', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'Space Grotesk,sans-serif' }}>
+    <div style={{ minHeight:'100vh', background:'#0a0a12', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'Space Grotesk,sans-serif', cursor:'auto' }}>
       <form onSubmit={handleLogin} style={{ display:'flex', flexDirection:'column', gap:16, width:300 }}>
         <div style={{ textAlign:'center', marginBottom:8 }}>
           <div style={{ color:'#ff007f', fontWeight:900, fontSize:22, letterSpacing:2 }}>RDCreator</div>
