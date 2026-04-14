@@ -275,6 +275,7 @@ export default function Admin() {
           Gerar todos
         </button>
         <div className="admin-tag">ADMIN</div>
+        <button className="admin-sair-btn" onClick={() => { localStorage.removeItem('rdc_owner'); setAuthed(false); }}>Sair</button>
       </div>
 
       <div className="admin-body">

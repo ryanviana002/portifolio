@@ -300,6 +300,19 @@
 }
 .admin-add-btn:hover { border-color: #ff007f; color: #ff007f; }
 
+.admin-sair-btn {
+  background: none;
+  border: 1px solid rgba(255,0,127,0.2);
+  color: rgba(255,255,255,0.3);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  padding: 5px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.admin-sair-btn:hover { border-color: #ff007f; color: #ff007f; }
+
 .admin-modelo-toggle {
   display: flex;
   gap: 2px;
