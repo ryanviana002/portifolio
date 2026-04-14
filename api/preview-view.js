@@ -22,6 +22,8 @@ export default async function handler(req, res) {
     return res.status(410).json({ error: 'Prévia expirada. Gere uma nova em ryancreator.dev/preview' });
   }
 
+  const novasViews = (preview.views || 0) + 1;
+
   // Incrementa views (silencioso se coluna não existir)
   fetch(`${SUPABASE_URL}/rest/v1/previews?id=eq.${id}`, {
     method: 'PATCH',
@@ -31,8 +33,18 @@ export default async function handler(req, res) {
       'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
       'Prefer': 'return=minimal',
     },
-    body: JSON.stringify({ views: (preview.views || 0) + 1 }),
+    body: JSON.stringify({ views: novasViews }),
   }).catch(() => {});
+
+  // Notifica Ryan no WA na 1ª visualização
+  if (novasViews === 1) {
+    const key = process.env.CALLMEBOT_KEY;
+    if (key) {
+      const msg = encodeURIComponent(`👀 Preview aberto!\n*${preview.nome || 'Negócio'}* acabou de ver o site.\nhttps://ryancreator.dev/r/${id}`);
+      fetch(`https://api.callmebot.com/whatsapp.php?phone=5519992525515&text=${msg}&apikey=${key}`)
+        .catch(() => {});
+    }
+  }
 
   return res.status(200).json(preview);
 }
