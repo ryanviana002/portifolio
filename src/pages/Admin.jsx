@@ -54,9 +54,11 @@ export default function Admin() {
   const [historico, setHistorico] = useState([]);
   const [views, setViews] = useState({});
   const [modelo, setModelo] = useState(() => localStorage.getItem('rdc_modelo') || 'haiku');
+  const [aba, setAba] = useState('buscar');
   const [busca, setBusca] = useState('');
   const [prospects, setProspects] = useState([]);
   const [buscando, setBuscando] = useState(false);
+  const [prospectStatus, setProspectStatus] = useState({}); // { [id]: { status, link, nome, erro } }
 
   useEffect(() => {
     if (localStorage.getItem('rdc_owner') === '1') {
@@ -248,6 +250,54 @@ export default function Admin() {
     finally { setBuscando(false); }
   };
 
+  const updateProspect = (id, patch) =>
+    setProspectStatus(prev => ({ ...prev, [id]: { ...prev[id], ...patch } }));
+
+  const gerarProspect = async (prospect) => {
+    const pid = prospect.id;
+    if (['checando','gerando','salvando'].includes(prospectStatus[pid]?.status)) return;
+    updateProspect(pid, { status: 'checando', erro: '', link: '', nome: '' });
+    try {
+      const checkData = await retryFetch(async () => {
+        const r = await fetch('/api/preview-check', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: prospect.mapsUrl }),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+        return d;
+      });
+      updateProspect(pid, { status: 'gerando', nome: checkData.nome, waNum: checkData.waNum || null });
+      const genData = await retryFetch(async () => {
+        const r = await fetch('/api/preview', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: prospect.mapsUrl, prompt: '', modelo, origem: 'admin' }),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+        return d;
+      });
+      const nome = genData.dados?.nome || checkData.nome;
+      updateProspect(pid, { status: 'salvando', nome });
+      const saveData = await retryFetch(async () => {
+        const r = await fetch('/api/preview-save', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ html: genData.html, nome, categoria: genData.dados?.categoria || checkData.categoria, origem: 'admin' }),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error);
+        return d;
+      });
+      updateProspect(pid, { status: 'pronto', link: saveData.url, nome });
+      salvarEAtualizar(saveData.id || saveData.url.split('/').pop(), nome, genData.dados?.categoria || checkData.categoria, saveData.url, Date.now());
+      const waNum = prospectStatus[pid]?.waNum || checkData.waNum || null;
+      const msg = encodeURIComponent(msgWa(nome, saveData.url));
+      window.open(`https://wa.me/${waNum || WA_RYAN}?text=${msg}`, '_blank');
+    } catch(e) {
+      updateProspect(pid, { status: 'erro', erro: e.message || 'Erro desconhecido' });
+    }
+  };
+
   const usarProspect = (prospect) => {
     const vazia = linhas.find(l => !l.url.trim() && l.status === 'idle');
     if (vazia) {
@@ -309,168 +359,209 @@ export default function Admin() {
 
       <div className="admin-body">
 
-        {/* Busca de prospects */}
-        <div className="admin-busca-wrap">
-          <form className="admin-busca-form" onSubmit={handleBuscar}>
-            <input
-              className="admin-busca-input"
-              placeholder="Ex: barbearia Campinas, restaurante Santo André..."
-              value={busca}
-              onChange={e => setBusca(e.target.value)}
-            />
-            <button className="admin-busca-btn" type="submit" disabled={buscando || !busca.trim()}>
-              {buscando ? 'Buscando...' : 'Buscar sem site'}
-            </button>
-          </form>
-
-          {prospects.length > 0 && (
-            <div className="admin-prospects">
-              <div className="admin-prospects-header">
-                <span className="admin-prospects-count">{prospects.length} negócios sem site encontrados</span>
-                <button className="admin-prospects-fechar" onClick={() => setProspects([])}>✕</button>
-              </div>
-              <div className="admin-prospects-lista">
-                {prospects.map(p => (
-                  <div key={p.id} className="admin-prospect-row">
-                    <div className="admin-prospect-info">
-                      <span className="admin-prospect-nome">{p.nome}</span>
-                      <span className="admin-prospect-cat">{p.categoria}</span>
-                      {p.avaliacao && <span className="admin-prospect-rating">⭐ {p.avaliacao} ({p.numAvaliacoes})</span>}
-                      <span className="admin-prospect-end">{p.endereco}</span>
-                      {p.telefone && <span className="admin-prospect-tel">{p.telefone}</span>}
-                    </div>
-                    <div className="admin-prospect-btns">
-                      <a href={p.mapsUrl} target="_blank" rel="noreferrer" className="admin-mini-btn">Maps</a>
-                      <button className="admin-mini-btn admin-mini-preview" onClick={() => usarProspect(p)}>Usar</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {!buscando && busca && prospects.length === 0 && (
-            <p className="admin-prospects-vazio">Nenhum negócio sem site encontrado. Tente outra busca.</p>
-          )}
+        {/* Abas */}
+        <div className="admin-abas">
+          <button className={`admin-aba${aba === 'buscar' ? ' active' : ''}`} onClick={() => setAba('buscar')}>Buscar prospects</button>
+          <button className={`admin-aba${aba === 'manual' ? ' active' : ''}`} onClick={() => setAba('manual')}>Manual</button>
+          <button className={`admin-aba${aba === 'historico' ? ' active' : ''}`} onClick={() => setAba('historico')}>
+            Histórico {historico.length > 0 && <span className="admin-aba-badge">{historico.length}</span>}
+          </button>
         </div>
 
-        <div className="admin-linhas">
-          {linhas.map((linha, idx) => (
-            <div key={linha.id} className={`admin-row admin-row--${linha.status}`}>
-              <div className="admin-row-num">{idx + 1}</div>
+        {/* Aba Buscar */}
+        {aba === 'buscar' && (
+          <div className="admin-busca-wrap">
+            <form className="admin-busca-form" onSubmit={handleBuscar}>
+              <input
+                className="admin-busca-input"
+                placeholder="Ex: barbearia Campinas, restaurante Santo André..."
+                value={busca}
+                onChange={e => setBusca(e.target.value)}
+              />
+              <button className="admin-busca-btn" type="submit" disabled={buscando || !busca.trim()}>
+                {buscando ? 'Buscando...' : 'Buscar sem site'}
+              </button>
+            </form>
 
-              <div className="admin-row-main">
-                <input
-                  className="admin-url-input"
-                  placeholder="Link do Google Maps ou share.google..."
-                  value={linha.url}
-                  onChange={e => update(linha.id, { url: e.target.value, status: 'idle', erro: '', nome: '', link: '' })}
-                  disabled={isProcessando(linha.status)}
-                  onKeyDown={e => e.key === 'Enter' && handleGerar(linha.id)}
-                />
-                <button
-                  className={`admin-prompt-toggle${linha.promptOpen ? ' active' : ''}${linha.prompt?.trim() ? ' has-value' : ''}`}
-                  onClick={() => update(linha.id, { promptOpen: !linha.promptOpen })}
-                  disabled={isProcessando(linha.status)}
-                  title="Personalizar prompt"
-                >⚙ prompt{linha.prompt?.trim() ? ' •' : ''}</button>
-                {linha.promptOpen && (
-                  <textarea
-                    className="admin-prompt-input"
-                    placeholder="Ex: cores azul e dourado, tom elegante, destaque pacote premium... (máx 300 caracteres)"
-                    value={linha.prompt}
-                    onChange={e => update(linha.id, { prompt: e.target.value.slice(0, 300) })}
-                    disabled={isProcessando(linha.status)}
-                    maxLength={300}
-                    rows={2}
-                  />
-                )}
-
-                {linha.status === 'pronto' && linha.nome && (
-                  <div className="admin-row-result">
-                    <span className="admin-row-nome">{linha.nome}</span>
-                    <a href={linha.link} target="_blank" rel="noreferrer" className="admin-row-link">{linha.link}</a>
-                    <div className="admin-row-btns">
-                      <button className="admin-mini-btn admin-mini-preview" onClick={() => window.open(linha.link + '?skip=1', '_blank')}>Ver preview</button>
-                      <button className="admin-mini-btn" onClick={() => navigator.clipboard.writeText(linha.link)}>Copiar link</button>
-                      {linha.waNum && (
-                        <button className="admin-mini-btn admin-mini-wa" onClick={() => {
-                          const msg = encodeURIComponent(msgWa(linha.nome, linha.link));
-                          window.open(`https://wa.me/${linha.waNum}?text=${msg}`, '_blank');
-                        }}>WA cliente</button>
-                      )}
-                      <button className="admin-mini-btn admin-mini-wa-ryan" onClick={() => {
-                        const msg = encodeURIComponent(msgWa(linha.nome, linha.link));
-                        window.open(`https://wa.me/${WA_RYAN}?text=${msg}`, '_blank');
-                      }}>WA Ryan</button>
-                    </div>
-                  </div>
-                )}
-
-                {linha.status === 'erro' && (
-                  <p className="admin-row-erro">{linha.erro}</p>
-                )}
+            {buscando && (
+              <div className="admin-busca-loading">
+                <span className="admin-spinner" /> Buscando negócios sem site...
               </div>
+            )}
 
-              <div className="admin-row-actions">
-                {isProcessando(linha.status) ? (
-                  <div className="admin-row-status">
-                    <span className="admin-spinner" />
-                    <span>{statusLabel[linha.status]}</span>
-                  </div>
-                ) : (
-                  <button
-                    className="admin-gerar-btn"
-                    onClick={() => handleGerar(linha.id)}
-                    disabled={!linha.url.trim()}
-                    title="Gerar e abrir WhatsApp"
-                  >
-                    {linha.status === 'pronto' ? 'Gerar novo' : 'Gerar + WA'}
-                  </button>
-                )}
-                {linhas.length > 1 && !isProcessando(linha.status) && (
-                  <button className="admin-remove-btn" onClick={() => removerLinha(linha.id)} title="Remover">✕</button>
-                )}
+            {!buscando && prospects.length > 0 && (
+              <div className="admin-prospects">
+                <div className="admin-prospects-header">
+                  <span className="admin-prospects-count">{prospects.length} negócios sem site encontrados</span>
+                  <button className="admin-prospects-fechar" onClick={() => setProspects([])}>✕</button>
+                </div>
+                <div className="admin-prospects-lista">
+                  {prospects.map(p => {
+                    const ps = prospectStatus[p.id] || {};
+                    const processando = ['checando','gerando','salvando'].includes(ps.status);
+                    return (
+                      <div key={p.id} className={`admin-prospect-row${ps.status === 'pronto' ? ' pronto' : ''}`}>
+                        <div className="admin-prospect-info">
+                          <span className="admin-prospect-nome">{p.nome}</span>
+                          <span className="admin-prospect-cat">{p.categoria}</span>
+                          {p.avaliacao && <span className="admin-prospect-rating">⭐ {p.avaliacao} ({p.numAvaliacoes})</span>}
+                          <span className="admin-prospect-end">{p.endereco}</span>
+                          {p.telefone && <span className="admin-prospect-tel">{p.telefone}</span>}
+                        </div>
+                        <div className="admin-prospect-btns">
+                          {ps.status === 'pronto' ? (
+                            <>
+                              <button className="admin-mini-btn admin-mini-preview" onClick={() => window.open(ps.link + '?skip=1', '_blank')}>Ver</button>
+                              <button className="admin-mini-btn" onClick={() => navigator.clipboard.writeText(ps.link)}>Copiar</button>
+                              <button className="admin-mini-btn admin-mini-wa" onClick={() => {
+                                const msg = encodeURIComponent(msgWa(ps.nome, ps.link));
+                                window.open(`https://wa.me/${ps.waNum || WA_RYAN}?text=${msg}`, '_blank');
+                              }}>WA</button>
+                            </>
+                          ) : processando ? (
+                            <div className="admin-row-status">
+                              <span className="admin-spinner" />
+                              <span>{statusLabel[ps.status]}</span>
+                            </div>
+                          ) : (
+                            <>
+                              <a href={p.mapsUrl} target="_blank" rel="noreferrer" className="admin-mini-btn">Maps</a>
+                              <button className="admin-gerar-btn" onClick={() => gerarProspect(p)}>
+                                {ps.status === 'erro' ? 'Tentar novo' : 'Gerar + WA'}
+                              </button>
+                            </>
+                          )}
+                        </div>
+                        {ps.status === 'erro' && <p className="admin-row-erro">{ps.erro}</p>}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            )}
 
-        {historico.length > 0 && (
-          <div className="admin-historico">
-            <div className="admin-historico-header">
-              <h3 className="admin-historico-title">Histórico</h3>
-              <button className="admin-historico-limpar" onClick={limparHistorico}>Limpar tudo</button>
-            </div>
-            <div className="admin-historico-lista">
-              {historico.map(h => {
-                const expirado = isExpirado(h.createdAt);
-                const v = views[h.previewId];
-                return (
-                  <div key={h.previewId} className={`admin-hist-row${expirado ? ' expirado' : ''}`}>
-                    <div className="admin-hist-info">
-                      <span className="admin-hist-nome">{h.nome}</span>
-                      <span className="admin-hist-cat">{h.categoria}</span>
-                      <span className="admin-hist-data">{new Date(h.createdAt).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}</span>
-                    </div>
-                    <div className="admin-hist-right">
-                      {v !== undefined && <span className="admin-hist-views">{v} view{v !== 1 ? 's' : ''}</span>}
-                      {expirado
-                        ? <span className="admin-hist-expirado">expirado</span>
-                        : <a href={h.link + '?skip=1'} target="_blank" rel="noreferrer" className="admin-mini-btn admin-mini-preview">Ver</a>
-                      }
-                      <button className="admin-hist-wa" onClick={() => {
-                        const msg = encodeURIComponent(msgWa(h.nome, h.link));
-                        window.open(`https://wa.me/${WA_RYAN}?text=${msg}`, '_blank');
-                      }} title="Reenviar WA">WA</button>
-                      <button className="admin-hist-del" onClick={() => removerHistorico(h.previewId)} title="Remover">✕</button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            {!buscando && busca && prospects.length === 0 && (
+              <p className="admin-prospects-vazio">Nenhum negócio sem site encontrado. Tente outra busca.</p>
+            )}
           </div>
         )}
+
+        {/* Aba Manual */}
+        {aba === 'manual' && (
+          <div className="admin-linhas">
+            {linhas.map((linha, idx) => (
+              <div key={linha.id} className={`admin-row admin-row--${linha.status}`}>
+                <div className="admin-row-num">{idx + 1}</div>
+                <div className="admin-row-main">
+                  <input
+                    className="admin-url-input"
+                    placeholder="Link do Google Maps ou share.google..."
+                    value={linha.url}
+                    onChange={e => update(linha.id, { url: e.target.value, status: 'idle', erro: '', nome: '', link: '' })}
+                    disabled={isProcessando(linha.status)}
+                    onKeyDown={e => e.key === 'Enter' && handleGerar(linha.id)}
+                  />
+                  <button
+                    className={`admin-prompt-toggle${linha.promptOpen ? ' active' : ''}${linha.prompt?.trim() ? ' has-value' : ''}`}
+                    onClick={() => update(linha.id, { promptOpen: !linha.promptOpen })}
+                    disabled={isProcessando(linha.status)}
+                  >⚙ prompt{linha.prompt?.trim() ? ' •' : ''}</button>
+                  {linha.promptOpen && (
+                    <textarea
+                      className="admin-prompt-input"
+                      placeholder="Ex: cores azul e dourado, tom elegante... (máx 300 chars)"
+                      value={linha.prompt}
+                      onChange={e => update(linha.id, { prompt: e.target.value.slice(0, 300) })}
+                      disabled={isProcessando(linha.status)}
+                      maxLength={300}
+                      rows={2}
+                    />
+                  )}
+                  {linha.status === 'pronto' && linha.nome && (
+                    <div className="admin-row-result">
+                      <span className="admin-row-nome">{linha.nome}</span>
+                      <a href={linha.link} target="_blank" rel="noreferrer" className="admin-row-link">{linha.link}</a>
+                      <div className="admin-row-btns">
+                        <button className="admin-mini-btn admin-mini-preview" onClick={() => window.open(linha.link + '?skip=1', '_blank')}>Ver preview</button>
+                        <button className="admin-mini-btn" onClick={() => navigator.clipboard.writeText(linha.link)}>Copiar link</button>
+                        {linha.waNum && (
+                          <button className="admin-mini-btn admin-mini-wa" onClick={() => {
+                            const msg = encodeURIComponent(msgWa(linha.nome, linha.link));
+                            window.open(`https://wa.me/${linha.waNum}?text=${msg}`, '_blank');
+                          }}>WA cliente</button>
+                        )}
+                        <button className="admin-mini-btn admin-mini-wa-ryan" onClick={() => {
+                          const msg = encodeURIComponent(msgWa(linha.nome, linha.link));
+                          window.open(`https://wa.me/${WA_RYAN}?text=${msg}`, '_blank');
+                        }}>WA Ryan</button>
+                      </div>
+                    </div>
+                  )}
+                  {linha.status === 'erro' && <p className="admin-row-erro">{linha.erro}</p>}
+                </div>
+                <div className="admin-row-actions">
+                  {isProcessando(linha.status) ? (
+                    <div className="admin-row-status">
+                      <span className="admin-spinner" />
+                      <span>{statusLabel[linha.status]}</span>
+                    </div>
+                  ) : (
+                    <button className="admin-gerar-btn" onClick={() => handleGerar(linha.id)} disabled={!linha.url.trim()}>
+                      {linha.status === 'pronto' ? 'Gerar novo' : 'Gerar + WA'}
+                    </button>
+                  )}
+                  {linhas.length > 1 && !isProcessando(linha.status) && (
+                    <button className="admin-remove-btn" onClick={() => removerLinha(linha.id)}>✕</button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Aba Histórico */}
+        {aba === 'historico' && (
+          <div className="admin-historico">
+            {historico.length === 0 ? (
+              <p className="admin-prospects-vazio">Nenhum preview gerado ainda.</p>
+            ) : (
+              <>
+                <div className="admin-historico-header">
+                  <h3 className="admin-historico-title">Histórico</h3>
+                  <button className="admin-historico-limpar" onClick={limparHistorico}>Limpar tudo</button>
+                </div>
+                <div className="admin-historico-lista">
+                  {historico.map(h => {
+                    const expirado = isExpirado(h.createdAt);
+                    const v = views[h.previewId];
+                    return (
+                      <div key={h.previewId} className={`admin-hist-row${expirado ? ' expirado' : ''}`}>
+                        <div className="admin-hist-info">
+                          <span className="admin-hist-nome">{h.nome}</span>
+                          <span className="admin-hist-cat">{h.categoria}</span>
+                          <span className="admin-hist-data">{new Date(h.createdAt).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}</span>
+                        </div>
+                        <div className="admin-hist-right">
+                          {v !== undefined && <span className="admin-hist-views">{v} view{v !== 1 ? 's' : ''}</span>}
+                          {expirado
+                            ? <span className="admin-hist-expirado">expirado</span>
+                            : <a href={h.link + '?skip=1'} target="_blank" rel="noreferrer" className="admin-mini-btn admin-mini-preview">Ver</a>
+                          }
+                          <button className="admin-hist-wa" onClick={() => {
+                            const msg = encodeURIComponent(msgWa(h.nome, h.link));
+                            window.open(`https://wa.me/${WA_RYAN}?text=${msg}`, '_blank');
+                          }}>WA</button>
+                          <button className="admin-hist-del" onClick={() => removerHistorico(h.previewId)}>✕</button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
       </div>
     </div>
   );
