@@ -342,6 +342,148 @@
   color: #9e9eff;
 }
 
+/* Busca de prospects */
+.admin-busca-wrap {
+  margin-bottom: 32px;
+}
+
+.admin-busca-form {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-busca-input {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  padding: 11px 16px;
+  outline: none;
+  font-family: 'Space Grotesk', sans-serif;
+  transition: border-color 0.2s;
+}
+.admin-busca-input:focus { border-color: rgba(0,242,254,0.4); }
+.admin-busca-input::placeholder { color: rgba(255,255,255,0.2); }
+
+.admin-busca-btn {
+  background: linear-gradient(135deg, #00f2fe, #9e9eff);
+  border: none;
+  border-radius: 10px;
+  color: #0a0a12;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 11px 22px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+.admin-busca-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.admin-busca-btn:not(:disabled):hover { opacity: 0.85; }
+
+.admin-prospects {
+  margin-top: 16px;
+  border: 1px solid rgba(0,242,254,0.15);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.admin-prospects-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(0,242,254,0.05);
+  border-bottom: 1px solid rgba(0,242,254,0.1);
+}
+
+.admin-prospects-count {
+  font-size: 12px;
+  color: #00f2fe;
+  font-weight: 600;
+}
+
+.admin-prospects-fechar {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+}
+.admin-prospects-fechar:hover { color: #ff007f; }
+
+.admin-prospects-lista {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.admin-prospect-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.15s;
+}
+.admin-prospect-row:last-child { border-bottom: none; }
+.admin-prospect-row:hover { background: rgba(255,255,255,0.03); }
+
+.admin-prospect-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.admin-prospect-nome {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.admin-prospect-cat {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+}
+
+.admin-prospect-rating {
+  font-size: 11px;
+  color: #fbbf24;
+}
+
+.admin-prospect-end {
+  font-size: 11px;
+  color: rgba(255,255,255,0.25);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.admin-prospect-tel {
+  font-size: 11px;
+  color: rgba(0,242,254,0.6);
+}
+
+.admin-prospect-btns {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.admin-prospects-vazio {
+  font-size: 12px;
+  color: rgba(255,255,255,0.25);
+  margin-top: 12px;
+  text-align: center;
+}
+
 /* Histórico */
 .admin-historico {
   margin-top: 40px;

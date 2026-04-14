@@ -54,6 +54,9 @@ export default function Admin() {
   const [historico, setHistorico] = useState([]);
   const [views, setViews] = useState({});
   const [modelo, setModelo] = useState(() => localStorage.getItem('rdc_modelo') || 'haiku');
+  const [busca, setBusca] = useState('');
+  const [prospects, setProspects] = useState([]);
+  const [buscando, setBuscando] = useState(false);
 
   useEffect(() => {
     if (localStorage.getItem('rdc_owner') === '1') {
@@ -227,6 +230,32 @@ export default function Admin() {
   };
 
   const isProcessando = (status) => ['checando', 'gerando', 'salvando'].includes(status);
+
+  const handleBuscar = async (e) => {
+    e.preventDefault();
+    if (!busca.trim()) return;
+    setBuscando(true);
+    setProspects([]);
+    try {
+      const r = await fetch('/api/buscar-prospects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: busca.trim() }),
+      });
+      const data = await r.json();
+      setProspects(Array.isArray(data) ? data : []);
+    } catch { setProspects([]); }
+    finally { setBuscando(false); }
+  };
+
+  const usarProspect = (prospect) => {
+    const vazia = linhas.find(l => !l.url.trim() && l.status === 'idle');
+    if (vazia) {
+      update(vazia.id, { url: prospect.mapsUrl });
+    } else {
+      setLinhas(prev => [...prev, { ...novaLinha(), url: prospect.mapsUrl }]);
+    }
+  };
   const isExpirado = (createdAt) => Date.now() - createdAt > EXPIRY_MS;
 
   if (!authed) return (
@@ -279,6 +308,52 @@ export default function Admin() {
       </div>
 
       <div className="admin-body">
+
+        {/* Busca de prospects */}
+        <div className="admin-busca-wrap">
+          <form className="admin-busca-form" onSubmit={handleBuscar}>
+            <input
+              className="admin-busca-input"
+              placeholder="Ex: barbearia Campinas, restaurante Santo André..."
+              value={busca}
+              onChange={e => setBusca(e.target.value)}
+            />
+            <button className="admin-busca-btn" type="submit" disabled={buscando || !busca.trim()}>
+              {buscando ? 'Buscando...' : 'Buscar sem site'}
+            </button>
+          </form>
+
+          {prospects.length > 0 && (
+            <div className="admin-prospects">
+              <div className="admin-prospects-header">
+                <span className="admin-prospects-count">{prospects.length} negócios sem site encontrados</span>
+                <button className="admin-prospects-fechar" onClick={() => setProspects([])}>✕</button>
+              </div>
+              <div className="admin-prospects-lista">
+                {prospects.map(p => (
+                  <div key={p.id} className="admin-prospect-row">
+                    <div className="admin-prospect-info">
+                      <span className="admin-prospect-nome">{p.nome}</span>
+                      <span className="admin-prospect-cat">{p.categoria}</span>
+                      {p.avaliacao && <span className="admin-prospect-rating">⭐ {p.avaliacao} ({p.numAvaliacoes})</span>}
+                      <span className="admin-prospect-end">{p.endereco}</span>
+                      {p.telefone && <span className="admin-prospect-tel">{p.telefone}</span>}
+                    </div>
+                    <div className="admin-prospect-btns">
+                      <a href={p.mapsUrl} target="_blank" rel="noreferrer" className="admin-mini-btn">Maps</a>
+                      <button className="admin-mini-btn admin-mini-preview" onClick={() => usarProspect(p)}>Usar</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!buscando && busca && prospects.length === 0 && (
+            <p className="admin-prospects-vazio">Nenhum negócio sem site encontrado. Tente outra busca.</p>
+          )}
+        </div>
+
         <div className="admin-linhas">
           {linhas.map((linha, idx) => (
             <div key={linha.id} className={`admin-row admin-row--${linha.status}`}>
