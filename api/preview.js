@@ -3,28 +3,39 @@ import Anthropic from '@anthropic-ai/sdk';
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const PLACES_KEY = process.env.GOOGLE_PLACES_API_KEY;
 
+const SUPABASE_URL = 'https://zivrekynlmznlyoyyrvg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppdnJla3lubG16bmx5b3l5cnZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzE5ODgsImV4cCI6MjA5MTQwNzk4OH0.S05mkQ4iKZHFZT4HuTmDKOUwcYx1wJlL1hSELnschVE';
+const LIMIT = 3;
+
 // Cache de Place Details (evita chamadas duplicadas à API do Google)
 const placeCache = new Map();
 const CACHE_TTL = 10 * 60 * 1000; // 10 min
 
-// Rate limit: 3 gerações por IP por dia
-const rateLimitMap = new Map();
-const LIMIT = 3;
+async function checkRateLimit(ip) {
+  const today = new Date().toISOString().slice(0, 10);
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rate_limits?ip=eq.${encodeURIComponent(ip)}&date=eq.${today}&select=count`, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+    });
+    const data = await r.json();
+    const count = data?.[0]?.count || 0;
+    if (count >= LIMIT) return false;
 
-function checkRateLimit(ip) {
-  const today = new Date().toISOString().slice(0, 10); // "2026-04-09"
-  const key = `${ip}:${today}`;
-  const count = rateLimitMap.get(key) || 0;
-  if (count >= LIMIT) return false;
-  rateLimitMap.set(key, count + 1);
-  // Limpa entradas antigas (evita memory leak)
-  if (rateLimitMap.size > 5000) {
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-    for (const k of rateLimitMap.keys()) {
-      if (k.includes(yesterday)) rateLimitMap.delete(k);
-    }
+    // Upsert incrementa o count
+    await fetch(`${SUPABASE_URL}/rest/v1/rate_limits`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Prefer': 'resolution=merge-duplicates',
+      },
+      body: JSON.stringify({ ip, date: today, count: count + 1 }),
+    });
+    return true;
+  } catch {
+    return true; // em caso de erro no Supabase, não bloqueia
   }
-  return true;
 }
 
 async function extractPlaceId(url) {
@@ -123,7 +134,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
-  if (!checkRateLimit(ip)) {
+  if (!await checkRateLimit(ip)) {
     return res.status(429).json({ error: 'Limite de 3 prévias por dia atingido. Volte amanhã ou fale conosco pelo WhatsApp!' });
   }
 
