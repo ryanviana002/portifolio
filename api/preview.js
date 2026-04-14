@@ -133,12 +133,12 @@ async function getPlaceDetails(placeId) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  const { url, prompt: customPrompt, modelo, origem } = req.body;
+
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
-  if (!await checkRateLimit(ip)) {
+  if (origem !== 'admin' && !await checkRateLimit(ip)) {
     return res.status(429).json({ error: 'Limite de 3 prévias por dia atingido. Volte amanhã ou fale conosco pelo WhatsApp!' });
   }
-
-  const { url, prompt: customPrompt, modelo } = req.body;
   if (!url) return res.status(400).json({ error: 'URL obrigatória' });
 
   const modelId = modelo === 'sonnet' ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001';

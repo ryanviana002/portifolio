@@ -121,7 +121,7 @@ export default function Admin() {
       const genData = await retryFetch(async () => {
         const r = await fetch('/api/preview', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: linha.url.trim(), prompt: linha.prompt?.trim() || '', modelo }),
+          body: JSON.stringify({ url: linha.url.trim(), prompt: linha.prompt?.trim() || '', modelo, origem: 'admin' }),
         });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error);
@@ -188,7 +188,7 @@ export default function Admin() {
       const genData = await retryFetch(async () => {
         const r = await fetch('/api/preview', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: url.trim(), prompt: linha?.prompt?.trim() || '', modelo }),
+          body: JSON.stringify({ url: url.trim(), prompt: linha?.prompt?.trim() || '', modelo, origem: 'admin' }),
         });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error);
