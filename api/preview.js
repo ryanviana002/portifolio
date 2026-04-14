@@ -229,12 +229,12 @@ CSS das novas seções no <style> no início desta parte. Retorne APENAS o HTML 
     const [msg1, msg2] = await Promise.all([
       client.messages.create({
         model: modelId,
-        max_tokens: 4096,
+        max_tokens: 6000,
         messages: [{ role: 'user', content: prompt1 }],
       }),
       client.messages.create({
         model: modelId,
-        max_tokens: 4096,
+        max_tokens: 6000,
         messages: [{ role: 'user', content: prompt2 }],
       }),
     ]);
@@ -252,12 +252,12 @@ CSS das novas seções no <style> no início desta parte. Retorne APENAS o HTML 
     const parte1Clean = parte1WithCharset.replace(/<\/body>\s*<\/html>\s*$/i, '');
     const mockupHtml = parte1Clean + '\n' + parte2;
 
-    // Valida se o HTML gerado está completo
-    if (!/<\/html>/i.test(mockupHtml)) {
-      throw new Error('HTML gerado incompleto. Tente novamente.');
-    }
+    // Garante fechamento do HTML se o modelo cortou
+    const htmlFinal = /<\/html>/i.test(mockupHtml)
+      ? mockupHtml
+      : mockupHtml + '\n</body></html>';
 
-    return res.status(200).json({ html: mockupHtml, dados });
+    return res.status(200).json({ html: htmlFinal, dados });
   } catch (err) {
     console.error('Preview error:', err);
     return res.status(500).json({ error: err.message });

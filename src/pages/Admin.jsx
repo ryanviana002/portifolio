@@ -56,15 +56,24 @@ export default function Admin() {
   const [modelo, setModelo] = useState(() => localStorage.getItem('rdc_modelo') || 'haiku');
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('admin') === 'dani') localStorage.setItem('rdc_owner', '1');
     if (localStorage.getItem('rdc_owner') === '1') {
       setAuthed(true);
       setHistorico(lerHistorico());
-    } else {
-      navigate('/');
     }
   }, []);
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    const senha = e.target.senha.value;
+    if (senha === 'familia1@') {
+      localStorage.setItem('rdc_owner', '1');
+      setAuthed(true);
+      setHistorico(lerHistorico());
+    } else {
+      e.target.senha.value = '';
+      e.target.senha.placeholder = 'Senha incorreta';
+    }
+  };
 
   // Busca views dos previews no histórico
   useEffect(() => {
@@ -220,7 +229,26 @@ export default function Admin() {
   const isProcessando = (status) => ['checando', 'gerando', 'salvando'].includes(status);
   const isExpirado = (createdAt) => Date.now() - createdAt > EXPIRY_MS;
 
-  if (!authed) return null;
+  if (!authed) return (
+    <div style={{ minHeight:'100vh', background:'#0a0a12', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'Space Grotesk,sans-serif' }}>
+      <form onSubmit={handleLogin} style={{ display:'flex', flexDirection:'column', gap:16, width:300 }}>
+        <div style={{ textAlign:'center', marginBottom:8 }}>
+          <div style={{ color:'#ff007f', fontWeight:900, fontSize:22, letterSpacing:2 }}>RDCreator</div>
+          <div style={{ color:'rgba(255,255,255,0.3)', fontSize:13, marginTop:4 }}>Painel Admin</div>
+        </div>
+        <input
+          name="senha"
+          type="password"
+          placeholder="Senha"
+          autoFocus
+          style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, color:'#fff', fontSize:15, padding:'12px 16px', outline:'none', fontFamily:'Space Grotesk,sans-serif' }}
+        />
+        <button type="submit" style={{ background:'linear-gradient(135deg,#ff007f,#d12c96)', color:'#fff', border:'none', borderRadius:10, padding:'12px', fontWeight:700, fontSize:14, cursor:'pointer', fontFamily:'Space Grotesk,sans-serif', letterSpacing:1 }}>
+          ENTRAR
+        </button>
+      </form>
+    </div>
+  );
 
   return (
     <div className="admin-page">
