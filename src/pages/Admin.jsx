@@ -301,11 +301,12 @@ export default function Admin() {
                 {linha.promptOpen && (
                   <textarea
                     className="admin-prompt-input"
-                    placeholder="Ex: use cores azul e dourado, site voltado para casamentos, destaque o pacote premium..."
+                    placeholder="Ex: cores azul e dourado, tom elegante, destaque pacote premium... (máx 300 caracteres)"
                     value={linha.prompt}
-                    onChange={e => update(linha.id, { prompt: e.target.value })}
+                    onChange={e => update(linha.id, { prompt: e.target.value.slice(0, 300) })}
                     disabled={isProcessando(linha.status)}
-                    rows={3}
+                    maxLength={300}
+                    rows={2}
                   />
                 )}
 

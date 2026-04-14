@@ -193,7 +193,7 @@ export default async function handler(req, res) {
     const ctx = `NEGÓCIO: ${dados.nome} | ${dados.categoria} | ⭐${dados.avaliacao} (${dados.numAvaliacoes} avaliações) | TEL: ${dados.telefone || ''} | END: ${dados.endereco || ''} | CORES: ${paletaSugerida}`;
 
     const extraInstructions = customPrompt?.trim()
-      ? `\nINSTRUÇÕES EXTRAS DO CLIENTE:\n${customPrompt.trim()}\n`
+      ? `\nAJUSTES DE ESTILO (apenas cores, tom e destaque — não adicione novas seções):\n${customPrompt.trim().slice(0, 300)}\n`
       : '';
 
     const prompt1 = `Você é um dev web. Gere APENAS a primeira metade de um site HTML para este negócio.
@@ -229,12 +229,12 @@ CSS das novas seções no <style> no início desta parte. Retorne APENAS o HTML 
     const [msg1, msg2] = await Promise.all([
       client.messages.create({
         model: modelId,
-        max_tokens: 6000,
+        max_tokens: 4096,
         messages: [{ role: 'user', content: prompt1 }],
       }),
       client.messages.create({
         model: modelId,
-        max_tokens: 6000,
+        max_tokens: 4096,
         messages: [{ role: 'user', content: prompt2 }],
       }),
     ]);
