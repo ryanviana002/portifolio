@@ -535,6 +535,14 @@
   margin-top: 4px;
 }
 
+.admin-cor-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  align-self: center;
+  text-transform: capitalize;
+  margin-right: 4px;
+}
+
 .admin-cor-btn {
   width: 22px;
   height: 22px;
@@ -548,8 +556,9 @@
 .admin-cor-btn:hover { transform: scale(1.2); }
 .admin-cor-btn.selected {
   border-color: #fff;
-  transform: scale(1.15);
-  box-shadow: 0 0 8px var(--cor);
+  transform: scale(1.25);
+  box-shadow: 0 0 10px var(--cor), 0 0 0 2px #fff;
+  outline: 2px solid #fff;
 }
 
 .admin-prospect-btns {

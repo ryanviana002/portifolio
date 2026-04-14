@@ -411,6 +411,7 @@ export default function Admin() {
                         </div>
                         {!processando && ps.status !== 'pronto' && (
                           <div className="admin-cores-wrap">
+                            {ps.cor && <span className="admin-cor-label">● {ps.cor}</span>}
                             {[
                               { label: 'Azul', value: 'azul', hex: '#1e40af' },
                               { label: 'Verde', value: 'verde', hex: '#16a34a' },

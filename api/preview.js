@@ -207,6 +207,10 @@ export default async function handler(req, res) {
       ? `\nAJUSTES DE ESTILO (apenas cores, tom e destaque — não adicione novas seções):\n${customPrompt.trim().slice(0, 300)}\n`
       : '';
 
+    const heroBackground = logo
+      ? `HERO BACKGROUND: use a foto real como background do hero: <img src="${logo}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0"> com overlay escuro rgba(0,0,0,0.55) sobre ela. O texto fica por cima com z-index:1.`
+      : `HERO BACKGROUND: use gradiente escuro da cor principal.`;
+
     const prompt1 = `Você é um dev web. Gere APENAS a primeira metade de um site HTML para este negócio.
 
 ${ctx}
@@ -214,7 +218,7 @@ ${extraInstructions}
 Gere exatamente estas seções com CSS inline no <style>:
 1. <!DOCTYPE html><html lang="pt-BR"><head> com <meta charset="UTF-8">, @import Montserrat+Open Sans, reset CSS, variáveis de cor
 2. NAVBAR fixa: nome da empresa bold à esquerda + links (Sobre,Serviços,Galeria,Depoimentos) + botão WhatsApp verde
-3. HERO: fundo gradiente escuro, h1 maiúsculas impactante com palavra colorida, subtítulo, botão WhatsApp verde, 3 stats (clientes/anos/satisfação)
+3. HERO: ${heroBackground} h1 maiúsculas impactante com palavra colorida, subtítulo, botão WhatsApp verde, 3 stats (clientes/anos/satisfação)
 4. SOBRE: 2 colunas — parágrafo sobre a empresa + 3 diferenciais com emoji e texto curto
 
 IMPORTANTE: Termine em </section> após o Sobre. NÃO feche </body> nem </html>. Retorne APENAS o HTML sem explicações.`;
