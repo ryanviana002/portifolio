@@ -467,7 +467,7 @@
 .admin-prospects-fechar:hover { color: #ff007f; }
 
 .admin-prospects-lista {
-  max-height: 320px;
+  max-height: 70vh;
   overflow-y: auto;
 }
 
