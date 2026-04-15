@@ -292,9 +292,7 @@ export default function Admin() {
       });
       updateProspect(pid, { status: 'pronto', link: saveData.url, nome });
       salvarEAtualizar(saveData.id || saveData.url.split('/').pop(), nome, genData.dados?.categoria || checkData.categoria, saveData.url, Date.now(), pid);
-      const waNum = prospectStatus[pid]?.waNum || checkData.waNum || null;
-      const msg = encodeURIComponent(msgWa(nome, saveData.url));
-      window.open(`https://wa.me/${waNum || WA_RYAN}?text=${msg}`, '_blank');
+      // WA aberto manualmente pelos botões
     } catch(e) {
       updateProspect(pid, { status: 'erro', erro: e.message || 'Erro desconhecido' });
     }
@@ -459,6 +457,7 @@ export default function Admin() {
                                 window.open(`https://wa.me/${WA_RYAN}?text=${msg}`, '_blank');
                                 setProspects(prev => prev.filter(x => x.id !== p.id));
                               }}>WA Ryan</button>
+                              <button className="admin-mini-btn" onClick={() => setProspects(prev => prev.filter(x => x.id !== p.id))}>Dispensar</button>
                             </>
                           ) : processando ? (
                             <div className="admin-row-status">
