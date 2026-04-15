@@ -14,7 +14,7 @@ async function buscarPagina(query, pageToken) {
     headers: {
       'Content-Type': 'application/json',
       'X-Goog-Api-Key': PLACES_KEY,
-      'X-Goog-FieldMask': 'places.id,places.displayName,places.primaryTypeDisplayName,places.formattedAddress,places.websiteUri,places.nationalPhoneNumber,places.rating,places.userRatingCount,places.businessStatus,places.googleMapsUri,places.photos,nextPageToken',
+      'X-Goog-FieldMask': 'places.id,places.displayName,places.primaryTypeDisplayName,places.formattedAddress,places.websiteUri,places.nationalPhoneNumber,places.rating,places.userRatingCount,places.businessStatus,places.googleMapsUri,places.photos',
     },
     body: JSON.stringify(body),
   });
@@ -42,7 +42,7 @@ export default async function handler(req, res) {
     for (let i = 0; i < 3; i++) {
       const data = await buscarPagina(query.trim(), pageToken);
       if (data.places) todos = todos.concat(data.places);
-      pageToken = data.nextPageToken || null;
+      pageToken = data.nextPageToken || data.next_page_token || null;
       if (!pageToken) break;
       await new Promise(r => setTimeout(r, 500)); // pequena pausa entre páginas
     }
@@ -55,8 +55,10 @@ export default async function handler(req, res) {
         const foto = p.photos?.[0]?.name
           ? `https://places.googleapis.com/v1/${p.photos[0].name}/media?maxWidthPx=200&key=${PLACES_KEY}`
           : null;
+        // A nova Places API pode retornar id com prefixo "places/"
+        const placeId = p.id?.replace(/^places\//, '') || p.id;
         return {
-          id: p.id,
+          id: placeId,
           nome: p.displayName?.text || '',
           categoria: p.primaryTypeDisplayName?.text || '',
           endereco: p.formattedAddress || '',
