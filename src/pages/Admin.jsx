@@ -374,7 +374,7 @@ export default function Admin() {
             <form className="admin-busca-form" onSubmit={handleBuscar}>
               <input
                 className="admin-busca-input"
-                placeholder="Ex: barbearia Campinas, restaurante Santo André..."
+                placeholder="Ex: barbearia, restaurante, salão de beleza..."
                 value={busca}
                 onChange={e => setBusca(e.target.value)}
               />
