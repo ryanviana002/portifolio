@@ -406,6 +406,7 @@ export default function Admin() {
                     return (
                       <div key={p.id} className={`admin-prospect-row${ps.status === 'pronto' ? ' pronto' : ''}`}>
                         <div className="admin-prospect-row-top">
+                        {p.foto && <img src={p.foto} alt={p.nome} className="admin-prospect-foto" />}
                         <div className="admin-prospect-info">
                           <span className="admin-prospect-nome">{p.nome}</span>
                           <span className="admin-prospect-cat">{p.categoria}</span>

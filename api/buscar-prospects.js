@@ -14,7 +14,7 @@ async function buscarPagina(query, pageToken) {
     headers: {
       'Content-Type': 'application/json',
       'X-Goog-Api-Key': PLACES_KEY,
-      'X-Goog-FieldMask': 'places.id,places.displayName,places.primaryTypeDisplayName,places.formattedAddress,places.websiteUri,places.nationalPhoneNumber,places.rating,places.userRatingCount,places.businessStatus,places.googleMapsUri,nextPageToken',
+      'X-Goog-FieldMask': 'places.id,places.displayName,places.primaryTypeDisplayName,places.formattedAddress,places.websiteUri,places.nationalPhoneNumber,places.rating,places.userRatingCount,places.businessStatus,places.googleMapsUri,places.photos,nextPageToken',
     },
     body: JSON.stringify(body),
   });
@@ -52,6 +52,9 @@ export default async function handler(req, res) {
       .filter(p => !p.websiteUri && p.businessStatus === 'OPERATIONAL' && temWA(p.nationalPhoneNumber))
       .map(p => {
         const digits = p.nationalPhoneNumber.replace(/\D/g, '');
+        const foto = p.photos?.[0]?.name
+          ? `https://places.googleapis.com/v1/${p.photos[0].name}/media?maxWidthPx=200&key=${PLACES_KEY}`
+          : null;
         return {
           id: p.id,
           nome: p.displayName?.text || '',
@@ -62,6 +65,7 @@ export default async function handler(req, res) {
           avaliacao: p.rating || null,
           numAvaliacoes: p.userRatingCount || 0,
           mapsUrl: p.googleMapsUri || `https://www.google.com/maps/place/?q=place_id:${p.id}`,
+          foto,
         };
       })
       .sort((a, b) => b.numAvaliacoes - a.numAvaliacoes);
