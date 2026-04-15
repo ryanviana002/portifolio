@@ -56,6 +56,7 @@ export default function Admin() {
   const [modelo, setModelo] = useState(() => localStorage.getItem('rdc_modelo') || 'haiku');
   const [aba, setAba] = useState('buscar');
   const [busca, setBusca] = useState('');
+  const [bairro, setBairro] = useState('');
   const [prospects, setProspects] = useState([]);
   const [buscando, setBuscando] = useState(false);
   const [prospectStatus, setProspectStatus] = useState({}); // { [id]: { status, link, nome, erro } }
@@ -245,7 +246,7 @@ export default function Admin() {
       const r = await fetch('/api/buscar-prospects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: busca.trim() }),
+        body: JSON.stringify({ query: busca.trim(), bairro: bairro.trim() }),
       });
       const data = await r.json();
       setProspects(Array.isArray(data) ? data : []);
@@ -375,9 +376,15 @@ export default function Admin() {
             <form className="admin-busca-form" onSubmit={handleBuscar}>
               <input
                 className="admin-busca-input"
-                placeholder="Ex: barbearia, restaurante, salão de beleza..."
+                placeholder="Categoria: barbearia, restaurante..."
                 value={busca}
                 onChange={e => setBusca(e.target.value)}
+              />
+              <input
+                className="admin-busca-input admin-busca-bairro"
+                placeholder="Bairro (opcional)"
+                value={bairro}
+                onChange={e => setBairro(e.target.value)}
               />
               <button className="admin-busca-btn" type="submit" disabled={buscando || !busca.trim()}>
                 {buscando ? 'Buscando...' : 'Buscar sem site'}

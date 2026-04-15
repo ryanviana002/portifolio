@@ -1,9 +1,9 @@
 const PLACES_KEY = process.env.GOOGLE_PLACES_API_KEY;
 const CIDADE_FIXA = 'Campinas SP';
 
-async function buscarPagina(query, pageToken) {
+async function buscarPagina(query, pageToken, localidade) {
   const body = {
-    textQuery: `${query} ${CIDADE_FIXA}`,
+    textQuery: `${query} ${localidade || CIDADE_FIXA}`,
     languageCode: 'pt-BR',
     maxResultCount: 20,
   };
@@ -31,7 +31,7 @@ function temWA(phone) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { query } = req.body;
+  const { query, bairro } = req.body;
   if (!query?.trim()) return res.status(400).json({ error: 'Query obrigatória' });
 
   try {
@@ -40,7 +40,8 @@ export default async function handler(req, res) {
 
     // Busca até 3 páginas (60 resultados)
     for (let i = 0; i < 3; i++) {
-      const data = await buscarPagina(query.trim(), pageToken);
+      const localidade = bairro?.trim() ? `${bairro.trim()} ${CIDADE_FIXA}` : CIDADE_FIXA;
+      const data = await buscarPagina(query.trim(), pageToken, localidade);
       if (data.places) todos = todos.concat(data.places);
       pageToken = data.nextPageToken || data.next_page_token || null;
       if (!pageToken) break;

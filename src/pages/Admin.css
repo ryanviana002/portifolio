@@ -403,6 +403,10 @@
   gap: 10px;
 }
 
+.admin-busca-bairro {
+  flex: 0 0 180px;
+}
+
 .admin-busca-input {
   flex: 1;
   background: rgba(255,255,255,0.05);
