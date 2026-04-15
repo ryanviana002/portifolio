@@ -295,8 +295,6 @@ export default function Admin() {
       const waNum = prospectStatus[pid]?.waNum || checkData.waNum || null;
       const msg = encodeURIComponent(msgWa(nome, saveData.url));
       window.open(`https://wa.me/${waNum || WA_RYAN}?text=${msg}`, '_blank');
-      // Remove da lista após abrir WA
-      setProspects(prev => prev.filter(p => p.id !== pid));
     } catch(e) {
       updateProspect(pid, { status: 'erro', erro: e.message || 'Erro desconhecido' });
     }
