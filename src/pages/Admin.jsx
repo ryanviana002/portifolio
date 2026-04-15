@@ -100,11 +100,13 @@ export default function Admin() {
   const update = (id, patch) =>
     setLinhas(prev => prev.map(l => l.id === id ? { ...l, ...patch } : l));
 
-  const salvarEAtualizar = (previewId, nome, categoria, link, createdAt) => {
-    const item = { previewId, nome, categoria, link, createdAt };
+  const salvarEAtualizar = (previewId, nome, categoria, link, createdAt, prospectId) => {
+    const item = { previewId, nome, categoria, link, createdAt, prospectId: prospectId || null };
     salvarHistorico(item);
     setHistorico(lerHistorico());
   };
+
+  const prospectosJaGerados = new Set(historico.map(h => h.prospectId).filter(Boolean));
 
   const handleGerar = async (id) => {
     const linha = linhas.find(l => l.id === id);
@@ -289,10 +291,12 @@ export default function Admin() {
         return d;
       });
       updateProspect(pid, { status: 'pronto', link: saveData.url, nome });
-      salvarEAtualizar(saveData.id || saveData.url.split('/').pop(), nome, genData.dados?.categoria || checkData.categoria, saveData.url, Date.now());
+      salvarEAtualizar(saveData.id || saveData.url.split('/').pop(), nome, genData.dados?.categoria || checkData.categoria, saveData.url, Date.now(), pid);
       const waNum = prospectStatus[pid]?.waNum || checkData.waNum || null;
       const msg = encodeURIComponent(msgWa(nome, saveData.url));
       window.open(`https://wa.me/${waNum || WA_RYAN}?text=${msg}`, '_blank');
+      // Remove da lista após abrir WA
+      setProspects(prev => prev.filter(p => p.id !== pid));
     } catch(e) {
       updateProspect(pid, { status: 'erro', erro: e.message || 'Erro desconhecido' });
     }
@@ -396,7 +400,7 @@ export default function Admin() {
                   <button className="admin-prospects-fechar" onClick={() => setProspects([])}>✕</button>
                 </div>
                 <div className="admin-prospects-lista">
-                  {prospects.map(p => {
+                  {prospects.filter(p => !prospectosJaGerados.has(p.id)).map(p => {
                     const ps = prospectStatus[p.id] || {};
                     const processando = ['checando','gerando','salvando'].includes(ps.status);
                     return (
@@ -448,11 +452,13 @@ export default function Admin() {
                                 <button className="admin-mini-btn admin-mini-wa" onClick={() => {
                                   const msg = encodeURIComponent(msgWa(ps.nome, ps.link));
                                   window.open(`https://wa.me/${ps.waNum}?text=${msg}`, '_blank');
+                                  setProspects(prev => prev.filter(x => x.id !== p.id));
                                 }}>WA cliente</button>
                               )}
                               <button className="admin-mini-btn admin-mini-wa-ryan" onClick={() => {
                                 const msg = encodeURIComponent(msgWa(ps.nome, ps.link));
                                 window.open(`https://wa.me/${WA_RYAN}?text=${msg}`, '_blank');
+                                setProspects(prev => prev.filter(x => x.id !== p.id));
                               }}>WA Ryan</button>
                             </>
                           ) : processando ? (
