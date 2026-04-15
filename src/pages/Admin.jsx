@@ -106,7 +106,8 @@ export default function Admin() {
     setHistorico(lerHistorico());
   };
 
-  const prospectosJaGerados = new Set(historico.map(h => h.prospectId).filter(Boolean));
+  const [dispensados, setDispensados] = useState(new Set());
+  const dispensar = (id) => setDispensados(prev => new Set([...prev, id]));
 
   const handleGerar = async (id) => {
     const linha = linhas.find(l => l.id === id);
@@ -396,7 +397,7 @@ export default function Admin() {
                   <button className="admin-prospects-fechar" onClick={() => setProspects([])}>✕</button>
                 </div>
                 <div className="admin-prospects-lista">
-                  {prospects.filter(p => !prospectosJaGerados.has(p.id)).map(p => {
+                  {prospects.filter(p => !dispensados.has(p.id)).map(p => {
                     const ps = prospectStatus[p.id] || {};
                     const processando = ['checando','gerando','salvando'].includes(ps.status);
                     return (
@@ -449,15 +450,15 @@ export default function Admin() {
                                 <button className="admin-mini-btn admin-mini-wa" onClick={() => {
                                   const msg = encodeURIComponent(msgWa(ps.nome, ps.link));
                                   window.open(`https://wa.me/${ps.waNum}?text=${msg}`, '_blank');
-                                  setProspects(prev => prev.filter(x => x.id !== p.id));
+                                  dispensar(p.id);
                                 }}>WA cliente</button>
                               )}
                               <button className="admin-mini-btn admin-mini-wa-ryan" onClick={() => {
                                 const msg = encodeURIComponent(msgWa(ps.nome, ps.link));
                                 window.open(`https://wa.me/${WA_RYAN}?text=${msg}`, '_blank');
-                                setProspects(prev => prev.filter(x => x.id !== p.id));
+                                dispensar(p.id);
                               }}>WA Ryan</button>
-                              <button className="admin-mini-btn" onClick={() => setProspects(prev => prev.filter(x => x.id !== p.id))}>Dispensar</button>
+                              <button className="admin-mini-btn" onClick={() => dispensar(p.id)}>Dispensar</button>
                             </>
                           ) : processando ? (
                             <div className="admin-row-status">
