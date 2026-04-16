@@ -211,36 +211,66 @@ export default async function handler(req, res) {
       ? `HERO BACKGROUND: use a foto real como background do hero: <img src="${logo}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0"> com overlay escuro rgba(0,0,0,0.55) sobre ela. O texto fica por cima com z-index:1.`
       : `HERO BACKGROUND: use gradiente escuro da cor principal.`;
 
-    const prompt = `Dev web. Gere site HTML completo para este negócio. Retorne APENAS o HTML.
+    const prompt1 = `Você é um dev web. Gere APENAS a primeira metade de um site HTML para este negócio.
 
-${ctx}${extraInstructions ? '\n' + extraInstructions : ''}${reviewsText ? '\nDEPOIMENTOS: ' + reviewsText : ''}${galeria.length ? '\nFOTOS: ' + galeria.slice(0,3).join(' | ') : ''}
+${ctx}
+${extraInstructions}
+Gere exatamente estas seções com CSS inline no <style>:
+1. <!DOCTYPE html><html lang="pt-BR"><head> com <meta charset="UTF-8">, @import Montserrat+Open Sans, reset CSS, variáveis de cor
+2. NAVBAR fixa: nome da empresa bold à esquerda + links (Sobre,Serviços,Galeria,Depoimentos) + botão WhatsApp verde
+3. HERO: ${heroBackground} h1 maiúsculas impactante com palavra colorida, subtítulo, botão WhatsApp verde, 3 stats (clientes/anos/satisfação)
+4. SOBRE: 2 colunas — parágrafo sobre a empresa + 3 diferenciais com emoji e texto curto
 
-ESTRUTURA (CSS tudo no <style> do <head>, variáveis de cor, @import Montserrat+Open Sans):
-1. NAVBAR fixa: nome bold + links Sobre/Serviços/Galeria/Depoimentos + botão WA verde
-2. HERO: ${heroBackground} h1 maiúsculas com palavra colorida, subtítulo, botão WA verde, 3 stats
-3. SOBRE: 2 colunas — texto da empresa + 3 diferenciais com emoji
-4. SERVIÇOS: 4 cards grid com emoji, nome e descrição para ${dados.categoria}
-5. GALERIA: grid 3 colunas ${galeria.length ? 'com fotos reais <img src="..." style="width:100%;height:200px;object-fit:cover;border-radius:8px">' : 'placeholders coloridos 200px'}
-6. DEPOIMENTOS: 3 cards ⭐ ${dados.reviews.length ? '(use os reais)' : '(crie realistas)'}
-7. FOOTER escuro: nome, endereço, tel, "Site criado por RDCreator | ryancreator.dev"
-8. Botão WA flutuante fixed bottom:24px right:24px #25d366
-Feche com </body></html>.`;
+IMPORTANTE: Termine em </section> após o Sobre. NÃO feche </body> nem </html>. Retorne APENAS o HTML sem explicações.`;
 
-    const msg = await client.messages.create({
-      model: modelId,
-      max_tokens: 5000,
-      messages: [{ role: 'user', content: prompt }],
-    });
+    const prompt2 = `Você é um dev web. Gere APENAS a segunda metade de um site HTML para este negócio.
 
-    const htmlGerado = msg.content[0].text.replace(/^```html\n?/, '').replace(/\n?```$/, '');
+${ctx}
+${extraInstructions}
+${reviewsText ? `DEPOIMENTOS REAIS: ${reviewsText}` : ''}
+${galeria.length ? `FOTOS: ${galeria.slice(0,3).join(' | ')}` : ''}
 
-    // Garante charset UTF-8
-    const htmlComCharset = htmlGerado.replace(/<head([^>]*)>/i, '<head$1><meta charset="UTF-8">');
+Gere exatamente estas seções (sem <html><head><body> — apenas as sections e o fechamento):
+1. SERVIÇOS: 4 cards em grid com emoji, nome e descrição curta para ${dados.categoria}
+2. GALERIA: grid 3 colunas, ${galeria.length ? 'use as fotos reais com <img src="..." style="width:100%;height:200px;object-fit:cover;border-radius:8px">' : 'placeholders coloridos height:200px'}, sem texto
+3. DEPOIMENTOS: 3 cards com ⭐ e texto curto ${dados.reviews.length ? '(use os reais)' : '(crie realistas)'}
+4. FOOTER: fundo escuro, nome da empresa, endereço, telefone, "Site criado por RDCreator | ryancreator.dev"
+5. Botão WhatsApp flutuante fixo bottom:24px right:24px cor #25d366
+6. Feche com </body></html>
+
+CSS das novas seções no <style> no início desta parte. Retorne APENAS o HTML sem explicações.`;
+
+    // Executa as 2 chamadas em paralelo
+    const [msg1, msg2] = await Promise.all([
+      client.messages.create({
+        model: modelId,
+        max_tokens: 4096,
+        messages: [{ role: 'user', content: prompt1 }],
+      }),
+      client.messages.create({
+        model: modelId,
+        max_tokens: 4096,
+        messages: [{ role: 'user', content: prompt2 }],
+      }),
+    ]);
+
+    const parte1 = msg1.content[0].text.replace(/^```html\n?/, '').replace(/\n?```$/, '');
+    const parte2 = msg2.content[0].text.replace(/^```html\n?/, '').replace(/\n?```$/, '');
+
+    // Garante charset UTF-8 (evita encoding quebrado em pt-BR)
+    const parte1WithCharset = parte1.replace(
+      /<head([^>]*)>/i,
+      '<head$1><meta charset="UTF-8">'
+    );
+
+    // Remove o fechamento </body></html> da parte1 se existir, e junta
+    const parte1Clean = parte1WithCharset.replace(/<\/body>\s*<\/html>\s*$/i, '');
+    const mockupHtml = parte1Clean + '\n' + parte2;
 
     // Garante fechamento do HTML se o modelo cortou
-    const htmlFinal = /<\/html>/i.test(htmlComCharset)
-      ? htmlComCharset
-      : htmlComCharset + '\n</body></html>';
+    const htmlFinal = /<\/html>/i.test(mockupHtml)
+      ? mockupHtml
+      : mockupHtml + '\n</body></html>';
 
     return res.status(200).json({ html: htmlFinal, dados });
   } catch (err) {
