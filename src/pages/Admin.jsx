@@ -10,8 +10,41 @@ const WA_RYAN = '5519994175385';
 const HISTORICO_KEY = 'rdc_historico_previews';
 const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24h
 
+const CORES = [
+  { label: 'Azul', value: 'azul', hex: '#1e40af' },
+  { label: 'Verde', value: 'verde', hex: '#16a34a' },
+  { label: 'Vermelho', value: 'vermelho', hex: '#dc2626' },
+  { label: 'Laranja', value: 'laranja', hex: '#ea580c' },
+  { label: 'Amarelo', value: 'amarelo', hex: '#ca8a04' },
+  { label: 'Rosa', value: 'rosa', hex: '#db2777' },
+  { label: 'Roxo', value: 'roxo', hex: '#7c3aed' },
+  { label: 'Dourado', value: 'dourado', hex: '#b45309' },
+  { label: 'Marrom', value: 'marrom', hex: '#78350f' },
+  { label: 'Cinza', value: 'cinza', hex: '#4b5563' },
+  { label: 'Preto', value: 'preto', hex: '#111827' },
+  { label: 'Branco', value: 'branco', hex: '#e5e7eb' },
+];
+
+function SeletorCores({ corSelecionada, onChange, disabled }) {
+  return (
+    <div className="admin-cores-wrap">
+      {corSelecionada && <span className="admin-cor-label">● {corSelecionada}</span>}
+      {CORES.map(cor => (
+        <button
+          key={cor.value}
+          className={`admin-cor-btn${corSelecionada === cor.value ? ' selected' : ''}`}
+          style={{ '--cor': cor.hex }}
+          onClick={() => onChange(corSelecionada === cor.value ? '' : cor.value, corSelecionada === cor.value ? '' : `use ${cor.label.toLowerCase()} como cor predominante do site`)}
+          title={cor.label}
+          disabled={disabled}
+        />
+      ))}
+    </div>
+  );
+}
+
 function novaLinha() {
-  return { id: gerarId(), url: '', status: 'idle', nome: '', categoria: '', link: '', erro: '', waNum: null, prompt: '', promptOpen: false };
+  return { id: gerarId(), url: '', status: 'idle', nome: '', categoria: '', link: '', erro: '', waNum: null, prompt: '', promptOpen: false, cor: '' };
 }
 
 function msgWa(nome, link) {
@@ -419,34 +452,10 @@ export default function Admin() {
                           {p.telefone && <span className="admin-prospect-tel">{p.telefone}</span>}
                         </div>
                         {!processando && ps.status !== 'pronto' && (
-                          <div className="admin-cores-wrap">
-                            {ps.cor && <span className="admin-cor-label">● {ps.cor}</span>}
-                            {[
-                              { label: 'Azul', value: 'azul', hex: '#1e40af' },
-                              { label: 'Verde', value: 'verde', hex: '#16a34a' },
-                              { label: 'Vermelho', value: 'vermelho', hex: '#dc2626' },
-                              { label: 'Laranja', value: 'laranja', hex: '#ea580c' },
-                              { label: 'Amarelo', value: 'amarelo', hex: '#ca8a04' },
-                              { label: 'Rosa', value: 'rosa', hex: '#db2777' },
-                              { label: 'Roxo', value: 'roxo', hex: '#7c3aed' },
-                              { label: 'Dourado', value: 'dourado', hex: '#b45309' },
-                              { label: 'Marrom', value: 'marrom', hex: '#78350f' },
-                              { label: 'Cinza', value: 'cinza', hex: '#4b5563' },
-                              { label: 'Preto', value: 'preto', hex: '#111827' },
-                              { label: 'Branco', value: 'branco', hex: '#e5e7eb' },
-                            ].map(cor => (
-                              <button
-                                key={cor.value}
-                                className={`admin-cor-btn${ps.cor === cor.value ? ' selected' : ''}`}
-                                style={{ '--cor': cor.hex }}
-                                onClick={() => updateProspect(p.id, {
-                                  cor: ps.cor === cor.value ? '' : cor.value,
-                                  prompt: ps.cor === cor.value ? '' : `use ${cor.label.toLowerCase()} como cor predominante do site`,
-                                })}
-                                title={cor.label}
-                              />
-                            ))}
-                          </div>
+                          <SeletorCores
+                            corSelecionada={ps.cor || ''}
+                            onChange={(cor, prompt) => updateProspect(p.id, { cor, prompt })}
+                          />
                         )}
                         <div className="admin-prospect-btns">
                           {ps.status === 'pronto' ? (
@@ -511,22 +520,11 @@ export default function Admin() {
                     disabled={isProcessando(linha.status)}
                     onKeyDown={e => e.key === 'Enter' && handleGerar(linha.id)}
                   />
-                  <button
-                    className={`admin-prompt-toggle${linha.promptOpen ? ' active' : ''}${linha.prompt?.trim() ? ' has-value' : ''}`}
-                    onClick={() => update(linha.id, { promptOpen: !linha.promptOpen })}
+                  <SeletorCores
+                    corSelecionada={linha.cor || ''}
+                    onChange={(cor, prompt) => update(linha.id, { cor, prompt })}
                     disabled={isProcessando(linha.status)}
-                  >⚙ prompt{linha.prompt?.trim() ? ' •' : ''}</button>
-                  {linha.promptOpen && (
-                    <textarea
-                      className="admin-prompt-input"
-                      placeholder="Ex: cores azul e dourado, tom elegante... (máx 300 chars)"
-                      value={linha.prompt}
-                      onChange={e => update(linha.id, { prompt: e.target.value.slice(0, 300) })}
-                      disabled={isProcessando(linha.status)}
-                      maxLength={300}
-                      rows={2}
-                    />
-                  )}
+                  />
                   {linha.status === 'pronto' && linha.nome && (
                     <div className="admin-row-result">
                       <span className="admin-row-nome">{linha.nome}</span>
