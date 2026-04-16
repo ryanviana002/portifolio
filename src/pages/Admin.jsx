@@ -8,7 +8,7 @@ function gerarId() {
 
 const WA_RYAN = '5519994175385';
 const HISTORICO_KEY = 'rdc_historico_previews';
-const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24h
+const EXPIRY_MS = 3 * 24 * 60 * 60 * 1000; // 72h
 
 const CORES = [
   { label: 'Azul', value: 'azul', hex: '#1e40af' },
@@ -48,7 +48,7 @@ function novaLinha() {
 }
 
 function msgWa(nome, link) {
-  return `Olá, tudo bem?\n\nAqui é o Ryan, da RDCreator.\n\nEstava analisando a *${nome}*, no Google Maps, mas não encontrei um site do seu negócio. Vi que tinha muito potencial e montei um modelo baseado no que vocês fazem:\n\n${link}\n\nÉ um preview demonstrativo (não é o site final), mas já mostra como vocês podem se posicionar melhor online e atrair mais clientes.\n\nDeixei disponível por 24h\n\nQuero te ouvir — o que achou?`;
+  return `Olá, tudo bem?\n\nAqui é o Ryan, da RDCreator.\n\nEstava analisando a *${nome}*, no Google Maps, mas não encontrei um site do seu negócio. Vi que tinha muito potencial e montei um modelo baseado no que vocês fazem:\n\n${link}\n\nÉ um preview demonstrativo (não é o site final), mas já mostra como vocês podem se posicionar melhor online e atrair mais clientes.\n\nDeixei disponível por 3 dias\n\nQuero te ouvir — o que achou?`;
 }
 
 const statusLabel = {

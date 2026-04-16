@@ -77,7 +77,7 @@ export default async function handler(req, res) {
       'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
       'Prefer': 'return=minimal',
     },
-    body: JSON.stringify({ id, html: htmlFinal, nome, categoria, views: 0 }),
+    body: JSON.stringify({ id, html: htmlFinal, nome, categoria, views: 0, expires_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() }),
   });
 
   if (!r.ok) {
