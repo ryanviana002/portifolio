@@ -709,6 +709,13 @@
 }
 .admin-hist-wa:hover { background: rgba(37,211,102,0.15); }
 
+.admin-hist-interesse {
+  background: rgba(0,242,254,0.08);
+  border-color: rgba(0,242,254,0.3);
+  color: #00f2fe;
+}
+.admin-hist-interesse:hover { background: rgba(0,242,254,0.18); }
+
 .admin-hist-del {
   background: none;
   border: none;

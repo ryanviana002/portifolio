@@ -138,8 +138,8 @@ export default function Admin() {
   const update = (id, patch) =>
     setLinhas(prev => prev.map(l => l.id === id ? { ...l, ...patch } : l));
 
-  const salvarEAtualizar = (previewId, nome, categoria, link, createdAt, prospectId) => {
-    const item = { previewId, nome, categoria, link, createdAt, prospectId: prospectId || null };
+  const salvarEAtualizar = (previewId, nome, categoria, link, createdAt, prospectId, waNum) => {
+    const item = { previewId, nome, categoria, link, createdAt, prospectId: prospectId || null, waNum: waNum || null };
     salvarHistorico(item);
     setHistorico(lerHistorico());
   };
@@ -189,7 +189,7 @@ export default function Admin() {
 
       const waNumFinal = linhas.find(l => l.id === id)?.waNum || null;
       update(id, { status: 'pronto', link: saveData.url, nome });
-      salvarEAtualizar(saveData.id || saveData.url.split('/').pop(), nome, genData.dados?.categoria || checkData.categoria, saveData.url, Date.now());
+      salvarEAtualizar(saveData.id || saveData.url.split('/').pop(), nome, genData.dados?.categoria || checkData.categoria, saveData.url, Date.now(), null, waNumFinal);
 
       const msg = encodeURIComponent(msgWa(nome, saveData.url));
       const waTarget = waNumFinal || WA_RYAN;
@@ -255,7 +255,7 @@ export default function Admin() {
       });
 
       update(id, { status: 'pronto', link: saveData.url, nome });
-      salvarEAtualizar(saveData.id || saveData.url.split('/').pop(), nome, genData.dados?.categoria || checkData.categoria, saveData.url, Date.now());
+      salvarEAtualizar(saveData.id || saveData.url.split('/').pop(), nome, genData.dados?.categoria || checkData.categoria, saveData.url, Date.now(), null, checkData.waNum || null);
     } catch (e) {
       update(id, { status: 'erro', erro: e.message || 'Erro desconhecido' });
     }
@@ -330,7 +330,8 @@ export default function Admin() {
         return d;
       });
       updateProspect(pid, { status: 'pronto', link: saveData.url, nome });
-      salvarEAtualizar(saveData.id || saveData.url.split('/').pop(), nome, genData.dados?.categoria || checkData.categoria, saveData.url, Date.now(), pid);
+      const waNumFinalP = prospectStatus[pid]?.waNum || checkData.waNum || null;
+      salvarEAtualizar(saveData.id || saveData.url.split('/').pop(), nome, genData.dados?.categoria || checkData.categoria, saveData.url, Date.now(), pid, waNumFinalP);
       // WA aberto manualmente pelos botões
     } catch(e) {
       updateProspect(pid, { status: 'erro', erro: e.message || 'Erro desconhecido' });
@@ -606,10 +607,22 @@ export default function Admin() {
                             ? <span className="admin-hist-expirado">expirado</span>
                             : <a href={h.link + '?skip=1'} target="_blank" rel="noreferrer" className="admin-mini-btn admin-mini-preview">Ver</a>
                           }
+                          {h.waNum && (
+                            <>
+                              <button className="admin-hist-wa" onClick={() => {
+                                const msg = encodeURIComponent(msgWa(h.nome, h.link));
+                                window.open(`https://wa.me/${h.waNum}?text=${msg}`, '_blank');
+                              }}>1º WA</button>
+                              <button className="admin-hist-wa admin-hist-interesse" onClick={() => {
+                                const msg = encodeURIComponent(msgWa2(h.nome, h.link));
+                                window.open(`https://wa.me/${h.waNum}?text=${msg}`, '_blank');
+                              }}>Interesse</button>
+                            </>
+                          )}
                           <button className="admin-hist-wa" onClick={() => {
                             const msg = encodeURIComponent(msgWa(h.nome, h.link));
                             window.open(`https://wa.me/${WA_RYAN}?text=${msg}`, '_blank');
-                          }}>WA</button>
+                          }}>Ryan</button>
                           <button className="admin-hist-del" onClick={() => removerHistorico(h.previewId)}>✕</button>
                         </div>
                       </div>
