@@ -8,6 +8,7 @@
   },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/delega", "destination": "/delega.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
