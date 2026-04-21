@@ -39,16 +39,11 @@ export default async function handler(req, res) {
   // Notifica Ryan no WA (não notifica se for o admin via ?skip=1)
   if (!skip) {
     const key = process.env.CALLMEBOT_KEY;
-    console.log('[preview-view] CALLMEBOT_KEY:', key ? `${key.slice(0,3)}***` : 'AUSENTE');
     if (key) {
       const emoji = novasViews === 1 ? '👀' : '🔁';
       const msg = encodeURIComponent(`${emoji} Preview aberto! (${novasViews}x)\n*${preview.nome || 'Negócio'}*\nhttps://ryancreator.dev/r/${id}`);
-      const waUrl = `https://api.callmebot.com/whatsapp.php?phone=5519994175385&text=${msg}&apikey=${key}`;
-      console.log('[preview-view] WA URL:', waUrl.slice(0, 80));
-      fetch(waUrl)
-        .then(r => r.text())
-        .then(t => console.log('[preview-view] CallMeBot response:', t.slice(0, 100)))
-        .catch(e => console.log('[preview-view] CallMeBot error:', e.message));
+      fetch(`https://api.callmebot.com/whatsapp.php?phone=5519994175385&text=${msg}&apikey=${key}`)
+        .catch(() => {});
     }
   }
 
