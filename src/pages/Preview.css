@@ -362,7 +362,10 @@
   z-index: 9999;
   padding: 24px;
   animation: fadeIn 0.3s ease;
+  cursor: auto;
 }
+.preview-popup-overlay * { cursor: auto; }
+.preview-popup-btn, .preview-popup-close, .preview-confirm-sim, .preview-confirm-nao, .preview-popup-wa { cursor: pointer !important; }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
