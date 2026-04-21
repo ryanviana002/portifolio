@@ -491,7 +491,10 @@
   padding: 32px;
   text-align: center;
   animation: fadeIn 0.5s ease;
+  cursor: auto;
 }
+.preview-obrigado-overlay * { cursor: auto; }
+.preview-obrigado-fallback a { cursor: pointer; }
 .preview-obrigado-emoji { font-size: 64px; }
 .preview-obrigado-title { font-size: 32px; font-weight: 900; color: #fff; margin: 0; }
 .preview-obrigado-desc { font-size: 16px; color: rgba(255,255,255,0.5); max-width: 320px; line-height: 1.6; margin: 0; }
