@@ -256,22 +256,23 @@ Gere exatamente estas seções com CSS inline no <style>:
 
 IMPORTANTE: Termine em </section> após o Sobre. NÃO feche </body> nem </html>. Retorne APENAS o HTML sem explicações.`;
 
-    const prompt2 = `Você é um dev web. Gere APENAS a segunda metade de um site HTML para este negócio.
+    const prompt2 = `Dev web: gere a 2ª metade do site (sem html/head/body — só sections + fechamento).
 
 ${ctx}
 ${extraInstructions}
-${reviewsText ? `DEPOIMENTOS REAIS: ${reviewsText}` : ''}
-${galeria.length ? `FOTOS: ${galeria.slice(0,3).join(' | ')}` : ''}
+${reviewsText ? `DEPOIMENTOS: ${reviewsText}` : ''}
+${galeria.length ? `FOTOS: ${galeria.slice(0,2).join(' | ')}` : ''}
 
-Gere exatamente estas seções (sem <html><head><body> — apenas as sections e o fechamento):
-1. SERVIÇOS: 4 cards em grid com emoji, nome e descrição curta para ${dados.categoria}
-2. GALERIA: grid 3 colunas, ${galeria.length ? 'use as fotos reais com <img src="..." style="width:100%;height:200px;object-fit:cover;border-radius:8px">' : 'placeholders coloridos height:200px'}, sem texto
-3. DEPOIMENTOS: 3 cards com ⭐ e texto curto ${dados.reviews.length ? '(use os reais)' : '(crie realistas)'}
-4. FOOTER: fundo escuro, nome da empresa, endereço, telefone, "Site criado por RDCreator | ryancreator.dev"
-5. Botão WhatsApp flutuante fixo bottom:24px right:24px cor #25d366
-6. Feche com </body></html>
+Seções OBRIGATÓRIAS em ordem:
+<style>/* CSS compacto das seções abaixo */</style>
+<section id="servicos">/* 3 cards simples: emoji+nome+descrição 1 linha */</section>
+<section id="galeria">/* ${galeria.length ? '2 fotos reais <img>' : '2 divs coloridas'} lado a lado */</section>
+<section id="depoimentos">/* 2 cards: ⭐⭐⭐⭐⭐ + texto curto + nome */</section>
+<footer>/* 1 linha: nome | endereço | tel | "Site por RDCreator·ryancreator.dev" */</footer>
+<a href="https://wa.me/55${dados.telefone?.replace(/\D/g,'')}" style="position:fixed;bottom:24px;right:24px;background:#25d366;color:#fff;padding:14px 20px;border-radius:999px;font-weight:700;text-decoration:none;z-index:9999;font-size:14px">💬 WhatsApp</a>
+</body></html>
 
-CSS das novas seções no <style> no início desta parte. Retorne APENAS o HTML sem explicações.`;
+CSS compacto, sem repetição. TERMINE com </body></html>. Só HTML, sem explicações.`;
 
     // Executa as 2 chamadas em paralelo
     const [msg1, msg2] = await Promise.all([

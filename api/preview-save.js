@@ -11,7 +11,7 @@ function injetarMarcaDagua(html) {
 #rdc-badge {
   position: fixed;
   bottom: 16px;
-  left: 16px;
+  right: 16px;
   background: rgba(10,10,18,0.85);
   border: 1px solid rgba(255,0,127,0.3);
   border-radius: 8px;
