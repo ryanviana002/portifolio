@@ -60,6 +60,15 @@ const projects = [
   },
   {
     num: '03',
+    tag: 'PRODUTO DIGITAL • LANDING PAGE',
+    title: 'Delega',
+    desc: 'Landing page para app de marketplace de serviços — conecta pessoas com profissionais qualificados para tarefas do dia a dia.',
+    tech: ['HTML', 'Tailwind', 'CSS3'],
+    color: '#D95D00',
+    link: 'https://ryancreator.dev/delega',
+  },
+  {
+    num: '04',
     tag: 'OPEN SOURCE • GITHUB',
     title: 'GitHub — ryanviana002',
     desc: 'Repositório com projetos de desenvolvimento web, sistemas e experimentos. Código aberto, organizado e documentado.',

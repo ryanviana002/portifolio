@@ -469,6 +469,36 @@
 
 .preview-popup-wa:hover { color: #25d366; }
 
+.preview-popup-parcel {
+  display: block;
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  margin-top: 4px;
+}
+.preview-popup-parcel strong { color: rgba(255,255,255,0.6); }
+
+/* Tela de obrigado */
+.preview-obrigado-overlay {
+  position: fixed;
+  inset: 0;
+  background: #0a0a12;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  gap: 16px;
+  padding: 32px;
+  text-align: center;
+  animation: fadeIn 0.5s ease;
+}
+.preview-obrigado-emoji { font-size: 64px; }
+.preview-obrigado-title { font-size: 32px; font-weight: 900; color: #fff; margin: 0; }
+.preview-obrigado-desc { font-size: 16px; color: rgba(255,255,255,0.5); max-width: 320px; line-height: 1.6; margin: 0; }
+.preview-obrigado-wa { display: flex; align-items: center; gap: 10px; color: #25d366; font-weight: 700; font-size: 15px; }
+.preview-obrigado-fallback { font-size: 12px; color: rgba(255,255,255,0.2); margin: 0; }
+.preview-obrigado-fallback a { color: #ff007f; }
+
 /* Popup de confirmação */
 .preview-confirm-popup {
   max-width: 400px;
