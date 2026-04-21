@@ -244,16 +244,27 @@ export default function Preview() {
       setProgressMsg('Prévia pronta!');
       if (!res.ok) throw new Error(data.error);
       const watermark = `
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <style>
   #rdc-banner{position:fixed;top:0;left:0;right:0;z-index:999999;background:linear-gradient(135deg,#ff007f,#d12c96);color:#fff;text-align:center;padding:8px 16px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;}
   #rdc-banner a{color:#fff;text-decoration:underline;}
   #rdc-corner{position:fixed;bottom:80px;left:20px;z-index:999999;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);border:1px solid rgba(255,0,127,0.4);color:#fff;padding:6px 12px;border-radius:999px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;}
   #rdc-corner span{color:#ff007f;}
-  html,body{scroll-behavior:smooth;}
+  html,body{scroll-behavior:smooth;max-width:100%;overflow-x:hidden;}
+  img,video,iframe,table{max-width:100%!important;height:auto;}
   nav,header,[class*="navbar"],[class*="nav-"]{top:36px!important;}
   ::-webkit-scrollbar{width:4px;}
   ::-webkit-scrollbar-track{background:#0a0a12;}
   ::-webkit-scrollbar-thumb{background:#ff007f;border-radius:2px;}
+  @media(max-width:768px){
+    *{box-sizing:border-box;}
+    body{font-size:15px!important;}
+    [class*="container"],[class*="wrapper"],[class*="section"]{padding-left:16px!important;padding-right:16px!important;width:100%!important;max-width:100%!important;}
+    [class*="grid"],[class*="row"],[class*="flex"]{flex-wrap:wrap!important;}
+    [class*="col-"],[class*="column"]{width:100%!important;max-width:100%!important;flex:0 0 100%!important;}
+    h1{font-size:clamp(28px,7vw,48px)!important;}
+    h2{font-size:clamp(22px,5vw,36px)!important;}
+  }
 </style>
 <div id="rdc-banner">🎨 PRÉVIA — <a href="https://ryancreator.dev" target="_blank">ryancreator.dev</a> | Este site ainda não existe. Quer criar o seu?</div>
 <div id="rdc-corner">por <span>RDCreator</span></div>
@@ -426,7 +437,7 @@ export default function Preview() {
             onLoad={() => setIframeReady(true)}
             onMouseEnter={() => { if(cursorRef.current) cursorRef.current.style.display='none'; document.body.style.cursor='auto'; }}
             onMouseLeave={() => { if(cursorRef.current) cursorRef.current.style.display=''; document.body.style.cursor='none'; }}
-            style={{ opacity: iframeReady ? 1 : 0, transition: 'opacity 0.4s ease' }}
+            style={{ opacity: iframeReady ? 1 : 0, transition: 'opacity 0.4s ease', width: '100%' }}
           />
 
           {/* Botão CTA fixo */}

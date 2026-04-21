@@ -48,7 +48,7 @@ function novaLinha() {
 }
 
 function msgWa(nome, link) {
-  return `Oi, tudo bem?\n\nAqui é o Ryan — vi a *${nome}* no Maps e montei algo pra vocês. Posso mandar?`;
+  return `Olá! Aqui é o Ryan, desenvolvedor web da RDCreator. Vi a *${nome}* no Google Maps e já deixei algo pronto pra vocês. Pode ser que goste — posso mandar?`;
 }
 
 function msgWa2(nome, link) {

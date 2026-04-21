@@ -49,6 +49,14 @@ async function extractPlaceId(url) {
     return placeId ? { placeId } : { error: 'not_found' };
   }
 
+  // Fallback: short links que não expandiram — tenta ?q= da URL final
+  const qMatch = finalUrl.match(/[?&]q=([^&]+)/);
+  if (qMatch) {
+    const nome = decodeURIComponent(qMatch[1].replace(/\+/g, ' '));
+    const placeId = await searchPlaceByName(nome);
+    return placeId ? { placeId } : { error: 'not_found' };
+  }
+
   return { error: 'not_found' };
 }
 

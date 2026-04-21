@@ -39,7 +39,6 @@ async function checkRateLimit(ip) {
 }
 
 async function extractPlaceId(url) {
-  // Expande links encurtados
   let finalUrl = url;
   try {
     const r = await fetch(url, {
@@ -49,21 +48,42 @@ async function extractPlaceId(url) {
     finalUrl = r.url;
   } catch {}
 
-  // Tenta extrair place ID da URL
   const placeIdMatch = finalUrl.match(/place_id=([^&]+)/);
   if (placeIdMatch) return placeIdMatch[1];
 
-  // Tenta extrair o nome do lugar da URL para buscar via Text Search
-  const nameMatch = finalUrl.match(/place\/([^/@]+)/);
+  // CID (share.google, goo.gl)
+  const cidMatch = finalUrl.match(/[?&]cid=(\d+)/);
+  if (cidMatch) {
+    const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': PLACES_KEY, 'X-Goog-FieldMask': 'places.id' },
+      body: JSON.stringify({ textQuery: `cid:${cidMatch[1]}`, languageCode: 'pt-BR' }),
+    });
+    const data = await res.json();
+    const id = data.places?.[0]?.id;
+    if (id) return id;
+  }
+
+  const nameMatch = finalUrl.match(/place\/([^/@?]+)/);
   if (nameMatch) {
     const nome = decodeURIComponent(nameMatch[1].replace(/\+/g, ' '));
     return await searchPlaceByName(nome);
   }
 
-  // Tenta extrair coordenadas para busca por nearby
   const coordMatch = finalUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
   if (coordMatch) {
     return await searchPlaceByCoords(coordMatch[1], coordMatch[2]);
+  }
+
+  // Fallback: se ainda é short link (maps.app.goo.gl, goo.gl), tenta buscar via query
+  const isShort = url.includes('maps.app.goo.gl') || url.includes('goo.gl/maps') || url.includes('g.co/kgs');
+  if (isShort) {
+    // Tenta extrair qualquer nome da URL final expandida
+    const anyName = finalUrl.match(/q=([^&]+)/);
+    if (anyName) {
+      const nome = decodeURIComponent(anyName[1].replace(/\+/g, ' '));
+      return await searchPlaceByName(nome);
+    }
   }
 
   return null;
@@ -203,9 +223,22 @@ export default async function handler(req, res) {
 
     const ctx = `NEGÓCIO: ${dados.nome} | ${dados.categoria} | ⭐${dados.avaliacao} (${dados.numAvaliacoes} avaliações) | TEL: ${dados.telefone || ''} | END: ${dados.endereco || ''} | CORES: ${paletaSugerida}`;
 
-    const extraInstructions = customPrompt?.trim()
-      ? `\nAJUSTES DE ESTILO (apenas cores, tom e destaque — não adicione novas seções):\n${customPrompt.trim().slice(0, 300)}\n`
-      : '';
+    // Mapeia nome da cor para hex real
+    const COR_HEX = {
+      'azul': '#1e40af', 'verde': '#16a34a', 'vermelho': '#dc2626',
+      'laranja': '#ea580c', 'amarelo': '#ca8a04', 'rosa': '#db2777',
+      'roxo': '#7c3aed', 'dourado': '#b45309', 'marrom': '#78350f',
+      'cinza': '#4b5563', 'preto': '#111827', 'branco': '#f9fafb',
+    };
+    const corMatch = customPrompt?.match(/use (\w+) como cor/);
+    const corNome = corMatch?.[1];
+    const corHex = corNome ? COR_HEX[corNome] : null;
+
+    const extraInstructions = corHex
+      ? `\nCOR OBRIGATÓRIA: use EXATAMENTE #${corHex.replace('#','')} como cor primária/principal (--color-primary, botões, destaques, navbar, títulos coloridos). Cor secundária pode ser um tom mais escuro ou mais claro desta mesma cor. NÃO use outras cores dominantes.\n`
+      : customPrompt?.trim()
+        ? `\nAJUSTES DE ESTILO:\n${customPrompt.trim().slice(0, 300)}\n`
+        : '';
 
     const heroBackground = logo
       ? `HERO BACKGROUND: use a foto real como background do hero: <img src="${logo}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0"> com overlay escuro rgba(0,0,0,0.55) sobre ela. O texto fica por cima com z-index:1.`
