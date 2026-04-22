@@ -14,20 +14,25 @@ const TESTIMONIALS = [
 ];
 
 const WORKS = [
-  { tag: 'Web Design', title: 'AutoAirShop', desc: 'Site institucional para empresa de ar-condicionado automotivo.', sub: 'Mais acessos e contatos em 30 dias.', img: '/preview-autoairshop.png', link: '#' },
-  { tag: 'Web Design', title: 'Genuína', desc: 'Presença digital completa para empresa local.', sub: 'Site com foco em contato e vendas.', img: '/preview-genuina.png', link: '#' },
-  { tag: 'Sistema Web', title: 'Preview AI', desc: 'Geração de sites com IA para prospecção via Google Maps.', sub: 'Automatiza contato com +50 leads/dia.', img: '/preview-previewai.png', link: '/preview' },
-  { tag: 'Landing Page', title: 'Delega', desc: 'Landing page para app de marketplace de serviços.', sub: 'Design arrojado, alta conversão.', img: '/preview-delega.png', link: '/delega' },
-  { tag: 'Portfólio', title: 'RDCreator', desc: 'Portfólio pessoal com animações canvas e efeitos neon.', sub: 'Terminal interativo e star warp.', img: '/preview-rdcreator.png', link: '/' },
+  { tag: 'Web Design', title: 'AutoAirShop', desc: 'Site institucional para empresa de ar-condicionado automotivo.', sub: 'Mais acessos e contatos em 30 dias.', url: 'https://autoarshop.vercel.app', link: 'https://autoarshop.vercel.app' },
+  { tag: 'Web Design', title: 'Genuína', desc: 'Presença digital completa para empresa local.', sub: 'Site com foco em contato e vendas.', url: 'https://genuinaarautomotivo.com', link: 'https://genuinaarautomotivo.com' },
+  { tag: 'Sistema Web', title: 'Preview AI', desc: 'Geração de sites com IA para prospecção via Google Maps.', sub: 'Automatiza contato com +50 leads/dia.', url: 'https://ryancreator.dev/preview', link: '/preview' },
+  { tag: 'Landing Page', title: 'Delega', desc: 'Landing page para app de marketplace de serviços.', sub: 'Design arrojado, alta conversão.', url: 'https://ryancreator.dev/delega', link: '/delega' },
+  { tag: 'Portfólio', title: 'RDCreator', desc: 'Portfólio pessoal com animações canvas e efeitos neon.', sub: 'Terminal interativo e star warp.', url: 'https://ryancreator.dev', link: '/' },
 ];
 
 export default function V2() {
   const cursorRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [scrollPct, setScrollPct] = useState(0);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 20);
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollPct(total > 0 ? (window.scrollY / total) * 100 : 0);
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -75,6 +80,7 @@ export default function V2() {
 
   return (
     <div className="v2">
+      <div className="v2-scroll-progress" style={{width:`${scrollPct}%`}} />
       <div className="v2-cursor" ref={cursorRef} />
 
       {/* NAV */}
@@ -237,7 +243,9 @@ export default function V2() {
 
         {/* Carrossel 3D */}
         <div className="v2-carousel-3d-wrap">
-          <button className="v2-carousel-btn v2-carousel-btn--side v2-carousel-btn--left" onClick={() => setActiveWork(p => (p - 1 + WORKS.length) % WORKS.length)}>←</button>
+          <button className="v2-carousel-btn v2-carousel-btn--side v2-carousel-btn--left" onClick={() => setActiveWork(p => (p - 1 + WORKS.length) % WORKS.length)}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="18" height="18"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
         <div className="v2-carousel-3d">
           {[-2, -1, 0, 1, 2].map(offset => {
             const i = (activeWork + offset + WORKS.length) % WORKS.length;
@@ -266,7 +274,7 @@ export default function V2() {
                 <div className={`v2-card3d ${isCenter ? 'center' : ''}`}
                   style={{ filter: isCenter ? 'none' : 'grayscale(1) brightness(0.55)' }}
                 >
-                  <img src={w.img} alt={w.title} className="v2-card3d-img" />
+                  <img src={`https://image.thum.io/get/width/480/crop/800/noanimate/${w.url}`} alt={w.title} className="v2-card3d-img" />
                   {isCenter && (
                     <>
                       <div className="v2-card3d-overlay" />
@@ -288,7 +296,9 @@ export default function V2() {
             );
           })}
         </div>
-          <button className="v2-carousel-btn v2-carousel-btn--pink v2-carousel-btn--side v2-carousel-btn--right" onClick={() => setActiveWork(p => (p + 1) % WORKS.length)}>→</button>
+          <button className="v2-carousel-btn v2-carousel-btn--pink v2-carousel-btn--side v2-carousel-btn--right" onClick={() => setActiveWork(p => (p + 1) % WORKS.length)}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="18" height="18"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
         </div>
 
         {/* Dots */}
