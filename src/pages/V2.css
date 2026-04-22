@@ -1096,25 +1096,15 @@
   .v2-hamburger { display: flex; z-index: 200; }
 
   /* HERO */
-  .v2-hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 0 48px; }
-  .v2-hero-title { font-size: clamp(52px, 14vw, 80px); letter-spacing: -2px; }
+  .v2-hero { min-height: 100vh; }
   .v2-hero-left {
-    position: relative; top: auto; left: auto; transform: none;
-    padding: 0 20px; max-width: 100%; z-index: 3;
+    position: absolute; top: auto; bottom: 60px; left: 20px;
+    transform: none; max-width: calc(100% - 40px); z-index: 3;
   }
-  .v2-hero-card {
-    position: absolute; top: 16px; right: 20px; left: auto;
-    transform: none; min-width: 150px;
-  }
-  .v2-hero-stat-right {
-    position: absolute; top: auto; bottom: 200px; right: 20px;
-    width: 150px;
-  }
-  .v2-hero-tagline {
-    position: absolute; bottom: 48px; right: 20px;
-    left: auto; top: auto;
-  }
-  .v2-hero-tagline-title { font-size: clamp(16px, 4vw, 24px); }
+  .v2-hero-title { font-size: clamp(44px, 12vw, 72px); letter-spacing: -2px; }
+  .v2-hero-card { display: none; }
+  .v2-hero-stat-right { display: none; }
+  .v2-hero-tagline { display: none; }
 
   /* SERVICES */
   .v2-services { padding: 60px 20px; }
