@@ -1,6 +1,46 @@
 import { useState, useEffect, useRef } from 'react';
 import './V2.css';
 
+function StarField() {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.offsetWidth;
+    const H = canvas.offsetHeight;
+    canvas.width = W;
+    canvas.height = H;
+    const cx = W / 2, cy = H / 2;
+    const stars = Array.from({ length: 120 }, () => ({
+      x: Math.random() * W - cx,
+      y: Math.random() * H - cy,
+      z: Math.random() * W,
+    }));
+    let raf;
+    const draw = () => {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, W, H);
+      stars.forEach(s => {
+        s.z -= 4;
+        if (s.z <= 0) { s.z = W; s.x = Math.random() * W - cx; s.y = Math.random() * H - cy; }
+        const sx = (s.x / s.z) * W + cx;
+        const sy = (s.y / s.z) * H + cy;
+        const r = Math.max(0.3, (1 - s.z / W) * 2.5);
+        const alpha = 1 - s.z / W;
+        ctx.beginPath();
+        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.fill();
+      });
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  return <canvas ref={canvasRef} style={{position:'absolute',inset:0,width:'100%',height:'100%'}} />;
+}
+
 const STATS = [
   { val: '+30', label: 'projetos entregues' },
   { val: '+5', label: 'anos de experiência' },
@@ -14,11 +54,11 @@ const TESTIMONIALS = [
 ];
 
 const WORKS = [
-  { tag: 'Web Design', title: 'AutoAirShop', desc: 'Site institucional para empresa de ar-condicionado automotivo.', sub: 'Mais acessos e contatos em 30 dias.', url: 'https://autoarshop.vercel.app', link: 'https://autoarshop.vercel.app' },
-  { tag: 'Web Design', title: 'Genuína', desc: 'Presença digital completa para empresa local.', sub: 'Site com foco em contato e vendas.', url: 'https://genuinaarautomotivo.com', link: 'https://genuinaarautomotivo.com' },
-  { tag: 'Sistema Web', title: 'Preview AI', desc: 'Geração de sites com IA para prospecção via Google Maps.', sub: 'Automatiza contato com +50 leads/dia.', url: 'https://ryancreator.dev/preview', link: '/preview' },
-  { tag: 'Landing Page', title: 'Delega', desc: 'Landing page para app de marketplace de serviços.', sub: 'Design arrojado, alta conversão.', url: 'https://ryancreator.dev/delega', link: '/delega' },
-  { tag: 'Portfólio', title: 'RDCreator', desc: 'Portfólio pessoal com animações canvas e efeitos neon.', sub: 'Terminal interativo e star warp.', url: 'https://ryancreator.dev', link: '/' },
+  { tag: 'Web Design', title: 'AutoAirShop', desc: 'Site institucional para empresa de ar-condicionado automotivo.', sub: 'Mais acessos e contatos em 30 dias.', logo: '/logo-autoairshop.png', bg: 'linear-gradient(135deg, #1a3a6e 0%, #0d1f3c 100%)', link: 'https://autoarshop.vercel.app' },
+  { tag: 'Web Design', title: 'Genuína', desc: 'Presença digital completa para empresa local.', sub: 'Site com foco em contato e vendas.', logo: '/logo-genuina.png', bg: 'linear-gradient(135deg, #2a5a9e 0%, #1a3a6e 100%)', link: 'https://genuinaarautomotivo.com' },
+  { tag: 'Sistema Web', title: 'Preview AI', desc: 'Geração de sites com IA para prospecção via Google Maps.', sub: 'Automatiza contato com +50 leads/dia.', logo: '/preview-maps.png', bg: '#0a0a14', raw: true, screen: true, link: '/preview' },
+  { tag: 'Landing Page', title: 'Delega', desc: 'Landing page para app de marketplace de serviços.', sub: 'Design arrojado, alta conversão.', logo: '/logo-delega.png', bg: '#FF6A00', raw: true, link: '/delega' },
+  { tag: 'Portfólio', title: 'RDCreator', desc: 'Portfólio pessoal com animações canvas e efeitos neon.', sub: 'Terminal interativo e star warp.', logo: '/logo-rdc.png', bg: '#000', starfield: true, link: '/start' },
 ];
 
 export default function V2() {
@@ -26,6 +66,15 @@ export default function V2() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [scrollPct, setScrollPct] = useState(0);
+
+  useEffect(() => {
+    document.body.style.background = '#000';
+    document.documentElement.style.background = '#000';
+    return () => {
+      document.body.style.background = '';
+      document.documentElement.style.background = '';
+    };
+  }, []);
 
   useEffect(() => {
     const onScroll = () => {
@@ -110,7 +159,7 @@ export default function V2() {
 
       {/* HERO */}
       <section className="v2-hero" id="v2-work">
-        <img src="/polvo3.jpg" alt="" className="v2-hero-person" />
+        <img src="/lion.jpg" alt="" className="v2-hero-person" />
         <div className="v2-hero-overlay" />
 
         {/* Esquerda — título + CTA */}
@@ -274,11 +323,13 @@ export default function V2() {
                 <div className={`v2-card3d ${isCenter ? 'center' : ''}`}
                   style={{ filter: isCenter ? 'none' : 'grayscale(1) brightness(0.55)' }}
                 >
-                  <img src={`https://image.thum.io/get/width/480/crop/800/noanimate/${w.url}`} alt={w.title} className="v2-card3d-img" />
+                  <div className="v2-card3d-logo-bg" style={{background: w.bg}}>
+                    {w.starfield && <StarField />}
+                    <img src={w.logo} alt={w.title} className="v2-card3d-logo" style={{position:'relative', zIndex:1, filter: w.raw ? 'none' : undefined, mixBlendMode: w.screen ? 'screen' : 'normal'}} />
+                  </div>
                   {isCenter && (
                     <>
                       <div className="v2-card3d-overlay" />
-                      <div className="v2-card3d-ghost">{w.title.substring(0,3).toUpperCase()}</div>
                       <div className="v2-card3d-bottom">
                         <div className="v2-card3d-info">
                           <span className="v2-card3d-tag">{w.tag}</span>
@@ -335,7 +386,7 @@ export default function V2() {
 
       {/* ABOUT */}
       <div className="v2-about-wrap">
-        <img src="/rabo.jpg" alt="" className="v2-about-rabo" />
+        <img src="/corda_lion.png" alt="" className="v2-about-rabo" />
         <div className="v2-about-ghost">ry.<br/>an.</div>
         <div className="v2-about-glow" />
       <section className="v2-about-section" id="v2-about2">
