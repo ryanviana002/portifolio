@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp -r public/delega dist/delega",
+    "build": "vite build && mkdir -p dist/delega && cp -r public/delega/. dist/delega/",
     "lint": "eslint .",
     "preview": "vite preview"
   },
