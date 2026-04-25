@@ -8,7 +8,8 @@
   },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/delega", "destination": "/delega.html" },
+    { "source": "/delega", "destination": "/delega/index.html" },
+    { "source": "/delega/(.*)", "destination": "/delega/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
