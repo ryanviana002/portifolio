@@ -1,0 +1,34 @@
+{
+  "id": "2026-04-23T20-14-03-430Z-clone-pocketchangethe-world-revoluti",
+  "createdAt": "2026-04-23T20:15:26.460Z",
+  "repoRoot": "/Users/ryan/Projetos Claude/WebSites/delegapage",
+  "prompt": "Clone pocketchangethe.world — revolution in your pocket, values-driven app, red hero, phone mockups, category cards, pure CSS",
+  "targetRouteHint": null,
+  "targetFileHint": null,
+  "detectedFrameworks": [],
+  "componentLibraries": [],
+  "stylingSystems": [],
+  "routeCandidates": [],
+  "tokenSources": [],
+  "componentDirectories": [],
+  "htmlStructure": {
+    "title": "Pocketchange Clone",
+    "primaryHeading": "",
+    "sectionCount": 3,
+    "buttonCount": 2,
+    "formCount": 0,
+    "cardLikeCount": 0,
+    "hasNavigation": true,
+    "hasFooter": false,
+    "hasPricingSignals": false,
+    "hasDashboardSignals": false
+  },
+  "recommendations": [
+    "Break the artifact into section-level components before editing details.",
+    "Use the generated preview as the visual truth source while porting the layout."
+  ],
+  "warnings": [
+    "No frontend framework was detected. Validate the target surface manually before porting.",
+    "No obvious route targets were detected. Choose a target file deliberately before editing."
+  ]
+}
