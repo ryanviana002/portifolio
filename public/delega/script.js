@@ -17,11 +17,13 @@ const circle1     = document.querySelector('.circle-1');
 const circle2     = document.querySelector('.circle-2');
 const circle3     = document.querySelector('.circle-3');
 
+const isMobile = () => window.innerWidth <= 768;
+
 function getHeroProgress() {
-  if (!heroWrapper) return 0;
-  const wrapH  = heroWrapper.offsetHeight;      // 300vh
-  const viewH  = window.innerHeight;            // 100vh
-  const travel = wrapH - viewH;                 // 200vh of scroll travel
+  if (!heroWrapper || isMobile()) return 0;
+  const wrapH  = heroWrapper.offsetHeight;
+  const viewH  = window.innerHeight;
+  const travel = wrapH - viewH;
   return Math.min(Math.max(window.scrollY / travel, 0), 1);
 }
 
@@ -79,7 +81,7 @@ function updateHero() {
 
   /* scroll hint */
   if (scrollHint) {
-    scrollHint.style.opacity = clamp01(1 - p * 6).toFixed(3);
+    scrollHint.style.opacity = isMobile() ? '1' : clamp01(1 - p * 6).toFixed(3);
   }
 
 
@@ -168,16 +170,24 @@ function waveLoop() {
   const floatR3 = Math.sin(t * 0.9) * 2;
 
   if (phone1) {
-    const exitTy = parseFloat(phone1.dataset.exitTy || '0');
-    const exitSc = parseFloat(phone1.dataset.exitSc || '1');
-    phone1.style.transform = `translateY(calc(-50% + ${floatY1.toFixed(1)}px + ${exitTy}%)) scale(${exitSc})`;
+    if (isMobile()) {
+      if (phonesReady) phone1.style.transform = `translateY(${floatY1.toFixed(1)}px)`;
+    } else {
+      const exitTy = parseFloat(phone1.dataset.exitTy || '0');
+      const exitSc = parseFloat(phone1.dataset.exitSc || '1');
+      phone1.style.transform = `translateY(calc(-50% + ${floatY1.toFixed(1)}px + ${exitTy}%)) scale(${exitSc})`;
+    }
   }
   if (phone3) {
-    const sc  = parseFloat(phone3.dataset.exitSc  || '0.78');
-    const tx  = parseFloat(phone3.dataset.exitTx  || '0');
-    const ty  = parseFloat(phone3.dataset.exitTy  || '0');
-    const rot = parseFloat(phone3.dataset.exitRot || '8') + floatR3;
-    phone3.style.transform = `translateY(calc(-42% + ${floatY3.toFixed(1)}px)) rotate(${rot.toFixed(1)}deg) scale(${sc}) translateX(${tx}%) translateY(${ty}%)`;
+    if (isMobile()) {
+      if (phonesReady) phone3.style.transform = `translateY(${floatY3.toFixed(1)}px) rotate(${(6 + floatR3).toFixed(1)}deg)`;
+    } else {
+      const sc  = parseFloat(phone3.dataset.exitSc  || '0.78');
+      const tx  = parseFloat(phone3.dataset.exitTx  || '0');
+      const ty  = parseFloat(phone3.dataset.exitTy  || '0');
+      const rot = parseFloat(phone3.dataset.exitRot || '8') + floatR3;
+      phone3.style.transform = `translateY(calc(-42% + ${floatY3.toFixed(1)}px)) rotate(${rot.toFixed(1)}deg) scale(${sc}) translateX(${tx}%) translateY(${ty}%)`;
+    }
   }
 
   requestAnimationFrame(waveLoop);
@@ -187,17 +197,18 @@ requestAnimationFrame(waveLoop);
 /* ============================================================
    HERO ENTRANCE ANIMATION (on load)
    ============================================================ */
+let phonesReady = false;
+
 function heroEntrance() {
-  const items = [
+  const textItems = [
     { el: header,     delay: 0,   from: 'translateY(-20px)' },
     { el: heroH1,     delay: 180, from: 'translateY(40px)'  },
     { el: heroP,      delay: 340, from: 'translateY(30px)'  },
     { el: heroBtns,   delay: 480, from: 'translateY(24px)'  },
     { el: scrollHint, delay: 600, from: 'translateY(16px)'  },
-    { el: phone1,     delay: 200, from: 'translateY(-30%) scale(1.2)' },
-    { el: phone3,     delay: 380, from: 'translateY(-15%) rotate(14deg) scale(0.85)' },
   ];
-  items.forEach(({ el, delay, from }) => {
+
+  textItems.forEach(({ el, delay, from }) => {
     if (!el) return;
     el.style.opacity = '0';
     el.style.transform = from;
@@ -208,6 +219,44 @@ function heroEntrance() {
       el.style.transform = '';
     }, delay + 100);
   });
+
+  if (isMobile()) {
+    /* phones entram de baixo com fade */
+    [phone1, phone3].forEach((el, i) => {
+      if (!el) return;
+      el.style.opacity = '0';
+      el.style.transition = 'none';
+      el.style.marginTop = '40px';
+      setTimeout(() => {
+        el.style.transition = 'opacity 0.9s cubic-bezier(0.22,1,0.36,1), margin-top 0.9s cubic-bezier(0.22,1,0.36,1)';
+        el.style.opacity = '1';
+        el.style.marginTop = '0px';
+        if (i === 1) setTimeout(() => { phonesReady = true; }, 900);
+      }, 300 + i * 150);
+    });
+  } else {
+    phonesReady = true;
+    if (phone1) {
+      phone1.style.opacity = '0';
+      phone1.style.transform = 'translateY(-30%) scale(1.2)';
+      phone1.style.transition = 'none';
+      setTimeout(() => {
+        phone1.style.transition = 'opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1)';
+        phone1.style.opacity = '';
+        phone1.style.transform = '';
+      }, 300);
+    }
+    if (phone3) {
+      phone3.style.opacity = '0';
+      phone3.style.transform = 'translateY(-15%) rotate(14deg) scale(0.85)';
+      phone3.style.transition = 'none';
+      setTimeout(() => {
+        phone3.style.transition = 'opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1)';
+        phone3.style.opacity = '';
+        phone3.style.transform = '';
+      }, 480);
+    }
+  }
 }
 window.addEventListener('load', heroEntrance);
 
@@ -312,6 +361,42 @@ document.addEventListener('DOMContentLoaded', initCounters);
    ============================================================ */
 const ticker = document.getElementById('ticker-track');
 if (ticker) ticker.innerHTML += ticker.innerHTML;
+
+/* ============================================================
+   NEWSLETTER FORM
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('.newsletter-form');
+  if (!form) return;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = form.querySelector('input[type="email"]');
+    const btn   = form.querySelector('button');
+    const email = input.value.trim();
+    if (!email) return;
+
+    btn.textContent = 'Enviando...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/delega-contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (res.ok) {
+        btn.textContent = 'Enviado! ✓';
+        input.value = '';
+        setTimeout(() => { btn.textContent = 'Entrar na lista'; btn.disabled = false; }, 3000);
+      } else {
+        throw new Error();
+      }
+    } catch {
+      btn.textContent = 'Erro, tente novamente';
+      btn.disabled = false;
+    }
+  });
+});
 
 /* ============================================================
    FAQ ACCORDION
