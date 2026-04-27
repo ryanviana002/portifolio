@@ -42,7 +42,7 @@ async function alertar(msg) {
 }
 
 async function analisarResposta(texto) {
-  if (!texto?.trim()) return { interesse: true, despedida: null };
+  if (!texto?.trim()) return { tipo: 'interesse', resposta: null };
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -60,19 +60,26 @@ async function analisarResposta(texto) {
 
 O cliente respondeu: "${texto}"
 
-Se o cliente NÃO tem interesse, escreva uma resposta curta, simpática e natural em português brasileiro (máx 2 frases, sem emoji excessivo).
-Se o cliente TEM interesse ou a resposta for ambígua, responda apenas: INTERESSE
+Classifique a resposta em uma das três categorias:
+- INTERESSE: cliente quer ver o site (sim, pode mandar, quero ver, claro, etc)
+- PERGUNTA: cliente fez alguma pergunta antes de decidir (quanto custa? quem é você? como funciona? etc)
+- RECUSA: cliente não tem interesse (não obrigado, já tenho, não preciso, etc)
 
-Responda apenas a mensagem de despedida ou a palavra INTERESSE.`,
+Se RECUSA: escreva uma despedida curta e simpática em português brasileiro (máx 2 frases).
+Se INTERESSE ou PERGUNTA: responda apenas a palavra INTERESSE ou PERGUNTA.
+
+Responda apenas: INTERESSE, PERGUNTA, ou a mensagem de despedida.`,
         }],
       }),
     });
     const d = await r.json();
-    const resposta = d.content?.[0]?.text?.trim() || 'INTERESSE';
-    if (resposta.toUpperCase().includes('INTERESSE')) return { interesse: true, despedida: null };
-    return { interesse: false, despedida: resposta };
+    const txt = d.content?.[0]?.text?.trim() || 'INTERESSE';
+    const upper = txt.toUpperCase();
+    if (upper.startsWith('INTERESSE')) return { tipo: 'interesse', resposta: null };
+    if (upper.startsWith('PERGUNTA')) return { tipo: 'pergunta', resposta: null };
+    return { tipo: 'recusa', resposta: txt };
   } catch {
-    return { interesse: true, despedida: null };
+    return { tipo: 'interesse', resposta: null };
   }
 }
 
@@ -151,24 +158,47 @@ export default async function handler(req, res) {
       received_at: receivedAt.toISOString(),
     }).catch(() => {});
 
-    // Busca prospect — sent1 (aguardando 1ª resposta) ou replied (aguardando 2ª)
+    // Busca prospect ativo
     const prospects = await sbFetch(
-      `/wa_prospects?wa_num=eq.${waNum}&status=in.(sent1,replied)&select=*&order=sent1_at.desc&limit=1`
+      `/wa_prospects?wa_num=eq.${waNum}&status=in.(sent1,replied,aguardando_ryan)&select=*&order=sent1_at.desc&limit=1`
     );
     if (!prospects?.length) return res.status(200).json({ ok: true });
 
     const prospect = prospects[0];
 
+    // Prospect aguardando Ryan — cliente respondeu após você tirar a dúvida
+    if (prospect.status === 'aguardando_ryan') {
+      const texto = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
+      const { tipo, resposta } = await analisarResposta(texto);
+      if (tipo === 'recusa') {
+        await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() });
+        if (resposta) await enviarWA(waNum, resposta).catch(() => {});
+        return res.status(200).json({ ok: true, ignored: 'recusa' });
+      }
+      if (tipo === 'pergunta') {
+        await alertar(`❓ Nova pergunta em *${prospect.nome}*:\n"${texto}"\n\nWA: wa.me/${waNum}`);
+        return res.status(200).json({ ok: true, aguardando: 'pergunta' });
+      }
+      // Interesse — gera site e manda link
+      const { nome, previewUrl } = await gerarESalvarSite(prospect);
+      await enviarWA(waNum, MSG_2(nome, previewUrl));
+      await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'sent2', sent2_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+      return res.status(200).json({ ok: true, sent2: true, trigger: 'after_question' });
+    }
+
     // Prospect em "replied" = já recebeu resposta de bot antes, agora é humano
     if (prospect.status === 'replied') {
       const texto = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
-      const { interesse, despedida } = await analisarResposta(texto);
-      if (!interesse) {
-        await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
-          status: 'ignored', updated_at: new Date().toISOString(),
-        });
-        if (despedida) await enviarWA(waNum, despedida).catch(() => {});
-        return res.status(200).json({ ok: true, ignored: 'no_interest' });
+      const { tipo, resposta } = await analisarResposta(texto);
+      if (tipo === 'recusa') {
+        await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() });
+        if (resposta) await enviarWA(waNum, resposta).catch(() => {});
+        return res.status(200).json({ ok: true, ignored: 'recusa' });
+      }
+      if (tipo === 'pergunta') {
+        await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'aguardando_ryan', updated_at: new Date().toISOString() });
+        await alertar(`❓ Pergunta em *${prospect.nome}*:\n"${texto}"\n\nWA: wa.me/${waNum}`);
+        return res.status(200).json({ ok: true, aguardando: 'pergunta' });
       }
       const { nome, previewUrl } = await gerarESalvarSite(prospect);
       await enviarWA(waNum, MSG_2(nome, previewUrl));
@@ -200,13 +230,16 @@ export default async function handler(req, res) {
 
     // Resposta humana (> 60s): verifica interesse antes de gerar site
     const textoHumano = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
-    const { interesse, despedida } = await analisarResposta(textoHumano);
-    if (!interesse) {
-      await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
-        status: 'ignored', updated_at: new Date().toISOString(),
-      });
-      if (despedida) await enviarWA(waNum, despedida).catch(() => {});
-      return res.status(200).json({ ok: true, ignored: 'no_interest' });
+    const { tipo, resposta } = await analisarResposta(textoHumano);
+    if (tipo === 'recusa') {
+      await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() });
+      if (resposta) await enviarWA(waNum, resposta).catch(() => {});
+      return res.status(200).json({ ok: true, ignored: 'recusa' });
+    }
+    if (tipo === 'pergunta') {
+      await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'aguardando_ryan', updated_at: new Date().toISOString() });
+      await alertar(`❓ Pergunta em *${prospect.nome}*:\n"${textoHumano}"\n\nWA: wa.me/${waNum}`);
+      return res.status(200).json({ ok: true, aguardando: 'pergunta' });
     }
 
     // Gera site e envia 2º WA
