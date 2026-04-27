@@ -233,6 +233,12 @@ async function jobDisparoLote(limite) {
       console.log(`✓ ${p.nome} (${p.wa_num})`);
     } catch (err) {
       console.error(`Erro WA ${p.nome}:`, err.message);
+      if (err.message.includes('exists":false') || err.message.includes('not exists')) {
+        await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
+          status: 'ignored', updated_at: new Date().toISOString(),
+        }).catch(() => {});
+        continue;
+      }
       if (err.message.includes('quota') || err.message.includes('rate')) {
         await alertar(`Evolution API rate limit:\n${err.message}`);
         break;
@@ -277,18 +283,33 @@ http.createServer(async (req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true, job }));
       } else if (job === 'disparar1') {
-        // Dispara UMA mensagem e retorna — admin chama repetidamente
-        const pendentes = await sbFetch('/wa_prospects?status=eq.pending&select=*&limit=1').catch(() => []);
+        // Dispara UMA mensagem e retorna — tenta até achar número válido
+        const pendentes = await sbFetch('/wa_prospects?status=eq.pending&select=*&limit=10').catch(() => []);
         if (!pendentes?.length) {
           res.writeHead(200); res.end(JSON.stringify({ ok: true, done: true })); return;
         }
-        const p = pendentes[0];
-        await enviarWA(p.wa_num, MSG_1(p.nome));
-        await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
-          status: 'sent1', sent1_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-        });
-        console.log(`✓ ${p.nome} (${p.wa_num})`);
-        res.writeHead(200); res.end(JSON.stringify({ ok: true, nome: p.nome, pending: pendentes.length - 1 }));
+        let enviado = null;
+        for (const p of pendentes) {
+          try {
+            await enviarWA(p.wa_num, MSG_1(p.nome));
+            await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
+              status: 'sent1', sent1_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+            });
+            console.log(`✓ ${p.nome} (${p.wa_num})`);
+            enviado = p;
+            break;
+          } catch (err) {
+            // Número não existe no WA — ignora e tenta próximo
+            console.log(`✗ ${p.nome} (${p.wa_num}): ${err.message}`);
+            await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
+              status: 'ignored', updated_at: new Date().toISOString(),
+            }).catch(() => {});
+          }
+        }
+        if (!enviado) {
+          res.writeHead(200); res.end(JSON.stringify({ ok: true, done: true })); return;
+        }
+        res.writeHead(200); res.end(JSON.stringify({ ok: true, nome: enviado.nome }));
       } else {
         res.writeHead(200); res.end(JSON.stringify({ ok: true, job }));
         if (job === 'disparar') await jobDisparoLote(LIMITE_TARDE);
