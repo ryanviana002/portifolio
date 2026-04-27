@@ -158,18 +158,40 @@ export default function Admin() {
 
   const [triggerStatus, setTriggerStatus] = useState('');
   const dispararJob = async (job) => {
-    setTriggerStatus(job === 'buscar' ? 'Buscando...' : 'Disparando...');
-    try {
-      await fetch('/api/wa-trigger', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ senha: 'familia1@', job }),
-      });
-      setTriggerStatus(job === 'buscar' ? 'Busca iniciada ✓' : 'Disparo iniciado ✓');
-    } catch {
-      setTriggerStatus('Erro');
+    if (job === 'disparar') {
+      setTriggerStatus('Disparando 1/? ...');
+      let count = 0;
+      while (true) {
+        try {
+          const r = await fetch('/api/wa-trigger', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ senha: 'familia1@', job: 'disparar' }),
+          });
+          const d = await r.json();
+          if (d.done || !d.ok) break;
+          count++;
+          setTriggerStatus(`Enviado ${count} ✓ — aguardando...`);
+          const delay = 60000 + Math.floor(Math.random() * 240000); // 60-300s
+          await new Promise(res => setTimeout(res, delay));
+        } catch { break; }
+      }
+      setTriggerStatus(`Disparo concluído: ${count} mensagens ✓`);
+      setTimeout(() => setTriggerStatus(''), 5000);
+    } else {
+      setTriggerStatus('Buscando...');
+      try {
+        await fetch('/api/wa-trigger', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ senha: 'familia1@', job }),
+        });
+        setTriggerStatus('Busca iniciada ✓');
+      } catch {
+        setTriggerStatus('Erro');
+      }
+      setTimeout(() => setTriggerStatus(''), 4000);
     }
-    setTimeout(() => setTriggerStatus(''), 4000);
   };
 
   const handleGerar = async (id) => {

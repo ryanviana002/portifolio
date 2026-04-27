@@ -10,11 +10,13 @@ export default async function handler(req, res) {
   if (senha !== 'familia1@') return res.status(401).json({ error: 'Não autorizado' });
   if (!WORKER_URL) return res.status(500).json({ error: 'WORKER_URL não configurada' });
 
+  const jobReal = job === 'disparar' ? 'disparar1' : job;
+
   try {
     const r = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: 'familia1@', job }),
+      body: JSON.stringify({ key: 'familia1@', job: jobReal }),
     });
     const data = await r.json();
     return res.status(200).json(data);

@@ -270,12 +270,32 @@ http.createServer(async (req, res) => {
     try {
       const { key, job } = JSON.parse(body);
       if (key !== TRIGGER_KEY) { res.writeHead(401); res.end('unauthorized'); return; }
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ ok: true, job }));
-      if (job === 'buscar') await jobBuscar();
-      if (job === 'disparar') await jobDisparoLote(LIMITE_TARDE);
+
+      if (job === 'buscar') {
+        // Busca é rápida — responde depois
+        await jobBuscar();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, job }));
+      } else if (job === 'disparar1') {
+        // Dispara UMA mensagem e retorna — admin chama repetidamente
+        const pendentes = await sbFetch('/wa_prospects?status=eq.pending&select=*&limit=1').catch(() => []);
+        if (!pendentes?.length) {
+          res.writeHead(200); res.end(JSON.stringify({ ok: true, done: true })); return;
+        }
+        const p = pendentes[0];
+        await enviarWA(p.wa_num, MSG_1(p.nome));
+        await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
+          status: 'sent1', sent1_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+        });
+        console.log(`✓ ${p.nome} (${p.wa_num})`);
+        res.writeHead(200); res.end(JSON.stringify({ ok: true, nome: p.nome, pending: pendentes.length - 1 }));
+      } else {
+        res.writeHead(200); res.end(JSON.stringify({ ok: true, job }));
+        if (job === 'disparar') await jobDisparoLote(LIMITE_TARDE);
+      }
     } catch (e) {
-      res.writeHead(400); res.end(e.message);
+      console.error('HTTP trigger error:', e.message);
+      res.writeHead(500); res.end(e.message);
     }
   });
 }).listen(PORT, () => console.log(`  HTTP trigger: porta ${PORT}`));
