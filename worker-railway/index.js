@@ -1,4 +1,5 @@
 import cron from 'node-cron';
+import http from 'http';
 
 // ─── Configuração ────────────────────────────────────────────────────────────
 const SUPABASE_URL   = process.env.SUPABASE_URL   || 'https://zivrekynlmznlyoyyrvg.supabase.co';
@@ -247,6 +248,29 @@ cron.schedule('0 11 * * 1-6', () => jobDisparoLote(LIMITE_MANHA));
 // 13:00 BRT = 16:00 UTC — hoje (primeira vez) roda às 17:37 UTC
 cron.schedule('37 17 27 4 *', () => jobDisparoLote(LIMITE_TARDE)); // hoje 14:37 BRT
 cron.schedule('0 16 * * 1-6', () => jobDisparoLote(LIMITE_TARDE)); // normal
+
+// Servidor HTTP para triggers manuais
+const PORT = process.env.PORT || 3000;
+const TRIGGER_KEY = process.env.TRIGGER_KEY || 'familia1@';
+
+http.createServer(async (req, res) => {
+  if (req.method !== 'POST') { res.writeHead(405); res.end(); return; }
+
+  let body = '';
+  req.on('data', d => body += d);
+  req.on('end', async () => {
+    try {
+      const { key, job } = JSON.parse(body);
+      if (key !== TRIGGER_KEY) { res.writeHead(401); res.end('unauthorized'); return; }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, job }));
+      if (job === 'buscar') await jobBuscar();
+      if (job === 'disparar') await jobDisparoLote(LIMITE_TARDE);
+    } catch (e) {
+      res.writeHead(400); res.end(e.message);
+    }
+  });
+}).listen(PORT, () => console.log(`  HTTP trigger: porta ${PORT}`));
 
 console.log('🤖 RDCreator Worker iniciado');
 console.log('  Busca:     07:30 BRT (seg-sab)');
