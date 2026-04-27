@@ -8,6 +8,7 @@ const EVOLUTION_KEY   = process.env.EVOLUTION_KEY;
 const EVOLUTION_INST  = process.env.EVOLUTION_INSTANCE || 'rdcreator';
 const VERCEL_URL      = process.env.APP_URL || 'https://ryancreator.dev';
 const ALERT_NUM       = '5519992525515';
+const ANTHROPIC_KEY   = process.env.ANTHROPIC_API_KEY;
 
 const MSG_2 = (nome, link) =>
   `Aqui está 👇\n\n${link}\n\nÉ um preview do site que montei pra *${nome}*. Fica disponível por 3 dias.\n\nO que achou?`;
@@ -38,6 +39,33 @@ async function enviarWA(numero, mensagem) {
 
 async function alertar(msg) {
   try { await enviarWA(ALERT_NUM, `⚠️ RDCreator Bot\n${msg}`); } catch {}
+}
+
+async function temInteresse(texto) {
+  if (!texto?.trim()) return true; // sem texto = resposta automática, aguarda próxima
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 10,
+        messages: [{
+          role: 'user',
+          content: `Resposta de cliente para mensagem de prospecção de site: "${texto}"\n\nO cliente demonstra interesse em ver o site? Responda apenas: SIM ou NAO`,
+        }],
+      }),
+    });
+    const d = await r.json();
+    const resposta = d.content?.[0]?.text?.trim().toUpperCase() || 'SIM';
+    return resposta.includes('SIM');
+  } catch {
+    return true; // em caso de erro, assume interesse
+  }
 }
 
 async function gerarESalvarSite(prospect) {
@@ -125,6 +153,14 @@ export default async function handler(req, res) {
 
     // Prospect em "replied" = já recebeu resposta de bot antes, agora é humano
     if (prospect.status === 'replied') {
+      const texto = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
+      const interesse = await temInteresse(texto);
+      if (!interesse) {
+        await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
+          status: 'ignored', updated_at: new Date().toISOString(),
+        });
+        return res.status(200).json({ ok: true, ignored: 'no_interest' });
+      }
       const { nome, previewUrl } = await gerarESalvarSite(prospect);
       await enviarWA(waNum, MSG_2(nome, previewUrl));
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
@@ -153,7 +189,19 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, ignored: 'response_too_fast' });
     }
 
-    // Resposta humana (> 60s): gera site agora e envia 2º WA
+    // Resposta humana (> 60s): verifica interesse antes de gerar site
+    const textoHumano = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
+    const interesse = await temInteresse(textoHumano);
+    if (!interesse) {
+      await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
+        status: 'ignored', updated_at: new Date().toISOString(),
+      });
+      // Agradece educadamente
+      await enviarWA(waNum, `Tudo bem! Se precisar de um site no futuro, é só chamar. Abraço! 🤝`).catch(() => {});
+      return res.status(200).json({ ok: true, ignored: 'no_interest' });
+    }
+
+    // Gera site e envia 2º WA
     const { nome, previewUrl } = await gerarESalvarSite(prospect);
     await enviarWA(waNum, MSG_2(nome, previewUrl));
     await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
