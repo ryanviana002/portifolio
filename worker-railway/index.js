@@ -238,13 +238,13 @@ async function jobDisparoLote(limite) {
 // 07:30 BRT = 10:30 UTC
 cron.schedule('30 10 * * 1-5', jobBuscar);
 
-// 09:00 BRT = 12:00 UTC
-cron.schedule('0 12 * * 1-5', () => jobDisparoLote(LIMITE_MANHA));
+// 08:00 BRT = 11:00 UTC
+cron.schedule('0 11 * * 1-5', () => jobDisparoLote(LIMITE_MANHA));
 
-// 14:00 BRT = 17:00 UTC
-cron.schedule('0 17 * * 1-5', () => jobDisparoLote(LIMITE_TARDE));
+// 13:00 BRT = 16:00 UTC
+cron.schedule('0 16 * * 1-5', () => jobDisparoLote(LIMITE_TARDE));
 
 console.log('🤖 RDCreator Worker iniciado');
 console.log('  Busca:     07:30 BRT (seg-sex)');
-console.log('  Manhã WA:  09:00 BRT (seg-sex)');
-console.log('  Tarde WA:  14:00 BRT (seg-sex)');
+console.log('  Manhã WA:  08:00 BRT (seg-sex)');
+console.log('  Tarde WA:  13:00 BRT (seg-sex)');
