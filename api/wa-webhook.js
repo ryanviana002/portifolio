@@ -149,6 +149,12 @@ export default async function handler(req, res) {
     const waNum = msg.key?.remoteJid?.replace('@s.whatsapp.net', '');
     if (!waNum) return res.status(200).json({ ok: true });
 
+    // Detecta tipo de mensagem — só processa texto
+    const tipoMensagem = msg.message
+      ? Object.keys(msg.message)[0]
+      : 'unknown';
+    const eMidia = ['imageMessage','videoMessage','audioMessage','stickerMessage','documentMessage','reactionMessage'].includes(tipoMensagem);
+
     const receivedAt = new Date();
 
     // Log da mensagem
@@ -165,6 +171,14 @@ export default async function handler(req, res) {
     if (!prospects?.length) return res.status(200).json({ ok: true });
 
     const prospect = prospects[0];
+
+    // Mídia (figurinha, áudio, imagem, vídeo) — alerta Ryan para responder manualmente
+    if (eMidia) {
+      const tipoLabel = { imageMessage:'imagem', videoMessage:'vídeo', audioMessage:'áudio', stickerMessage:'figurinha', documentMessage:'documento', reactionMessage:'reação' };
+      await alertar(`📨 *${prospect.nome}* enviou ${tipoLabel[tipoMensagem] || 'mídia'}\n\nWA: wa.me/${waNum}`);
+      await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'aguardando_ryan', updated_at: new Date().toISOString() }).catch(() => {});
+      return res.status(200).json({ ok: true, aguardando: 'midia' });
+    }
 
     // Prospect aguardando Ryan — cliente respondeu após você tirar a dúvida
     if (prospect.status === 'aguardando_ryan') {
