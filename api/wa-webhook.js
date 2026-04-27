@@ -6,7 +6,7 @@ const SUPABASE_KEY    = process.env.SUPABASE_SERVICE_KEY;
 const EVOLUTION_URL   = process.env.EVOLUTION_URL;
 const EVOLUTION_KEY   = process.env.EVOLUTION_KEY;
 const EVOLUTION_INST  = process.env.EVOLUTION_INSTANCE || 'rdcreator';
-const VERCEL_URL      = process.env.VERCEL_URL || 'https://ryancreator.dev';
+const VERCEL_URL      = process.env.APP_URL || 'https://ryancreator.dev';
 const ALERT_NUM       = '5519992525515';
 
 const MSG_2 = (nome, link) =>
