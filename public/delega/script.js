@@ -171,7 +171,10 @@ function waveLoop() {
 
   if (phone1) {
     if (isMobile()) {
-      if (phonesReady) phone1.style.transform = `translateY(${floatY1.toFixed(1)}px)`;
+      if (phonesReady) {
+        phone1.style.transition = 'none';
+        phone1.style.transform = `translateY(${floatY1.toFixed(1)}px)`;
+      }
     } else {
       const exitTy = parseFloat(phone1.dataset.exitTy || '0');
       const exitSc = parseFloat(phone1.dataset.exitSc || '1');
@@ -180,7 +183,10 @@ function waveLoop() {
   }
   if (phone3) {
     if (isMobile()) {
-      if (phonesReady) phone3.style.transform = `translateY(${floatY3.toFixed(1)}px) rotate(${(6 + floatR3).toFixed(1)}deg)`;
+      if (phonesReady) {
+        phone3.style.transition = 'none';
+        phone3.style.transform = `translateY(${floatY3.toFixed(1)}px) rotate(${(6 + floatR3).toFixed(1)}deg)`;
+      }
     } else {
       const sc  = parseFloat(phone3.dataset.exitSc  || '0.78');
       const tx  = parseFloat(phone3.dataset.exitTx  || '0');
@@ -221,19 +227,16 @@ function heroEntrance() {
   });
 
   if (isMobile()) {
-    /* phones entram de baixo com fade */
     [phone1, phone3].forEach((el, i) => {
       if (!el) return;
       el.style.opacity = '0';
       el.style.transition = 'none';
-      el.style.marginTop = '40px';
       setTimeout(() => {
-        el.style.transition = 'opacity 0.9s cubic-bezier(0.22,1,0.36,1), margin-top 0.9s cubic-bezier(0.22,1,0.36,1)';
+        el.style.transition = 'opacity 0.7s ease';
         el.style.opacity = '1';
-        el.style.marginTop = '0px';
-        if (i === 1) setTimeout(() => { phonesReady = true; }, 900);
-      }, 300 + i * 150);
+      }, 300 + i * 120);
     });
+    setTimeout(() => { phonesReady = true; }, 500);
   } else {
     phonesReady = true;
     if (phone1) {
@@ -379,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.disabled = true;
 
     try {
-      const res = await fetch('/api/delega-contact', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
