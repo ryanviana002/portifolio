@@ -18,9 +18,9 @@ const CATEGORIAS = [
   'serralheria', 'marcenaria', 'encanador', 'eletricista', 'pintura residencial',
 ];
 
-const LIMITE_DIA   = 35;
-const LIMITE_MANHA = 18;
-const LIMITE_TARDE = 17;
+const LIMITE_DIA   = 50;
+const LIMITE_MANHA = 25;
+const LIMITE_TARDE = 25;
 const DELAY_MIN_MS = 90_000;
 const DELAY_MAX_MS = 180_000;
 
