@@ -101,7 +101,16 @@ export default function Admin() {
   useEffect(() => {
     if (localStorage.getItem('rdc_owner') === '1') {
       setAuthed(true);
-      setHistorico(lerHistorico());
+      const hist = lerHistorico();
+      setHistorico(hist);
+      // Sincroniza histórico com Supabase automaticamente
+      if (hist.length > 0) {
+        fetch('/api/wa-sync-historico', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ itens: hist }),
+        }).catch(() => {});
+      }
     }
   }, []);
 
