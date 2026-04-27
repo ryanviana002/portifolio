@@ -1,0 +1,16 @@
+{
+  "name": "rdc-worker",
+  "version": "1.0.0",
+  "description": "RDCreator - Worker automático de prospecção e WhatsApp",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "node-cron": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

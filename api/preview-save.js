@@ -85,7 +85,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Erro ao salvar prévia: ' + err });
   }
 
-  // Fire-and-forget: Sheets + WA (só se não for admin)
   notificarSheets(nome, categoria, url);
   if (origem !== 'admin') notificarWA(nome, categoria, url);
 
