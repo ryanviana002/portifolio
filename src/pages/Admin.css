@@ -29,6 +29,29 @@
 }
 .admin-back:hover { color: #fff; }
 
+.admin-bot-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.admin-bot-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.admin-bot-btn:hover { background: rgba(255,255,255,0.1); }
+.admin-bot-btn--wa { border-color: rgba(37,211,102,0.3); color: #25d366; }
+.admin-bot-btn--wa:hover { background: rgba(37,211,102,0.1); }
+.admin-bot-status { font-size: 12px; color: rgba(255,255,255,0.5); }
+
 .admin-title {
   font-size: 16px;
   font-weight: 700;

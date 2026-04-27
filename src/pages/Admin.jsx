@@ -156,6 +156,22 @@ export default function Admin() {
   const [dispensados, setDispensados] = useState(new Set());
   const dispensar = (id) => setDispensados(prev => new Set([...prev, id]));
 
+  const [triggerStatus, setTriggerStatus] = useState('');
+  const dispararJob = async (job) => {
+    setTriggerStatus(job === 'buscar' ? 'Buscando...' : 'Disparando...');
+    try {
+      await fetch('/api/wa-trigger', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senha: 'familia1@', job }),
+      });
+      setTriggerStatus(job === 'buscar' ? 'Busca iniciada ✓' : 'Disparo iniciado ✓');
+    } catch {
+      setTriggerStatus('Erro');
+    }
+    setTimeout(() => setTriggerStatus(''), 4000);
+  };
+
   const handleGerar = async (id) => {
     const linha = linhas.find(l => l.id === id);
     if (!linha?.url.trim()) return;
@@ -402,6 +418,11 @@ export default function Admin() {
         >
           Gerar todos
         </button>
+        <div className="admin-bot-btns">
+          <button className="admin-bot-btn" onClick={() => dispararJob('buscar')} title="Busca prospects no Google Maps">🔍 Buscar</button>
+          <button className="admin-bot-btn admin-bot-btn--wa" onClick={() => dispararJob('disparar')} title="Dispara WA para prospects na fila">📲 Disparar WA</button>
+          {triggerStatus && <span className="admin-bot-status">{triggerStatus}</span>}
+        </div>
         <div className="admin-tag">ADMIN</div>
         <button className="admin-sair-btn" onClick={() => { localStorage.removeItem('rdc_owner'); setAuthed(false); }}>Sair</button>
       </div>
