@@ -21,8 +21,8 @@ const CATEGORIAS = [
 const LIMITE_DIA   = 50;
 const LIMITE_MANHA = 25;
 const LIMITE_TARDE = 25;
-const DELAY_MIN_MS = 90_000;
-const DELAY_MAX_MS = 180_000;
+const DELAY_MIN_MS = 60_000;
+const DELAY_MAX_MS = 300_000;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
