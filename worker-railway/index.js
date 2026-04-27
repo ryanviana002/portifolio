@@ -28,7 +28,15 @@ const DELAY_MAX_MS = 300_000;
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 function delayAleatorio() { return DELAY_MIN_MS + Math.floor(Math.random() * (DELAY_MAX_MS - DELAY_MIN_MS)); }
-function categoriaAleatoria() { return CATEGORIAS[Math.floor(Math.random() * CATEGORIAS.length)]; }
+async function proximaCategoria() {
+  // Busca qual índice foi usado por último no Supabase
+  const rows = await sbFetch('/wa_config?select=valor&id=eq.categoria_idx').catch(() => []);
+  const idx = rows?.[0]?.valor ? (parseInt(rows[0].valor) + 1) % CATEGORIAS.length : 0;
+  await sbFetch('/wa_config?id=eq.categoria_idx', 'PATCH', { valor: String(idx), updated_at: new Date().toISOString() }).catch(async () => {
+    await sbFetch('/wa_config', 'POST', { id: 'categoria_idx', valor: String(idx), updated_at: new Date().toISOString() }).catch(() => {});
+  });
+  return CATEGORIAS[idx];
+}
 
 async function sbFetch(path, method = 'GET', body) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1${path}`, {
@@ -160,7 +168,7 @@ async function jobBuscar() {
   const vagas = LIMITE_DIA - dispararHoje;
   if (vagas <= 0) { console.log('Limite diário atingido.'); return; }
 
-  const categoria = categoriaAleatoria();
+  const categoria = await proximaCategoria();
   console.log(`Categoria: ${categoria}`);
 
   let prospects;
