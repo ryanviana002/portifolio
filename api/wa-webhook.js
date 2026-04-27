@@ -41,8 +41,8 @@ async function alertar(msg) {
   try { await enviarWA(ALERT_NUM, `⚠️ RDCreator Bot\n${msg}`); } catch {}
 }
 
-async function temInteresse(texto) {
-  if (!texto?.trim()) return true; // sem texto = resposta automática, aguarda próxima
+async function analisarResposta(texto) {
+  if (!texto?.trim()) return { interesse: true, despedida: null };
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -53,18 +53,26 @@ async function temInteresse(texto) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5',
-        max_tokens: 10,
+        max_tokens: 120,
         messages: [{
           role: 'user',
-          content: `Resposta de cliente para mensagem de prospecção de site: "${texto}"\n\nO cliente demonstra interesse em ver o site? Responda apenas: SIM ou NAO`,
+          content: `Você é o Ryan, desenvolvedor web da RDCreator. Enviou uma mensagem de prospecção para um negócio no WhatsApp dizendo que montou algo para eles e perguntou se podia mandar.
+
+O cliente respondeu: "${texto}"
+
+Se o cliente NÃO tem interesse, escreva uma resposta curta, simpática e natural em português brasileiro (máx 2 frases, sem emoji excessivo).
+Se o cliente TEM interesse ou a resposta for ambígua, responda apenas: INTERESSE
+
+Responda apenas a mensagem de despedida ou a palavra INTERESSE.`,
         }],
       }),
     });
     const d = await r.json();
-    const resposta = d.content?.[0]?.text?.trim().toUpperCase() || 'SIM';
-    return resposta.includes('SIM');
+    const resposta = d.content?.[0]?.text?.trim() || 'INTERESSE';
+    if (resposta.toUpperCase().includes('INTERESSE')) return { interesse: true, despedida: null };
+    return { interesse: false, despedida: resposta };
   } catch {
-    return true; // em caso de erro, assume interesse
+    return { interesse: true, despedida: null };
   }
 }
 
@@ -154,11 +162,12 @@ export default async function handler(req, res) {
     // Prospect em "replied" = já recebeu resposta de bot antes, agora é humano
     if (prospect.status === 'replied') {
       const texto = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
-      const interesse = await temInteresse(texto);
+      const { interesse, despedida } = await analisarResposta(texto);
       if (!interesse) {
         await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
           status: 'ignored', updated_at: new Date().toISOString(),
         });
+        if (despedida) await enviarWA(waNum, despedida).catch(() => {});
         return res.status(200).json({ ok: true, ignored: 'no_interest' });
       }
       const { nome, previewUrl } = await gerarESalvarSite(prospect);
@@ -191,13 +200,12 @@ export default async function handler(req, res) {
 
     // Resposta humana (> 60s): verifica interesse antes de gerar site
     const textoHumano = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
-    const interesse = await temInteresse(textoHumano);
+    const { interesse, despedida } = await analisarResposta(textoHumano);
     if (!interesse) {
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
         status: 'ignored', updated_at: new Date().toISOString(),
       });
-      // Agradece educadamente
-      await enviarWA(waNum, `Tudo bem! Se precisar de um site no futuro, é só chamar. Abraço! 🤝`).catch(() => {});
+      if (despedida) await enviarWA(waNum, despedida).catch(() => {});
       return res.status(200).json({ ok: true, ignored: 'no_interest' });
     }
 
