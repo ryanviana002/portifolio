@@ -121,9 +121,12 @@ async function buscarProspects(categoria) {
   });
 }
 
-async function prospectNovo(placeId) {
-  const rows = await sbFetch(`/wa_prospects?id=eq.${placeId}&select=id`).catch(() => []);
-  return !rows || rows.length === 0;
+async function prospectNovo(placeId, waNum) {
+  const [byId, byNum] = await Promise.all([
+    sbFetch(`/wa_prospects?id=eq.${placeId}&select=id`).catch(() => []),
+    sbFetch(`/wa_prospects?wa_num=eq.${waNum}&select=id`).catch(() => []),
+  ]);
+  return (!byId || byId.length === 0) && (!byNum || byNum.length === 0);
 }
 
 // ─── Evolution API ───────────────────────────────────────────────────────────
@@ -173,7 +176,7 @@ async function jobBuscar() {
   let novos = 0;
   for (const p of prospects) {
     if (novos >= vagas * 2) break; // buffer 2x para ter fila suficiente
-    if (!await prospectNovo(p.id)) continue;
+    if (!await prospectNovo(p.id, p.waNum)) continue;
 
     // Salva na fila SEM gerar site (preview_url = null)
     await sbFetch('/wa_prospects', 'POST', {
