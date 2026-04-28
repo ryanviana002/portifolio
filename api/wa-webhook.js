@@ -97,9 +97,14 @@ async function responderPergunta(texto, nomeProspect) {
           role: 'user',
           content: `O cliente "${nomeProspect}" perguntou via WhatsApp: "${texto}"
 
-Responda de forma curta, simpática e natural como se fosse o assistente do Ryan no WhatsApp. Máximo 5 linhas. Use emojis com moderação. Não mencione que é um assistente virtual — fale como se fosse da equipe.
+Responda de forma curta e direta. Máximo 4 linhas. Use emojis com moderação.
 
-Se a pergunta for sobre negociação de preço/desconto, ou algo muito específico que não está no contexto, responda: ESCALAR`,
+REGRAS:
+- NÃO comece com cumprimento (não use "Olá", "Oi", "Tudo bem", "Bom dia", etc)
+- Vá direto ao ponto da resposta
+- Não mencione que é assistente virtual
+
+Se a pergunta for sobre desconto/negociação de preço, loja virtual/e-commerce, ou algo fora do contexto, responda apenas: ESCALAR`,
         }],
       }),
     });
@@ -114,7 +119,8 @@ Se a pergunta for sobre negociação de preço/desconto, ou algo muito específi
 
 async function analisarResposta(texto) {
   if (!texto?.trim()) return { tipo: 'ignorar', resposta: null };
-  const limpo = texto.trim().toLowerCase().replace(/[!?.,']/g, '');
+  const limpo = texto.trim().toLowerCase().replace(/[!?.,']/g, '').trim();
+  // Ignora SOMENTE se a mensagem inteira for um cumprimento
   if (CUMPRIMENTOS.includes(limpo)) return { tipo: 'ignorar', resposta: null };
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
