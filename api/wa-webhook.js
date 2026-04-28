@@ -43,6 +43,75 @@ async function alertar(msg) {
 
 const CUMPRIMENTOS = ['oi','olá','ola','bom dia','boa tarde','boa noite','boa','hey','hello','hi','tudo bem','tudo bom','td bem','td bom','e aí','eai','opa'];
 
+const CONTEXTO_RYAN = `Você é o assistente virtual do Ryan Viana, desenvolvedor web da RDCreator (ryancreator.dev), especialista em sites para negócios locais da região de Campinas e todo o Brasil.
+
+SOBRE O RYAN:
+- Desenvolvedor web especialista em negócios locais
+- Atendimento direto, sem intermediários
+- Atende em todo o Brasil (online)
+- Site: ryancreator.dev
+
+PLANOS (pagamento único, sem mensalidade):
+- Básico R$697: site one page moderno, até 6 seções, botão WhatsApp, galeria de fotos, mapa do Google, informações do negócio. Entrega em 5 dias úteis.
+- Padrão R$1.197 (mais escolhido): até 3 páginas, SEO para aparecer no Google, animações, domínio + hospedagem inclusos. Entrega em 12 dias úteis.
+- Premium R$1.597: até 5 páginas, copywriting estratégico, design exclusivo pensado para converter visitantes em clientes. Entrega em 14 dias úteis.
+
+MANUTENÇÃO (opcional): R$97/mês — atualizações de conteúdo, suporte e backup. Só contrata quem quiser.
+
+PAGAMENTO: Pix, transferência ou cartão de crédito em até 12x (com taxa da maquinha). 50% entrada + 50% na entrega.
+
+PROCESSO: Após fechar, Ryan envia um briefing rápido para preencher com as informações do negócio. Simples e rápido.
+
+GARANTIA: Se não gostar do resultado, revisamos sem custo até ficar perfeito.
+
+PORTFÓLIO: Tem exemplos de sites prontos para mostrar em ryancreator.dev.
+
+AGENDA: Limitada — poucos projetos por mês para garantir qualidade e dedicação total.
+
+CONTRATO: Sim, fornecemos contrato formal para quem preferir.
+
+DOMÍNIO PRÓPRIO: Sim, aproveitamos o domínio que o cliente já tem.
+
+PROPRIEDADE: Após a entrega, o site fica totalmente no nome do cliente.
+
+ALTERAÇÕES AVULSAS: Além da manutenção mensal, alterações pontuais têm valor a combinar.
+
+LOJA VIRTUAL (e-commerce): Se perguntarem sobre loja virtual ou e-commerce, responda: ESCALAR
+
+DIFERENCIAIS: Especialista em negócios locais, atendimento direto com o desenvolvedor, garantia de revisão, agenda limitada com dedicação total a cada projeto.`;
+
+async function responderPergunta(texto, nomeProspect) {
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 300,
+        system: CONTEXTO_RYAN,
+        messages: [{
+          role: 'user',
+          content: `O cliente "${nomeProspect}" perguntou via WhatsApp: "${texto}"
+
+Responda de forma curta, simpática e natural como se fosse o assistente do Ryan no WhatsApp. Máximo 5 linhas. Use emojis com moderação. Não mencione que é um assistente virtual — fale como se fosse da equipe.
+
+Se a pergunta for sobre negociação de preço/desconto, ou algo muito específico que não está no contexto, responda: ESCALAR`,
+        }],
+      }),
+    });
+    const d = await r.json();
+    const txt = (d.content?.[0]?.text || '').trim();
+    if (!txt || txt.includes('ESCALAR')) return null;
+    return txt;
+  } catch {
+    return null;
+  }
+}
+
 async function analisarResposta(texto) {
   if (!texto?.trim()) return { tipo: 'ignorar', resposta: null };
   const limpo = texto.trim().toLowerCase().replace(/[!?.,']/g, '');
@@ -217,7 +286,16 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, ignored: 'recusa' });
       }
       if (tipo === 'pergunta') {
-        await alertar(`❓ Nova pergunta em *${prospect.nome}*:\n"${texto}"\n\nWA: wa.me/${waNum}`);
+        const respostas_bot = (prospect.respostas_bot || 0);
+        if (respostas_bot < 3) {
+          const autoResp = await responderPergunta(texto, prospect.nome);
+          if (autoResp) {
+            await enviarWA(waNum, autoResp);
+            await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { respostas_bot: respostas_bot + 1, updated_at: new Date().toISOString() });
+            return res.status(200).json({ ok: true, auto_reply: true });
+          }
+        }
+        await alertar(`❓ Pergunta em *${prospect.nome}*:\n"${texto}"\n\nWA: wa.me/${waNum}`);
         return res.status(200).json({ ok: true, aguardando: 'pergunta' });
       }
       // Interesse — trava status antes de gerar (evita duplicata)
@@ -240,6 +318,15 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, ignored: 'recusa' });
       }
       if (tipo === 'pergunta') {
+        const respostas_bot = (prospect.respostas_bot || 0);
+        if (respostas_bot < 3) {
+          const autoResp = await responderPergunta(texto, prospect.nome);
+          if (autoResp) {
+            await enviarWA(waNum, autoResp);
+            await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { respostas_bot: respostas_bot + 1, updated_at: new Date().toISOString() });
+            return res.status(200).json({ ok: true, auto_reply: true });
+          }
+        }
         await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'aguardando_ryan', updated_at: new Date().toISOString() });
         await alertar(`❓ Pergunta em *${prospect.nome}*:\n"${texto}"\n\nWA: wa.me/${waNum}`);
         return res.status(200).json({ ok: true, aguardando: 'pergunta' });
@@ -285,6 +372,15 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, ignored: 'recusa' });
     }
     if (tipo === 'pergunta') {
+      const respostas_bot = (prospect.respostas_bot || 0);
+      if (respostas_bot < 3) {
+        const autoResp = await responderPergunta(textoHumano, prospect.nome);
+        if (autoResp) {
+          await enviarWA(waNum, autoResp);
+          await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { respostas_bot: respostas_bot + 1, status: 'replied', updated_at: new Date().toISOString() });
+          return res.status(200).json({ ok: true, auto_reply: true });
+        }
+      }
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'aguardando_ryan', updated_at: new Date().toISOString() });
       await alertar(`❓ Pergunta em *${prospect.nome}*:\n"${textoHumano}"\n\nWA: wa.me/${waNum}`);
       return res.status(200).json({ ok: true, aguardando: 'pergunta' });
