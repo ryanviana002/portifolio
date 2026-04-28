@@ -853,8 +853,9 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
 .v2-about-section > *:first-child { border-radius: 32px 0 0 32px; overflow: hidden; }
 .v2-about-section > *:last-child { border-radius: 0 32px 32px 0; overflow: visible; }
 .v2-about-img-wrap {
-  position: relative; overflow: hidden;
+  position: relative; overflow: visible;
   background: #0d0d0d; z-index: 1;
+  border-radius: inherit;
 }
 .v2-about-rabo {
   position: absolute;
@@ -1247,19 +1248,24 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
   .v2-hero-overlay {
     background:
       linear-gradient(to bottom, #000 0%, #000 8%, rgba(0,0,0,.4) 16%, transparent 24%),
-      linear-gradient(to right, #000 5%, transparent 20%, transparent 80%, #000 95%),
-      linear-gradient(to top, rgba(0,0,0,.9) 0%, rgba(0,0,0,.6) 20%, transparent 45%);
+      linear-gradient(to right, #000 5%, transparent 20%, transparent 80%, #000 95%);
+  }
+  @keyframes hero-breathe-mobile {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50%       { transform: translateY(0px) scale(1.015); }
   }
   .v2-hero-person {
-    inset: 0; left: 0; top: 0; transform: none;
-    width: 100%; height: 100%;
-    object-fit: cover; object-position: 70% center;
-    transform: translateY(60px);
+    inset: 0; left: 0; top: -10px;
+    width: 100%; height: calc(100% + 10px);
+    object-fit: cover; object-position: 65% top;
+    animation: hero-breathe-mobile 8s ease-in-out infinite;
   }
   .v2-hero-left {
-    position: absolute; top: auto; bottom: 60px; left: 20px;
-    transform: none; max-width: calc(100% - 40px); z-index: 3;
+    position: absolute; top: auto; bottom: 50px; left: 0; right: 0;
+    transform: none; width: 100%; padding: 0 20px; z-index: 10;
+    display: flex; flex-direction: column; align-items: flex-start;
   }
+  .v2-hero-left > :last-child { align-self: center; margin-top: 16px; }
   .v2-hero-title { font-size: clamp(44px, 12vw, 72px); letter-spacing: -2px; line-height: 0.9; text-shadow: 0 2px 20px rgba(0,0,0,.8), 0 4px 40px rgba(0,0,0,.6); }
   .v2-hero-card { display: none; }
   .v2-hero-stat-right { display: none; }
@@ -1299,7 +1305,11 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
   /* ABOUT */
   .v2-about-wrap { padding: 40px 20px 60px; }
   .v2-about-section { grid-template-columns: 1fr; max-height: none; }
-  .v2-about-img-wrap { height: 320px; }
+  .v2-about-section > *:first-child { border-radius: 32px 32px 0 0; overflow: visible; }
+  .v2-about-section > *:last-child { border-radius: 0 0 32px 32px; }
+  .v2-about-img-wrap { height: 360px; overflow: visible; border-radius: 32px 32px 0 0; clip-path: inset(0 round 32px 32px 0 0); }
+  .v2-about-img { object-position: center 10%; }
+  .v2-about-badge-wrap { top: calc(360px - 90px) !important; bottom: auto !important; left: 16px !important; transform: scale(0.9); transform-origin: bottom left; }
   .v2-about-text { padding: 40px 20px; }
   .v2-about-rabo { width: 100%; left: 0; transform: none; }
 

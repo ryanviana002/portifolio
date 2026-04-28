@@ -30,6 +30,7 @@ function playClick(vol = 0.15) {
 }
 
 export default function Preview() {
+  const [estilo, setEstilo] = useState('');
   const [url, setUrl] = useState('');
   const [checking, setChecking] = useState(false);
   const [confirmData, setConfirmData] = useState(null);
@@ -237,7 +238,7 @@ export default function Preview() {
       const res = await fetch('/api/preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url.trim() }),
+        body: JSON.stringify({ url: url.trim(), estilo }),
       });
       const data = await res.json();
       clearInterval(progressInterval);
@@ -331,6 +332,28 @@ export default function Preview() {
 
             <div className="preview-counter">+200 prévias geradas</div>
 
+            {/* Seleção de estilo */}
+            <div className="preview-estilos">
+              <p className="preview-estilos-label">Escolha o estilo do site:</p>
+              <div className="preview-estilos-grid">
+                {[
+                  { id: 'moderno', emoji: '⚡', nome: 'Moderno', desc: 'Clean, minimalista, cores vibrantes' },
+                  { id: 'classico', emoji: '🏛️', nome: 'Clássico', desc: 'Elegante, sóbrio, profissional' },
+                  { id: 'arrojado', emoji: '🔥', nome: 'Arrojado', desc: 'Bold, impactante, cheio de energia' },
+                ].map(e => (
+                  <button
+                    key={e.id}
+                    className={`preview-estilo-card${estilo === e.id ? ' selected' : ''}`}
+                    onClick={() => setEstilo(e.id)}
+                  >
+                    <span className="preview-estilo-emoji">{e.emoji}</span>
+                    <span className="preview-estilo-nome">{e.nome}</span>
+                    <span className="preview-estilo-desc">{e.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="preview-input-wrap">
               <input
                 className="preview-input"
@@ -340,10 +363,11 @@ export default function Preview() {
                 onChange={e => setUrl(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && verificar()}
               />
-              <button className="preview-btn" onClick={verificar} disabled={!url.trim() || checking}>
+              <button className="preview-btn" onClick={verificar} disabled={!url.trim() || checking || !estilo}>
                 {checking ? 'VERIFICANDO...' : 'GERAR PRÉVIA →'}
               </button>
             </div>
+            {!estilo && url.trim() && <p className="preview-error">Escolha um estilo antes de continuar</p>}
             <p className="preview-time-hint">Leva ~2 minutos para gerar</p>
 
             {error && <p className="preview-error">{error}</p>}

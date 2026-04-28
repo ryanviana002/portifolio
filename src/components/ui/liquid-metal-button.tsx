@@ -46,7 +46,6 @@ export function LiquidMetalButton({
           width: 100% !important; height: 100% !important;
           display: block !important; position: absolute !important;
           top: 0 !important; left: 0 !important;
-          border-radius: 100px !important;
           z-index: 0 !important;
           filter: none;
         }
@@ -59,9 +58,9 @@ export function LiquidMetalButton({
     }
 
     const metalStyleId = "lmb-metal-text-style";
-    if (!document.getElementById(metalStyleId)) {
-      const s = document.createElement("style");
-      s.id = metalStyleId;
+    {
+      let s = document.getElementById(metalStyleId) as HTMLStyleElement | null;
+      if (!s) { s = document.createElement("style"); s.id = metalStyleId; document.head.appendChild(s); }
       s.textContent = `
         @keyframes metal-shine {
           0%   { background-position: 200% center; }
@@ -69,7 +68,7 @@ export function LiquidMetalButton({
           100% { background-position: -200% center; }
         }
         .lmb-metal-text {
-          background: linear-gradient(105deg, #666 0%, #bbb 25%, #fff 42%, #eee 50%, #fff 58%, #bbb 75%, #666 100%);
+          background: linear-gradient(105deg, #e0e0e0 0%, #fff 30%, #fff 50%, #fff 70%, #e0e0e0 100%);
           background-size: 300% auto;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
@@ -77,7 +76,6 @@ export function LiquidMetalButton({
           animation: metal-shine 20s ease-in-out infinite;
         }
       `;
-      document.head.appendChild(s);
     }
 
     if (borderRadius !== undefined) {
@@ -87,9 +85,9 @@ export function LiquidMetalButton({
       if (!s) {
         s = document.createElement("style");
         s.id = id;
-        document.head.appendChild(s);
       }
       s.textContent = `[data-lmb-id="${id}"] canvas { border-radius: ${br} !important; }`;
+      document.head.appendChild(s);
     }
 
     if (shaderRef.current) {
@@ -101,9 +99,33 @@ export function LiquidMetalButton({
         undefined,
         0.6,
       );
+      {
+        const br = borderRadius !== undefined
+          ? (typeof borderRadius === "number" ? `${borderRadius}px` : borderRadius)
+          : "100px";
+        const applyBr = () => {
+          const canvas = shaderRef.current?.querySelector("canvas") as HTMLCanvasElement | null;
+          if (canvas) canvas.style.setProperty("border-radius", br, "important");
+          if (shaderRef.current) {
+            shaderRef.current.style.setProperty("border-radius", br, "important");
+            shaderRef.current.style.setProperty("overflow", "hidden", "important");
+          }
+        };
+        applyBr();
+        requestAnimationFrame(applyBr);
+        setTimeout(applyBr, 100);
+        setTimeout(applyBr, 500);
+        const observer = new MutationObserver(applyBr);
+        if (shaderRef.current) {
+          observer.observe(shaderRef.current, { childList: true, subtree: true, attributes: true, attributeFilter: ["style"] });
+        }
+        const origDestroy = shaderMount.current?.destroy?.bind(shaderMount.current);
+        if (shaderMount.current) shaderMount.current._brObserver = observer;
+      }
     }
 
     return () => {
+      if (shaderMount.current?._brObserver) shaderMount.current._brObserver.disconnect();
       if (shaderMount.current?.destroy) { shaderMount.current.destroy(); shaderMount.current = null; }
       const instanceStyle = document.getElementById(instanceId.current);
       if (instanceStyle) instanceStyle.remove();
@@ -162,8 +184,6 @@ export function LiquidMetalButton({
             top: 3, left: 3, right: 3, bottom: 3,
             background: bg,
             border: "none",
-            backdropFilter: "blur(12px) saturate(1.4)",
-            WebkitBackdropFilter: "blur(12px) saturate(1.4)",
             cursor: "pointer",
             outline: "none",
             borderRadius: br,

@@ -170,8 +170,8 @@ export default function V2() {
             <span style={{position:'relative', zIndex:2}}>creator.</span>
           </h1>
           <p className="v2-hero-sub">Sites, sistemas e design que constroem autoridade e geram resultado real.</p>
-          <LiquidMetalButton borderOnly onClick={() => scrollTo('v2-services')} style={{width:'220px', height:'58px'}}>
-            <span className="lmb-metal-text" style={{fontSize:12, fontWeight:900, letterSpacing:'2px', textTransform:'uppercase', whiteSpace:'nowrap', position:'relative', zIndex:999}}>Comece agora</span>
+          <LiquidMetalButton borderOnly onClick={() => scrollTo('v2-services')} style={{width:'220px', height:'58px', background:'#000'}}>
+            <span style={{fontSize:12, fontWeight:900, letterSpacing:'2px', textTransform:'uppercase', whiteSpace:'nowrap', position:'relative', zIndex:999, color:'#fff'}}>Comece agora</span>
           </LiquidMetalButton>
         </div>
 
@@ -366,7 +366,7 @@ export default function V2() {
                   )}
                 </div>
                 {isCenter && (
-                  <a href={w.link} className="v2-card3d-btn" onClick={e => e.stopPropagation()}><span style={{display:'inline-block',transform:'rotate(12deg)'}}>↗</span></a>
+                  <a href={w.link} className="v2-card3d-btn" onClick={e => e.stopPropagation()}><span style={{display:'inline-block',transform:'rotate(12deg)',fontFamily:'Arial,sans-serif',fontStyle:'normal'}}>&#x2197;&#xFE0E;</span></a>
                 )}
               </div>
             );
@@ -414,17 +414,17 @@ export default function V2() {
         <img src="/corda_lion.png" alt="" className="v2-about-rabo" />
         <div className="v2-about-ghost">ry.<br/>an.</div>
         <div className="v2-about-glow" />
-      <section className="v2-about-section" id="v2-about2">
+      <section className="v2-about-section" id="v2-about2" style={{position:'relative'}}>
         <div className="v2-about-img-wrap">
           <img src="/foto-ryan.png" alt="Ryan Viana" className="v2-about-img" />
-          <div style={{position:'absolute', bottom:28, left:28}}>
-            <LiquidMetalButton borderOnly borderRadius={16} style={{width:'160px', height:'68px', background:'rgba(38,38,38,.65)'}}>
-              <span style={{display:'flex', flexDirection:'column', gap:3, alignItems:'flex-start', position:'relative', zIndex:1, padding:'0 4px'}}>
-                <span style={{fontFamily:"'Onest',sans-serif", fontSize:16, fontWeight:900, color:'#fff'}}>Ryan Viana</span>
-                <small style={{fontSize:11, color:'rgba(255,255,255,0.45)', fontWeight:500}}>Desenvolvedor Web</small>
-              </span>
-            </LiquidMetalButton>
-          </div>
+        </div>
+        <div className="v2-about-badge-wrap" style={{position:'absolute', bottom:28, left:28, zIndex:10}}>
+          <LiquidMetalButton borderOnly borderRadius={16} style={{width:'160px', height:'68px', background:'rgba(38,38,38,.65)'}}>
+            <span style={{display:'flex', flexDirection:'column', gap:3, alignItems:'flex-start', position:'relative', zIndex:1, padding:'0 4px'}}>
+              <span style={{fontFamily:"'Onest',sans-serif", fontSize:16, fontWeight:900, color:'#fff'}}>Ryan Viana</span>
+              <small style={{fontSize:11, color:'rgba(255,255,255,0.45)', fontWeight:500}}>Desenvolvedor Web</small>
+            </span>
+          </LiquidMetalButton>
         </div>
         <div className="v2-about-text">
           <span className="v2-about-label">SOBRE MIM</span>
@@ -490,7 +490,7 @@ export default function V2() {
         </div>
 
         <div className="v2-footer-bottom">
-          <span>© 2025 <a href="https://ryancreator.dev" target="_blank" rel="noreferrer" style={{color:'inherit'}}>RDCreator</a>. Todos os direitos reservados.</span>
+          <span style={{whiteSpace:'nowrap', fontSize:'clamp(10px, 2.5vw, 13px)'}}>© 2025 <a href="https://ryancreator.dev" target="_blank" rel="noreferrer" style={{color:'inherit'}}>RDCreator</a>. Todos os direitos reservados.</span>
         </div>
       </footer>
     </div>

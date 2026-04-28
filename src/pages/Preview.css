@@ -134,6 +134,37 @@
   margin: 0 0 40px;
 }
 
+/* Seleção de estilo */
+.preview-estilos { margin-bottom: 24px; text-align: left; }
+.preview-estilos-label { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 12px; letter-spacing: 1px; text-transform: uppercase; }
+.preview-estilos-grid { display: flex; gap: 12px; }
+.preview-estilo-card {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 16px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.preview-estilo-card:hover { border-color: rgba(255,0,127,0.4); background: rgba(255,0,127,0.05); }
+.preview-estilo-card.selected { border-color: #ff007f; background: rgba(255,0,127,0.1); transform: translateY(-2px); }
+.preview-estilo-emoji { font-size: 28px; }
+.preview-estilo-nome { font-size: 14px; font-weight: 700; color: #fff; }
+.preview-estilo-desc { font-size: 11px; color: rgba(255,255,255,0.4); text-align: center; line-height: 1.4; }
+@media (max-width: 768px) {
+  .preview-estilos-grid { gap: 8px; }
+  .preview-estilo-card { padding: 12px 8px; }
+  .preview-estilo-emoji { font-size: 22px; }
+  .preview-estilo-nome { font-size: 12px; }
+  .preview-estilo-desc { display: none; }
+}
+
 /* Input */
 .preview-input-wrap {
   display: flex;

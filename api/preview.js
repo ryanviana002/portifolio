@@ -153,7 +153,7 @@ async function getPlaceDetails(placeId) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { url, placeId: directPlaceId, prompt: customPrompt, modelo, origem } = req.body;
+  const { url, placeId: directPlaceId, prompt: customPrompt, modelo, origem, estilo } = req.body;
 
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
   if (origem !== 'admin' && !await checkRateLimit(ip)) {
@@ -221,7 +221,13 @@ export default async function handler(req, res) {
     const paletaSugerida = Object.entries(paletasPorSegmento).find(([k]) => categoriaLower.includes(k))?.[1]
       || 'cores modernas e profissionais adequadas ao segmento';
 
-    const ctx = `NEGÓCIO: ${dados.nome} | ${dados.categoria} | ⭐${dados.avaliacao} (${dados.numAvaliacoes} avaliações) | TEL: ${dados.telefone || ''} | END: ${dados.endereco || ''} | CORES: ${paletaSugerida}`;
+    const estiloInstrucao = {
+      'moderno':  'ESTILO: moderno e minimalista — espaços generosos, tipografia grande, cores vibrantes, bordas arredondadas, muito whitespace',
+      'classico': 'ESTILO: clássico e elegante — cores sóbrias (azul marinho, dourado, bege), serif nos títulos, linhas limpas, aspecto corporativo',
+      'arrojado': 'ESTILO: arrojado e impactante — fundo escuro, cores neon, tipografia bold gigante, gradientes fortes, energia máxima',
+    }[estilo] || '';
+
+    const ctx = `NEGÓCIO: ${dados.nome} | ${dados.categoria} | ⭐${dados.avaliacao} (${dados.numAvaliacoes} avaliações) | TEL: ${dados.telefone || ''} | END: ${dados.endereco || ''} | CORES: ${paletaSugerida}${estiloInstrucao ? `\n${estiloInstrucao}` : ''}`;
 
     // Mapeia nome da cor para hex real
     const COR_HEX = {

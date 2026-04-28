@@ -259,6 +259,10 @@ ul {
   transition: left 0.06s linear, top 0.06s linear;
 }
 
+@media (max-width: 768px) {
+  .cursor, .cursor-dot { display: none !important; }
+}
+
 /* Scroll reveal animations */
 .reveal {
   opacity: 0;
