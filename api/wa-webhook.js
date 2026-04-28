@@ -305,7 +305,7 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error('wa-webhook error:', err);
-    const quem = _prospectNome ? `*${_prospectNome}*` : `wa.me/${_waNum}`;
+    const quem = _prospectNome ? `*${_prospectNome}*\nwa.me/${_waNum}` : `wa.me/${_waNum}`;
     await alertar(`Erro ao processar ${quem}:\n${err.message}`).catch(() => {});
     return res.status(200).json({ ok: true }); // sempre 200 pro Evolution não retentar
   }

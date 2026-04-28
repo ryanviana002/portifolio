@@ -19,9 +19,9 @@ const CATEGORIAS = [
   'serralheria', 'marcenaria', 'encanador', 'eletricista', 'pintura residencial',
 ];
 
-const LIMITE_DIA   = 50;
-const LIMITE_MANHA = 25;
-const LIMITE_TARDE = 25;
+const LIMITE_DIA   = 150;
+const LIMITE_MANHA = 75;
+const LIMITE_TARDE = 75;
 const DELAY_MIN_MS = 60_000;
 const DELAY_MAX_MS = 300_000;
 
@@ -67,10 +67,19 @@ async function alertar(msg) {
 const CAMPO_MASK = 'places.id,places.displayName,places.primaryTypeDisplayName,places.formattedAddress,places.websiteUri,places.nationalPhoneNumber,places.rating,places.userRatingCount,places.businessStatus,places.googleMapsUri,places.photos';
 const NAO_E_SITE = ['instagram.com','facebook.com','fb.com','wa.me','whatsapp.com','linktr.ee','linktree.com','beacons.ai','bio.link','ifood.com.br','rappi.com','uber.com','booking.com','tripadvisor','twitter.com','x.com','tiktok.com','youtube.com','google.com/maps','maps.google.com','waze.com'];
 
-const GRID_CAMPINAS = [
-  [-22.8600,-47.1000],[-22.8600,-47.0600],[-22.8600,-47.0200],
-  [-22.9000,-47.1000],[-22.9000,-47.0600],[-22.9000,-47.0200],
-  [-22.9400,-47.1000],[-22.9400,-47.0600],[-22.9400,-47.0200],
+const CIDADES = [
+  // Campinas (grid 3x3)
+  { nome: 'Campinas SP',              pontos: [[-22.8600,-47.1000],[-22.8600,-47.0600],[-22.8600,-47.0200],[-22.9000,-47.1000],[-22.9000,-47.0600],[-22.9000,-47.0200],[-22.9400,-47.1000],[-22.9400,-47.0600],[-22.9400,-47.0200]] },
+  // Cidades vizinhas (ponto central)
+  { nome: 'Sumaré SP',                pontos: [[-22.8219,-47.2669]] },
+  { nome: 'Hortolândia SP',           pontos: [[-22.8578,-47.2197]] },
+  { nome: 'Santa Bárbara d\'Oeste SP',pontos: [[-22.7536,-47.4136]] },
+  { nome: 'Americana SP',             pontos: [[-22.7386,-47.3319]] },
+  { nome: 'Indaiatuba SP',            pontos: [[-23.0903,-47.2192]] },
+  { nome: 'Valinhos SP',              pontos: [[-22.9703,-46.9961]] },
+  { nome: 'Vinhedo SP',               pontos: [[-23.0297,-46.9753]] },
+  { nome: 'Paulínia SP',              pontos: [[-22.7619,-47.1547]] },
+  { nome: 'Nova Odessa SP',           pontos: [[-22.7811,-47.2986]] },
 ];
 
 function temSiteProprio(uri) {
@@ -84,27 +93,30 @@ function temWA(phone) {
 }
 
 async function buscarProspects(categoria) {
-  const chamadas = GRID_CAMPINAS.map(([lat, lng]) =>
-    fetch('https://places.googleapis.com/v1/places:searchText', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': PLACES_KEY,
-        'X-Goog-FieldMask': CAMPO_MASK,
-      },
-      body: JSON.stringify({
-        textQuery: `${categoria} Campinas SP`,
-        languageCode: 'pt-BR',
-        maxResultCount: 20,
-        locationBias: { circle: { center: { latitude: lat, longitude: lng }, radius: 700 } },
-      }),
-    }).then(r => r.json()).then(d => d.places || []).catch(() => [])
+  const chamadas = CIDADES.flatMap(({ nome: cidade, pontos }) =>
+    pontos.map(([lat, lng]) =>
+      fetch('https://places.googleapis.com/v1/places:searchText', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': PLACES_KEY,
+          'X-Goog-FieldMask': CAMPO_MASK,
+        },
+        body: JSON.stringify({
+          textQuery: `${categoria} ${cidade}`,
+          languageCode: 'pt-BR',
+          maxResultCount: 20,
+          locationBias: { circle: { center: { latitude: lat, longitude: lng }, radius: 2000 } },
+        }),
+      }).then(r => r.json()).then(d => d.places || []).catch(() => [])
+    )
   );
   const todos = (await Promise.all(chamadas)).flat();
   const filtrados = todos.filter(p =>
     !temSiteProprio(p.websiteUri) &&
     p.businessStatus === 'OPERATIONAL' &&
-    temWA(p.nationalPhoneNumber)
+    temWA(p.nationalPhoneNumber) &&
+    (p.userRatingCount || 0) >= 25
   );
   const vistos = new Set();
   return filtrados.filter(p => {
@@ -323,5 +335,6 @@ http.createServer(async (req, res) => {
 
 console.log('🤖 RDCreator Worker iniciado');
 console.log('  Busca:     07:30 BRT (seg-sab)');
-console.log('  Manhã WA:  08:00 BRT (seg-sab)');
-console.log('  Tarde WA:  13:00 BRT (seg-sab)');
+console.log('  Manhã WA:  08:00 BRT (seg-sab) — 75 msgs');
+console.log('  Tarde WA:  13:00 BRT (seg-sab) — 75 msgs');
+console.log('  Limite:    150/dia | Cidades: Campinas + 9 vizinhas | Min 25 avaliações');
