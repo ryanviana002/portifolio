@@ -53,30 +53,46 @@ async function analisarResposta(texto) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5',
-        max_tokens: 120,
+        max_tokens: 150,
         messages: [{
           role: 'user',
-          content: `Você é o Ryan, desenvolvedor web da RDCreator. Enviou uma mensagem de prospecção para um negócio no WhatsApp dizendo que montou algo para eles e perguntou se podia mandar.
+          content: `Você é assistente de classificação. Um desenvolvedor web mandou prospecção no WhatsApp dizendo que montou um site para o negócio e perguntou se podia mandar.
 
-O cliente respondeu: "${texto}"
+Mensagem do cliente: "${texto}"
 
-Classifique a resposta em uma das três categorias:
-- INTERESSE: cliente quer ver o site (sim, pode mandar, quero ver, claro, etc)
-- PERGUNTA: cliente fez alguma pergunta antes de decidir (quanto custa? quem é você? como funciona? etc)
-- RECUSA: cliente não tem interesse (não obrigado, já tenho, não preciso, etc)
+Sua tarefa: classifique e responda EXATAMENTE como instruído abaixo, sem adicionar nada antes ou depois.
 
-Se RECUSA: escreva uma despedida curta e simpática em português brasileiro (máx 2 frases).
-Se INTERESSE ou PERGUNTA: responda apenas a palavra INTERESSE ou PERGUNTA.
+REGRAS:
+- INTERESSE: cliente autoriza ou quer ver (sim, pode, manda, quero ver, claro, ok, vai lá, etc)
+- PERGUNTA: cliente fez uma pergunta antes de decidir (quanto custa? quem é você? como funciona? etc)
+- RECUSA: cliente recusou, mesmo que de forma educada ou indireta
 
-Responda apenas: INTERESSE, PERGUNTA, ou a mensagem de despedida.`,
+Exemplos de RECUSA (atenção a estas):
+- "agradeço" / "obrigado" / "obrigada" sem pedir pra ver → RECUSA
+- "já temos site" / "já tenho" → RECUSA
+- "não obrigado" / "não preciso" / "não tenho interesse" → RECUSA
+- "tudo bem" / "ok obrigado" sem autorizar → RECUSA
+- qualquer agradecimento sem pedir o link → RECUSA
+
+Se RECUSA: escreva apenas uma despedida curta e simpática em português (máx 2 frases, sem mencionar "RECUSA").
+Se INTERESSE: responda somente a palavra INTERESSE.
+Se PERGUNTA: responda somente a palavra PERGUNTA.
+
+Responda agora:`,
         }],
       }),
     });
     const d = await r.json();
-    const txt = d.content?.[0]?.text?.trim() || 'INTERESSE';
+    const txt = (d.content?.[0]?.text || '').trim();
+    if (!txt) return { tipo: 'interesse', resposta: null };
     const upper = txt.toUpperCase();
-    if (upper.startsWith('INTERESSE')) return { tipo: 'interesse', resposta: null };
-    if (upper.startsWith('PERGUNTA')) return { tipo: 'pergunta', resposta: null };
+    if (upper === 'INTERESSE' || upper.startsWith('INTERESSE')) return { tipo: 'interesse', resposta: null };
+    if (upper === 'PERGUNTA' || upper.startsWith('PERGUNTA')) return { tipo: 'pergunta', resposta: null };
+    // Se contém RECUSA no texto (bug do modelo), extrai só a despedida
+    if (upper.includes('RECUSA')) {
+      const semRecusa = txt.replace(/recusa[:\s]*/i, '').trim();
+      return { tipo: 'recusa', resposta: semRecusa || 'Tudo bem! Qualquer coisa é só chamar. Abraço! 👋' };
+    }
     return { tipo: 'recusa', resposta: txt };
   } catch {
     return { tipo: 'interesse', resposta: null };
@@ -166,11 +182,14 @@ export default async function handler(req, res) {
 
     // Busca prospect ativo
     const prospects = await sbFetch(
-      `/wa_prospects?wa_num=eq.${waNum}&status=in.(sent1,replied,aguardando_ryan)&select=*&order=sent1_at.desc&limit=1`
+      `/wa_prospects?wa_num=eq.${waNum}&status=in.(sent1,replied,aguardando_ryan,generating)&select=*&order=sent1_at.desc&limit=1`
     );
     if (!prospects?.length) return res.status(200).json({ ok: true });
 
     const prospect = prospects[0];
+
+    // Já gerando site — ignora mensagem duplicada
+    if (prospect.status === 'generating') return res.status(200).json({ ok: true, ignored: 'generating' });
 
     // Mídia (figurinha, áudio, imagem, vídeo) — alerta Ryan para responder manualmente
     if (eMidia) {
@@ -193,7 +212,8 @@ export default async function handler(req, res) {
         await alertar(`❓ Nova pergunta em *${prospect.nome}*:\n"${texto}"\n\nWA: wa.me/${waNum}`);
         return res.status(200).json({ ok: true, aguardando: 'pergunta' });
       }
-      // Interesse — gera site e manda link
+      // Interesse — trava status antes de gerar (evita duplicata)
+      await sbFetch(`/wa_prospects?id=eq.${prospect.id}&status=eq.aguardando_ryan`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
       const { nome, previewUrl } = await gerarESalvarSite(prospect);
       await enviarWA(waNum, MSG_2(nome, previewUrl));
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'sent2', sent2_at: new Date().toISOString(), updated_at: new Date().toISOString() });
@@ -214,6 +234,8 @@ export default async function handler(req, res) {
         await alertar(`❓ Pergunta em *${prospect.nome}*:\n"${texto}"\n\nWA: wa.me/${waNum}`);
         return res.status(200).json({ ok: true, aguardando: 'pergunta' });
       }
+      // Trava status antes de gerar (evita duplicata)
+      await sbFetch(`/wa_prospects?id=eq.${prospect.id}&status=eq.replied`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
       const { nome, previewUrl } = await gerarESalvarSite(prospect);
       await enviarWA(waNum, MSG_2(nome, previewUrl));
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
@@ -256,7 +278,8 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, aguardando: 'pergunta' });
     }
 
-    // Gera site e envia 2º WA
+    // Trava status antes de gerar (evita duplicata)
+    await sbFetch(`/wa_prospects?id=eq.${prospect.id}&status=eq.sent1`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
     const { nome, previewUrl } = await gerarESalvarSite(prospect);
     await enviarWA(waNum, MSG_2(nome, previewUrl));
     await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
