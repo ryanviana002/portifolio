@@ -41,8 +41,12 @@ async function alertar(msg) {
   try { await enviarWA(ALERT_NUM, `⚠️ RDCreator Bot\n${msg}`); } catch {}
 }
 
+const CUMPRIMENTOS = ['oi','olá','ola','bom dia','boa tarde','boa noite','boa','hey','hello','hi','tudo bem','tudo bom','td bem','td bom','e aí','eai','opa'];
+
 async function analisarResposta(texto) {
-  if (!texto?.trim()) return { tipo: 'interesse', resposta: null };
+  if (!texto?.trim()) return { tipo: 'ignorar', resposta: null };
+  const limpo = texto.trim().toLowerCase().replace(/[!?.,']/g, '');
+  if (CUMPRIMENTOS.includes(limpo)) return { tipo: 'ignorar', resposta: null };
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -53,47 +57,31 @@ async function analisarResposta(texto) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5',
-        max_tokens: 150,
+        max_tokens: 10,
         messages: [{
           role: 'user',
-          content: `Você é assistente de classificação. Um desenvolvedor web mandou prospecção no WhatsApp dizendo que montou um site para o negócio e perguntou se podia mandar.
+          content: `Classifique a mensagem abaixo em uma única palavra: INTERESSE, PERGUNTA ou RECUSA.
 
-Mensagem do cliente: "${texto}"
+Contexto: um desenvolvedor web perguntou pelo WhatsApp se podia mandar um site que montou para o negócio do cliente.
 
-Sua tarefa: classifique e responda EXATAMENTE como instruído abaixo, sem adicionar nada antes ou depois.
+INTERESSE = cliente autoriza o envio (sim, pode, manda, quero ver, claro, ok, vai lá, etc)
+PERGUNTA = cliente fez pergunta antes de decidir (quanto custa? quem é você? como funciona? etc)
+RECUSA = qualquer outra coisa — recusa direta, educada, cumprimento sem autorizar, resposta vaga
 
-REGRAS:
-- INTERESSE: cliente autoriza ou quer ver (sim, pode, manda, quero ver, claro, ok, vai lá, etc)
-- PERGUNTA: cliente fez uma pergunta antes de decidir (quanto custa? quem é você? como funciona? etc)
-- RECUSA: cliente recusou, mesmo que de forma educada ou indireta
+Exemplos de RECUSA: "não obrigado", "já tenho", "agradeço", "tudo bem", "obrigada", "boa tarde", "oi", cumprimentos isolados, respostas que não autorizam o envio.
 
-Exemplos de RECUSA (atenção a estas):
-- "agradeço" / "obrigado" / "obrigada" sem pedir pra ver → RECUSA
-- "já temos site" / "já tenho" → RECUSA
-- "não obrigado" / "não preciso" / "não tenho interesse" → RECUSA
-- "tudo bem" / "ok obrigado" sem autorizar → RECUSA
-- qualquer agradecimento sem pedir o link → RECUSA
+Mensagem: "${texto}"
 
-Se RECUSA: escreva apenas uma despedida curta e simpática em português (máx 2 frases, sem mencionar "RECUSA").
-Se INTERESSE: responda somente a palavra INTERESSE.
-Se PERGUNTA: responda somente a palavra PERGUNTA.
-
-Responda agora:`,
+Responda só a palavra:`,
         }],
       }),
     });
     const d = await r.json();
-    const txt = (d.content?.[0]?.text || '').trim();
+    const txt = (d.content?.[0]?.text || '').trim().toUpperCase();
     if (!txt) return { tipo: 'interesse', resposta: null };
-    const upper = txt.toUpperCase();
-    if (upper === 'INTERESSE' || upper.startsWith('INTERESSE')) return { tipo: 'interesse', resposta: null };
-    if (upper === 'PERGUNTA' || upper.startsWith('PERGUNTA')) return { tipo: 'pergunta', resposta: null };
-    // Se contém RECUSA no texto (bug do modelo), extrai só a despedida
-    if (upper.includes('RECUSA')) {
-      const semRecusa = txt.replace(/recusa[:\s]*/i, '').trim();
-      return { tipo: 'recusa', resposta: semRecusa || 'Tudo bem! Qualquer coisa é só chamar. Abraço! 👋' };
-    }
-    return { tipo: 'recusa', resposta: txt };
+    if (txt.includes('INTERESSE')) return { tipo: 'interesse', resposta: null };
+    if (txt.includes('PERGUNTA')) return { tipo: 'pergunta', resposta: null };
+    return { tipo: 'recusa', resposta: 'Tudo bem! Se precisar de um site no futuro é só chamar. Abraço! 👋' };
   } catch {
     return { tipo: 'interesse', resposta: null };
   }
@@ -203,6 +191,7 @@ export default async function handler(req, res) {
     if (prospect.status === 'aguardando_ryan') {
       const texto = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
       const { tipo, resposta } = await analisarResposta(texto);
+      if (tipo === 'ignorar') return res.status(200).json({ ok: true, ignored: 'cumprimento' });
       if (tipo === 'recusa') {
         await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() });
         if (resposta) await enviarWA(waNum, resposta).catch(() => {});
@@ -224,6 +213,7 @@ export default async function handler(req, res) {
     if (prospect.status === 'replied') {
       const texto = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
       const { tipo, resposta } = await analisarResposta(texto);
+      if (tipo === 'ignorar') return res.status(200).json({ ok: true, ignored: 'cumprimento' });
       if (tipo === 'recusa') {
         await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() });
         if (resposta) await enviarWA(waNum, resposta).catch(() => {});
@@ -267,6 +257,7 @@ export default async function handler(req, res) {
     // Resposta humana (> 60s): verifica interesse antes de gerar site
     const textoHumano = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
     const { tipo, resposta } = await analisarResposta(textoHumano);
+    if (tipo === 'ignorar') return res.status(200).json({ ok: true, ignored: 'cumprimento' });
     if (tipo === 'recusa') {
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() });
       if (resposta) await enviarWA(waNum, resposta).catch(() => {});
