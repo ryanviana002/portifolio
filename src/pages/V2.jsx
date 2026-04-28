@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import './V2.css';
+import { LiquidMetalButton } from '../components/ui/liquid-metal-button';
 
 function StarField() {
   const canvasRef = useRef(null);
@@ -54,11 +55,11 @@ const TESTIMONIALS = [
 ];
 
 const WORKS = [
-  { tag: 'Web Design', title: 'AutoAirShop', desc: 'Site institucional para empresa de ar-condicionado automotivo.', sub: 'Mais acessos e contatos em 30 dias.', logo: '/logo-autoairshop.png', bg: 'linear-gradient(135deg, #1a3a6e 0%, #0d1f3c 100%)', link: 'https://autoarshop.vercel.app' },
-  { tag: 'Web Design', title: 'Genuína', desc: 'Presença digital completa para empresa local.', sub: 'Site com foco em contato e vendas.', logo: '/logo-genuina.png', bg: 'linear-gradient(135deg, #2a5a9e 0%, #1a3a6e 100%)', link: 'https://genuinaarautomotivo.com' },
-  { tag: 'Sistema Web', title: 'Preview AI', desc: 'Geração de sites com IA para prospecção via Google Maps.', sub: 'Automatiza contato com +50 leads/dia.', logo: '/preview-maps.png', bg: '#0a0a14', raw: true, screen: true, link: '/preview' },
-  { tag: 'Landing Page', title: 'Delega', desc: 'Landing page para app de marketplace de serviços.', sub: 'Design arrojado, alta conversão.', logo: '/logo-delega.png', bg: '#FF6A00', raw: true, link: '/delega' },
-  { tag: 'Portfólio', title: 'RDCreator', desc: 'Portfólio pessoal com animações canvas e efeitos neon.', sub: 'Terminal interativo e star warp.', logo: '/logo-rdc.png', bg: '#000', starfield: true, link: '/start' },
+  { tag: 'Web Design', title: 'AutoAirShop', desc: 'Site institucional para empresa de ar-condicionado automotivo.', sub: 'Mais acessos e contatos em 30 dias.', logo: '/logo-autoairshop.png', bg: 'linear-gradient(135deg, #1a3a6e 0%, #0d1f3c 100%)', link: 'https://autoarshop.vercel.app', glow: '59,130,246' },
+  { tag: 'Web Design', title: 'Genuína', desc: 'Presença digital completa para empresa local.', sub: 'Site com foco em contato e vendas.', logo: '/logo-genuina.png', bg: 'linear-gradient(135deg, #2a5a9e 0%, #1a3a6e 100%)', link: 'https://genuinaarautomotivo.com', glow: '59,130,246' },
+  { tag: 'Sistema Web', title: 'Preview AI', desc: 'Geração de sites com IA para prospecção via Google Maps.', sub: 'Automatiza contato com +50 leads/dia.', logo: '/preview-maps.png', bg: '#0a0a14', raw: true, screen: true, link: '/preview', glow: '158,100,255' },
+  { tag: 'Landing Page', title: 'Delega', desc: 'Landing page para app de marketplace de serviços.', sub: 'Design arrojado, alta conversão.', logo: '/logo-delega.png', bg: '#FF6A00', raw: true, link: '/delega', glow: '255,106,0' },
+  { tag: 'Portfólio', title: 'RDCreator', desc: 'Portfólio pessoal com animações canvas e efeitos neon.', sub: 'Terminal interativo e star warp.', logo: '/logo-rdc.png', bg: '#000', starfield: true, link: '/start', glow: '158,100,255' },
 ];
 
 export default function V2() {
@@ -169,9 +170,9 @@ export default function V2() {
             <span style={{position:'relative', zIndex:2}}>creator.</span>
           </h1>
           <p className="v2-hero-sub">Sites, sistemas e design que constroem autoridade e geram resultado real.</p>
-          <a href="#" onClick={e => { e.preventDefault(); scrollTo('v2-services'); }} className="v2-hero-cta-btn">
-            Comece agora
-          </a>
+          <LiquidMetalButton borderOnly onClick={() => scrollTo('v2-services')} style={{width:'220px', height:'58px'}}>
+            <span className="lmb-metal-text" style={{fontSize:12, fontWeight:900, letterSpacing:'2px', textTransform:'uppercase', whiteSpace:'nowrap', position:'relative', zIndex:999}}>Comece agora</span>
+          </LiquidMetalButton>
         </div>
 
         {/* Floating card — top center */}
@@ -203,6 +204,17 @@ export default function V2() {
 
       {/* SERVICES — grid estilo Octo */}
       <section className="v2-services" id="v2-services">
+        <svg style={{display:'none'}}>
+          <defs>
+            <filter id="svc-glass" x="0%" y="0%" width="100%" height="100%" colorInterpolationFilters="sRGB">
+              <feTurbulence type="fractalNoise" baseFrequency="0.04 0.04" numOctaves="1" seed="2" result="turbulence" />
+              <feGaussianBlur in="turbulence" stdDeviation="1.5" result="blurredNoise" />
+              <feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="40" xChannelSelector="R" yChannelSelector="B" result="displaced" />
+              <feGaussianBlur in="displaced" stdDeviation="2" result="finalBlur" />
+              <feComposite in="finalBlur" in2="finalBlur" operator="over" />
+            </filter>
+          </defs>
+        </svg>
         <div className="v2-svc-glow" />
         <div className="v2-svc-ghost">
           <div>rdc</div>
@@ -317,12 +329,25 @@ export default function V2() {
                   transform: `perspective(900px) translateX(${tx}px) rotateY(${ry}deg) scale(${sc})`,
                   zIndex: isCenter ? 10 : isEdge ? 3 : 5,
                   opacity: isEdge ? 0.55 : 1,
+                  '--mx': '50%', '--my': '50%', '--mo': '0',
+                  '--glow': w.glow || '180,100,255',
                 }}
                 onClick={() => !isCenter && setActiveWork(i)}
+                onMouseMove={e => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  const y = e.clientY - rect.top;
+                  e.currentTarget.style.setProperty('--mx', `${x}px`);
+                  e.currentTarget.style.setProperty('--my', `${y}px`);
+                  e.currentTarget.style.setProperty('--mo', '1');
+                }}
+                onMouseLeave={e => e.currentTarget.style.setProperty('--mo', '0')}
               >
-                <div className={`v2-card3d ${isCenter ? 'center' : ''}`}
+                <div
+                  className={`v2-card3d ${isCenter ? 'center' : ''}`}
                   style={{ filter: isCenter ? 'none' : 'grayscale(1) brightness(0.55)' }}
                 >
+                  <div className="v2-card3d-spotlight" style={{background: 'radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.10), transparent 70%)', opacity: 'var(--mo, 0)'}} />
                   <div className="v2-card3d-logo-bg" style={{background: w.bg}}>
                     {w.starfield && <StarField />}
                     <img src={w.logo} alt={w.title} className="v2-card3d-logo" style={{position:'relative', zIndex:1, filter: w.raw ? 'none' : undefined, mixBlendMode: w.screen ? 'screen' : 'normal'}} />
@@ -392,9 +417,13 @@ export default function V2() {
       <section className="v2-about-section" id="v2-about2">
         <div className="v2-about-img-wrap">
           <img src="/foto-ryan.png" alt="Ryan Viana" className="v2-about-img" />
-          <div className="v2-about-glass-badge">
-            <span>Ryan Viana</span>
-            <small>Desenvolvedor Web</small>
+          <div style={{position:'absolute', bottom:28, left:28}}>
+            <LiquidMetalButton borderOnly borderRadius={16} style={{width:'160px', height:'68px', background:'rgba(38,38,38,.65)'}}>
+              <span style={{display:'flex', flexDirection:'column', gap:3, alignItems:'flex-start', position:'relative', zIndex:1, padding:'0 4px'}}>
+                <span style={{fontFamily:"'Onest',sans-serif", fontSize:16, fontWeight:900, color:'#fff'}}>Ryan Viana</span>
+                <small style={{fontSize:11, color:'rgba(255,255,255,0.45)', fontWeight:500}}>Desenvolvedor Web</small>
+              </span>
+            </LiquidMetalButton>
           </div>
         </div>
         <div className="v2-about-text">
@@ -408,7 +437,9 @@ export default function V2() {
               <span key={s} className="v2-skill-pill">{s}</span>
             ))}
           </div>
-          <a href="https://wa.me/5519994175385" target="_blank" rel="noreferrer" className="v2-btn-glass">FALAR COMIGO</a>
+          <LiquidMetalButton borderOnly onClick={() => window.open('https://wa.me/5519994175385', '_blank')} style={{width:'220px', height:'58px', background:'#131313'}}>
+            <span className="lmb-metal-text" style={{fontSize:12, fontWeight:900, letterSpacing:'2px', textTransform:'uppercase', whiteSpace:'nowrap', position:'relative', zIndex:999}}>FALAR COMIGO</span>
+          </LiquidMetalButton>
         </div>
       </section>
       </div>

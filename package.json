@@ -12,16 +12,23 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.87.0",
     "@emailjs/browser": "^4.4.1",
+    "@paper-design/shaders": "^0.0.76",
+    "@radix-ui/react-slot": "^1.2.4",
     "@vercel/analytics": "^2.0.1",
     "cheerio": "^1.2.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.11.0",
     "nodemailer": "^8.0.5",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.2",
-    "resend": "^6.10.0"
+    "resend": "^6.10.0",
+    "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@tailwindcss/vite": "^4.2.4",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
@@ -31,6 +38,8 @@
     "globals": "^17.4.0",
     "puppeteer": "^24.42.0",
     "sharp": "^0.34.5",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^6.0.3",
     "vite": "^8.0.1"
   }
 }

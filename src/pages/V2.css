@@ -4,6 +4,7 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+
 html { overflow-x: hidden; }
 body { overflow-x: hidden; max-width: 100vw; position: relative; }
 
@@ -75,6 +76,13 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
   padding: 12px 28px;
   cursor: pointer;
   transition: all .3s cubic-bezier(.4,0,.2,1);
+  box-shadow:
+    inset 3px 3px 0.5px -3px rgba(255,255,255,0.4),
+    inset -3px -3px 0.5px -3px rgba(255,255,255,0.3),
+    inset 1px 1px 1px -0.5px rgba(255,255,255,0.5),
+    inset -1px -1px 1px -0.5px rgba(255,255,255,0.4),
+    inset 0 0 6px 6px rgba(255,255,255,0.08),
+    0 0 14px rgba(248,2,83,0.35);
 }
 .v2-btn-glass:hover {
   background: #d4055f;
@@ -172,15 +180,20 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
 }
 
 /* Imagem de fundo */
+@keyframes hero-breathe {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50%       { transform: translateX(-50%) scale(1.015); }
+}
 .v2-hero-person {
   position: absolute;
   top: 3%; left: 50%;
-  transform: translateX(-50%);
   width: 90%; height: 90%;
   object-fit: cover; object-position: 25% 5%;
   opacity: .9;
   pointer-events: none; user-select: none;
   z-index: 1;
+  will-change: transform;
+  animation: hero-breathe 8s ease-in-out infinite;
 }
 .v2-hero-overlay {
   position: absolute; inset: 0; z-index: 2;
@@ -218,9 +231,18 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
   font-size: 12px; font-weight: 900;
   letter-spacing: 2px; text-transform: uppercase;
   text-decoration: none; width: fit-content;
-  transition: background .2s;
+  transition: background .2s, transform .3s;
+  position: relative; overflow: hidden;
+  box-shadow:
+    inset 3px 3px 0.5px -3px rgba(255,255,255,0.4),
+    inset -3px -3px 0.5px -3px rgba(255,255,255,0.3),
+    inset 1px 1px 1px -0.5px rgba(255,255,255,0.5),
+    inset -1px -1px 1px -0.5px rgba(255,255,255,0.4),
+    inset 0 0 6px 6px rgba(255,255,255,0.08),
+    inset 0 0 2px 2px rgba(255,255,255,0.04),
+    0 0 18px rgba(248,2,83,0.4);
 }
-.v2-hero-cta-btn:hover { background: #d4055f; }
+.v2-hero-cta-btn:hover { background: #d4055f; transform: scale(1.04); }
 
 /* Floating card */
 .v2-hero-card {
@@ -247,6 +269,11 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
   display: flex; align-items: center; justify-content: center;
   font-size: 16px; text-decoration: none;
   flex-shrink: 0;
+  box-shadow:
+    inset 1px 1px 1px -0.5px rgba(255,255,255,0.5),
+    inset -1px -1px 1px -0.5px rgba(255,255,255,0.3),
+    inset 0 0 4px 4px rgba(255,255,255,0.07),
+    0 0 10px rgba(248,2,83,0.4);
 }
 .v2-hero-card-desc {
   font-size: 12px; color: #555; line-height: 1.4;
@@ -281,6 +308,11 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
   display: flex; align-items: center; justify-content: center;
   font-size: 16px; text-decoration: none; margin-top: 4px;
   align-self: flex-end;
+  box-shadow:
+    inset 1px 1px 1px -0.5px rgba(255,255,255,0.5),
+    inset -1px -1px 1px -0.5px rgba(255,255,255,0.3),
+    inset 0 0 4px 4px rgba(255,255,255,0.07),
+    0 0 10px rgba(248,2,83,0.4);
 }
 
 .v2-hero-tagline {
@@ -436,6 +468,18 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
   position: relative; overflow: hidden;
   transition: transform .3s ease;
   outline: none;
+  backdrop-filter: url("#svc-glass") blur(0px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 0 6px rgba(0,0,0,0.03),
+    0 2px 6px rgba(0,0,0,0.08),
+    inset 3px 3px 0.5px -3px rgba(255,255,255,0.09),
+    inset -3px -3px 0.5px -3px rgba(255,255,255,0.85),
+    inset 1px 1px 1px -0.5px rgba(255,255,255,0.6),
+    inset -1px -1px 1px -0.5px rgba(255,255,255,0.6),
+    inset 0 0 6px 6px rgba(255,255,255,0.12),
+    inset 0 0 2px 2px rgba(255,255,255,0.06),
+    0 0 12px rgba(0,0,0,0.15);
 }
 .v2-svc:hover { transform: translateY(-6px); }
 .v2-svc:focus { outline: none; }
@@ -529,6 +573,11 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
 .v2-filter-pill.active {
   background: var(--pink); border-color: var(--pink);
   color: #fff;
+  box-shadow:
+    inset 1px 1px 1px -0.5px rgba(255,255,255,0.5),
+    inset -1px -1px 1px -0.5px rgba(255,255,255,0.3),
+    inset 0 0 4px 4px rgba(255,255,255,0.07),
+    0 0 10px rgba(248,2,83,0.35);
 }
 .v2-stats-left { position: relative; z-index: 2; }
 .v2-stats-right { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; position: relative; z-index: 2; }
@@ -603,6 +652,11 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
 .v2-carousel-btn:hover { border-color: rgba(255,255,255,.4); }
 .v2-carousel-btn--pink {
   background: var(--pink); border-color: var(--pink);
+  box-shadow:
+    inset 1px 1px 1px -0.5px rgba(255,255,255,0.5),
+    inset -1px -1px 1px -0.5px rgba(255,255,255,0.3),
+    inset 0 0 4px 4px rgba(255,255,255,0.07),
+    0 0 12px rgba(248,2,83,0.4);
 }
 .v2-carousel-btn--pink:hover { opacity: .85; }
 
@@ -634,6 +688,25 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
   cursor: pointer;
   transition: transform .5s cubic-bezier(.4,0,.2,1);
   will-change: transform;
+  --mx: 50%; --my: 50%; --mo: 0;
+}
+.v2-card3d-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 30px;
+  padding: 2px;
+  background: radial-gradient(
+    300px circle at var(--mx) var(--my),
+    rgba(var(--glow, 180,100,255), calc(var(--mo) * 0.9)),
+    transparent 60%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 20;
 }
 
 /* Card interno — overflow hidden com border-radius */
@@ -643,6 +716,20 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
   overflow: hidden;
   position: relative;
   transition: filter .5s;
+}
+.v2-card3d-spotlight {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    300px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 255, 255, 0.10),
+    transparent 70%
+  );
+  opacity: var(--mo, 0);
+  transition: opacity .3s;
 }
 
 /* Card central — canto inferior esquerdo com borda arredondada */
@@ -660,6 +747,8 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
 .v2-card3d-logo-bg {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
+  border-radius: 28px;
+  overflow: hidden;
 }
 .v2-card3d-logo {
   width: 60%; max-width: 160px;
@@ -692,7 +781,7 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
 /* Conteúdo bottom */
 .v2-card3d-bottom {
   position: absolute;
-  bottom: 0; left: 0; right: 0;
+  bottom: -30px; left: 0; right: 0;
   padding: 20px 18px 80px 20px;
   z-index: 3;
   text-align: left;
@@ -718,14 +807,18 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
 /* Botão seta — encaixado no recorte do canto */
 .v2-card3d-btn {
   position: absolute;
-  bottom: 10px; left: -8px;
+  bottom: -20px; left: -8px;
   width: 64px; height: 64px;
   border-radius: 50%;
   background: #f0f0f0;
   border: none;
   display: flex; align-items: center; justify-content: center;
   color: #111; font-size: 22px; text-decoration: none;
-  box-shadow: 0 6px 24px rgba(0,0,0,.35);
+  box-shadow:
+    0 6px 24px rgba(0,0,0,.35),
+    inset 1px 1px 1px -0.5px rgba(255,255,255,0.8),
+    inset -1px -1px 1px -0.5px rgba(255,255,255,0.5),
+    inset 0 0 6px 6px rgba(255,255,255,0.15);
   z-index: 10;
   transition: background .2s, transform .2s;
 }
@@ -747,8 +840,7 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
 .v2-about-wrap {
   position: relative;
   padding: 40px 48px 80px;
-  overflow-x: clip;
-  overflow-y: visible;
+  overflow: visible;
 }
 .v2-about-section {
   display: grid; grid-template-columns: 360px 1fr;
@@ -756,8 +848,10 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
   max-width: 1100px; margin: 0 auto;
   position: relative; z-index: 3;
   border-radius: 32px;
-  overflow: hidden;
+  overflow: visible;
 }
+.v2-about-section > *:first-child { border-radius: 32px 0 0 32px; overflow: hidden; }
+.v2-about-section > *:last-child { border-radius: 0 32px 32px 0; overflow: visible; }
 .v2-about-img-wrap {
   position: relative; overflow: hidden;
   background: #0d0d0d; z-index: 1;
@@ -803,9 +897,10 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
   font-size: 11px; color: var(--muted); font-weight: 500;
 }
 .v2-about-text {
-  padding: 80px 60px;
-  display: flex; flex-direction: column; justify-content: center; gap: 20px;
+  padding: 80px 74px 80px 60px;
+  display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px;
   background: var(--surface); position: relative; z-index: 1;
+  text-align: center; overflow: visible;
 }
 .v2-about-label {
   font-family: 'Onest', sans-serif;
@@ -818,7 +913,7 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
   font-weight: 900; letter-spacing: -1px; line-height: 1.2; color: #fff;
 }
 .v2-about-text p { font-size: 15px; color: var(--muted); line-height: 1.7; }
-.v2-about-skills { display: flex; flex-wrap: wrap; gap: 8px; }
+.v2-about-skills { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .v2-skill-pill {
   padding: 7px 16px; border-radius: 999px;
   border: 1px solid var(--outline);
@@ -1148,7 +1243,7 @@ body { overflow-x: hidden; max-width: 100vw; position: relative; }
   .v2-services { overflow: hidden; }
   .v2-works { overflow: hidden; }
   .v2-stats { overflow: visible; }
-  .v2-about-wrap { overflow: hidden; }
+  .v2-about-wrap { overflow: visible; }
   .v2-hero-overlay {
     background:
       linear-gradient(to bottom, #000 0%, #000 8%, rgba(0,0,0,.4) 16%, transparent 24%),
