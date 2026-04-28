@@ -87,6 +87,20 @@ Responda só a palavra:`,
   }
 }
 
+async function tentarGerarESalvar(prospect, waNum, statusAnterior) {
+  try {
+    const { nome, previewUrl } = await gerarESalvarSite(prospect);
+    return { nome, previewUrl };
+  } catch (err) {
+    await alertar(`⚠️ Erro ao gerar site para *${prospect.nome}*:\n${err.message}\n\nWA: wa.me/${waNum}`);
+    await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
+      status: statusAnterior,
+      updated_at: new Date().toISOString(),
+    }).catch(() => {});
+    return null;
+  }
+}
+
 async function gerarESalvarSite(prospect) {
   // 1. Check (pega dados do Maps)
   const checkRes = await fetch(`${VERCEL_URL}/api/preview-check`, {
@@ -141,6 +155,9 @@ async function gerarESalvarSite(prospect) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
+  let _prospectNome = null;
+  let _waNum = null;
+
   try {
     const body = req.body;
 
@@ -151,6 +168,7 @@ export default async function handler(req, res) {
     if (!msg || msg.key?.fromMe) return res.status(200).json({ ok: true });
 
     const waNum = msg.key?.remoteJid?.replace('@s.whatsapp.net', '');
+    _waNum = waNum;
     if (!waNum) return res.status(200).json({ ok: true });
 
     // Detecta tipo de mensagem — só processa texto
@@ -175,6 +193,7 @@ export default async function handler(req, res) {
     if (!prospects?.length) return res.status(200).json({ ok: true });
 
     const prospect = prospects[0];
+    _prospectNome = prospect.nome;
 
     // Já gerando site — ignora mensagem duplicada
     if (prospect.status === 'generating') return res.status(200).json({ ok: true, ignored: 'generating' });
@@ -203,8 +222,9 @@ export default async function handler(req, res) {
       }
       // Interesse — trava status antes de gerar (evita duplicata)
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}&status=eq.aguardando_ryan`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
-      const { nome, previewUrl } = await gerarESalvarSite(prospect);
-      await enviarWA(waNum, MSG_2(nome, previewUrl));
+      const r1 = await tentarGerarESalvar(prospect, waNum, 'aguardando_ryan');
+      if (!r1) return res.status(200).json({ ok: true, error: 'geracao_falhou' });
+      await enviarWA(waNum, MSG_2(r1.nome, r1.previewUrl));
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'sent2', sent2_at: new Date().toISOString(), updated_at: new Date().toISOString() });
       return res.status(200).json({ ok: true, sent2: true, trigger: 'after_question' });
     }
@@ -226,8 +246,9 @@ export default async function handler(req, res) {
       }
       // Trava status antes de gerar (evita duplicata)
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}&status=eq.replied`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
-      const { nome, previewUrl } = await gerarESalvarSite(prospect);
-      await enviarWA(waNum, MSG_2(nome, previewUrl));
+      const r2 = await tentarGerarESalvar(prospect, waNum, 'replied');
+      if (!r2) return res.status(200).json({ ok: true, error: 'geracao_falhou' });
+      await enviarWA(waNum, MSG_2(r2.nome, r2.previewUrl));
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
         status: 'sent2',
         sent2_at: new Date().toISOString(),
@@ -271,8 +292,9 @@ export default async function handler(req, res) {
 
     // Trava status antes de gerar (evita duplicata)
     await sbFetch(`/wa_prospects?id=eq.${prospect.id}&status=eq.sent1`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
-    const { nome, previewUrl } = await gerarESalvarSite(prospect);
-    await enviarWA(waNum, MSG_2(nome, previewUrl));
+    const r3 = await tentarGerarESalvar(prospect, waNum, 'sent1');
+    if (!r3) return res.status(200).json({ ok: true, error: 'geracao_falhou' });
+    await enviarWA(waNum, MSG_2(r3.nome, r3.previewUrl));
     await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
       status: 'sent2',
       sent2_at: new Date().toISOString(),
@@ -283,7 +305,8 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error('wa-webhook error:', err);
-    await alertar(`Erro no webhook: ${err.message}`);
+    const quem = _prospectNome ? `*${_prospectNome}*` : `wa.me/${_waNum}`;
+    await alertar(`Erro ao processar ${quem}:\n${err.message}`).catch(() => {});
     return res.status(200).json({ ok: true }); // sempre 200 pro Evolution não retentar
   }
 }
