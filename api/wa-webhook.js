@@ -254,9 +254,8 @@ export default async function handler(req, res) {
         return `55${digits}`;
       }
 
-      // Comando: "previa <numero>" ou "previa <numero> <maps_url>"
-      // Aceita: (19) 99252-5515 / 19992525515 / 5519992525515 / com ou sem URL
-      const matchPreview = textoCmd.match(/^pr[eé]vi[ao]s?\s+([\d\s\(\)\-\.]{8,}?)(?:\s+(https?:\/\/\S+))?$/i);
+      // Comando: previa/prévia/preview/PREVIA/Previa + numero + URL opcional
+      const matchPreview = textoCmd.match(/^(?:pr[eé]vi[ao]s?|preview)\s+([\d\s\(\)\-\.]{8,}?)(?:\s+(https?:\/\/\S+))?$/i);
       if (matchPreview) {
         const numAlvo = normalizarNum(matchPreview[1]);
         const mapsUrlFornecida = matchPreview[2] || null;
