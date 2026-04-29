@@ -237,7 +237,9 @@ export default async function handler(req, res) {
   try {
     const body = req.body;
 
-    // Filtra só mensagens recebidas
+    // Log de debug — registra tudo que chega
+    console.log('[webhook]', JSON.stringify({ event: body?.event, fromMe: body?.data?.messages?.[0]?.key?.fromMe, remoteJid: body?.data?.messages?.[0]?.key?.remoteJid, text: body?.data?.messages?.[0]?.message?.conversation }));
+
     if (body?.event !== 'messages.upsert') return res.status(200).json({ ok: true });
 
     const msg = body?.data?.messages?.[0] || body?.data;
