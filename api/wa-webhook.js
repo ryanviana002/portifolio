@@ -323,6 +323,12 @@ export default async function handler(req, res) {
     _waNum = waNum;
     if (!waNum) return res.status(200).json({ ok: true });
 
+    // ── Comando do Ryan mandado do celular pessoal para o bot ─────────────────
+    if (waNum === ALERT_NUM) {
+      const textoCmd = (msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').trim();
+      return processarComandoRyan(textoCmd, res);
+    }
+
     // Detecta tipo de mensagem — só processa texto
     const tipoMensagem = msg.message
       ? Object.keys(msg.message)[0]
