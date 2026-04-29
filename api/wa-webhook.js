@@ -163,6 +163,65 @@ Responda só a palavra:`,
   }
 }
 
+// ── Normaliza número para formato 55XXXXXXXXXXX ───────────────────────────────
+function normalizarNum(raw) {
+  const digits = raw.replace(/\D/g, '');
+  if (digits.startsWith('55') && digits.length >= 12) return digits;
+  return `55${digits}`;
+}
+
+// ── Processa comandos enviados pelo Ryan para si mesmo ────────────────────────
+async function processarComandoRyan(textoCmd, res) {
+  const matchPreview = textoCmd.match(/^(?:pr[eé]vi[ao]s?|preview)\s+([\d\s\(\)\-\.]{8,}?)(?:\s+(https?:\/\/\S+))?$/i);
+  if (!matchPreview) return res.status(200).json({ ok: true });
+
+  const numAlvo = normalizarNum(matchPreview[1]);
+  const mapsUrlFornecida = matchPreview[2] || null;
+
+  await enviarWA(ALERT_NUM, `🔄 Processando prévia para *${numAlvo}*...`);
+  try {
+    let existentes = await sbFetch(`/wa_prospects?wa_num=eq.${numAlvo}&select=*&order=updated_at.desc&limit=1`);
+    let prospect = existentes?.[0] || null;
+    const statusOriginal = prospect?.status;
+
+    if (!prospect && !mapsUrlFornecida) {
+      await enviarWA(ALERT_NUM, `⚠️ *${numAlvo}* não está na base.\n\nInforme a URL do Maps:\n_previa ${numAlvo} https://maps.google.com/..._`);
+      return res.status(200).json({ ok: true });
+    }
+
+    if (!prospect) {
+      const criados = await sbFetch('/wa_prospects', 'POST', {
+        id: `manual_${numAlvo}`,
+        nome: numAlvo,
+        wa_num: numAlvo,
+        maps_url: mapsUrlFornecida,
+        status: 'pending',
+        updated_at: new Date().toISOString(),
+      });
+      prospect = Array.isArray(criados) ? criados[0] : { id: `manual_${numAlvo}`, nome: numAlvo, wa_num: numAlvo, maps_url: mapsUrlFornecida, status: 'pending' };
+    } else if (mapsUrlFornecida) {
+      await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { maps_url: mapsUrlFornecida, updated_at: new Date().toISOString() });
+      prospect.maps_url = mapsUrlFornecida;
+    }
+
+    if (prospect.preview_url && !mapsUrlFornecida) {
+      await enviarWA(ALERT_NUM, `✅ Prévia de *${prospect.nome}*:\n\n${prospect.preview_url}\n\n_Encaminhe ao cliente quando quiser._`);
+      return res.status(200).json({ ok: true });
+    }
+
+    await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
+    const { nome, previewUrl } = await gerarESalvarSite(prospect);
+    await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
+      status: statusOriginal && statusOriginal !== 'generating' ? statusOriginal : 'sent1',
+      updated_at: new Date().toISOString(),
+    });
+    await enviarWA(ALERT_NUM, `✅ Prévia de *${nome}*:\n\n${previewUrl}\n\n_Encaminhe ao cliente quando quiser._`);
+  } catch (err) {
+    await enviarWA(ALERT_NUM, `❌ Erro ao gerar prévia para ${numAlvo}:\n${err.message}`);
+  }
+  return res.status(200).json({ ok: true });
+}
+
 async function tentarGerarESalvar(prospect, waNum, statusAnterior) {
   try {
     const { nome, previewUrl } = await gerarESalvarSite(prospect);
@@ -238,79 +297,26 @@ export default async function handler(req, res) {
     const body = req.body;
 
     // Log de debug — registra tudo que chega
-    console.log('[webhook]', JSON.stringify({ event: body?.event, fromMe: body?.data?.messages?.[0]?.key?.fromMe, remoteJid: body?.data?.messages?.[0]?.key?.remoteJid, text: body?.data?.messages?.[0]?.message?.conversation }));
+    console.log('[webhook]', JSON.stringify({ event: body?.event, fromMe: body?.data?.key?.fromMe ?? body?.data?.messages?.[0]?.key?.fromMe, text: body?.data?.message?.conversation ?? body?.data?.messages?.[0]?.message?.conversation }));
+
+    // ── Comandos do Ryan via SEND_MESSAGE ─────────────────────────────────────
+    if (body?.event === 'send.message') {
+      const msgCmd = body?.data;
+      if (!msgCmd?.key?.fromMe) return res.status(200).json({ ok: true });
+      const textoCmd = (msgCmd?.message?.conversation || msgCmd?.message?.extendedTextMessage?.text || '').trim();
+      await processarComandoRyan(textoCmd, res);
+      return;
+    }
 
     if (body?.event !== 'messages.upsert') return res.status(200).json({ ok: true });
 
     const msg = body?.data?.messages?.[0] || body?.data;
     if (!msg) return res.status(200).json({ ok: true });
 
-    // ── Comandos do Ryan (mensagens enviadas por mim mesmo) ──────────────────
+    // ── Comandos do Ryan via MESSAGES_UPSERT (fromMe) ─────────────────────────
     if (msg.key?.fromMe) {
       const textoCmd = (msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').trim();
-
-      // Normaliza número: remove formatação, garante 55 na frente
-      function normalizarNum(raw) {
-        const digits = raw.replace(/\D/g, '');
-        if (digits.startsWith('55') && digits.length >= 12) return digits;
-        return `55${digits}`;
-      }
-
-      // Comando: previa/prévia/preview/PREVIA/Previa + numero + URL opcional
-      const matchPreview = textoCmd.match(/^(?:pr[eé]vi[ao]s?|preview)\s+([\d\s\(\)\-\.]{8,}?)(?:\s+(https?:\/\/\S+))?$/i);
-      if (matchPreview) {
-        const numAlvo = normalizarNum(matchPreview[1]);
-        const mapsUrlFornecida = matchPreview[2] || null;
-
-        await enviarWA(ALERT_NUM, `🔄 Processando prévia para *${numAlvo}*...`);
-        try {
-          let existentes = await sbFetch(`/wa_prospects?wa_num=eq.${numAlvo}&select=*&order=updated_at.desc&limit=1`);
-          let prospect = existentes?.[0] || null;
-          const statusOriginal = prospect?.status;
-
-          if (!prospect && !mapsUrlFornecida) {
-            await enviarWA(ALERT_NUM, `⚠️ *${numAlvo}* não está na base.\n\nInforme a URL do Maps:\n_previa ${numAlvo} https://maps.google.com/..._`);
-            return res.status(200).json({ ok: true });
-          }
-
-          if (!prospect) {
-            // Cria prospect manual com a URL fornecida
-            const criados = await sbFetch('/wa_prospects', 'POST', {
-              id: `manual_${numAlvo}`,
-              nome: numAlvo,
-              wa_num: numAlvo,
-              maps_url: mapsUrlFornecida,
-              status: 'pending',
-              updated_at: new Date().toISOString(),
-            });
-            prospect = Array.isArray(criados) ? criados[0] : { id: `manual_${numAlvo}`, nome: numAlvo, wa_num: numAlvo, maps_url: mapsUrlFornecida, status: 'pending' };
-          } else if (mapsUrlFornecida) {
-            // Atualiza URL se foi fornecida nova
-            await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { maps_url: mapsUrlFornecida, updated_at: new Date().toISOString() });
-            prospect.maps_url = mapsUrlFornecida;
-          }
-
-          // Se já tem prévia gerada, devolve o link
-          if (prospect.preview_url && !mapsUrlFornecida) {
-            await enviarWA(ALERT_NUM, `✅ Prévia de *${prospect.nome}*:\n\n${prospect.preview_url}\n\n_Encaminhe ao cliente quando quiser._`);
-            return res.status(200).json({ ok: true });
-          }
-
-          // Gera e salva
-          await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
-          const { nome, previewUrl } = await gerarESalvarSite(prospect);
-          await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
-            status: statusOriginal && statusOriginal !== 'generating' ? statusOriginal : 'sent1',
-            updated_at: new Date().toISOString(),
-          });
-          await enviarWA(ALERT_NUM, `✅ Prévia de *${nome}*:\n\n${previewUrl}\n\n_Encaminhe ao cliente quando quiser._`);
-        } catch (err) {
-          await enviarWA(ALERT_NUM, `❌ Erro ao gerar prévia para ${numAlvo}:\n${err.message}`);
-        }
-        return res.status(200).json({ ok: true });
-      }
-
-      return res.status(200).json({ ok: true });
+      return processarComandoRyan(textoCmd, res);
     }
 
     const waNum = msg.key?.remoteJid?.replace('@s.whatsapp.net', '');
