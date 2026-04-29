@@ -296,8 +296,8 @@ export default async function handler(req, res) {
   try {
     const body = req.body;
 
-    // Log de debug — registra tudo que chega
-    console.log('[webhook]', JSON.stringify({ event: body?.event, fromMe: body?.data?.key?.fromMe ?? body?.data?.messages?.[0]?.key?.fromMe, text: body?.data?.message?.conversation ?? body?.data?.messages?.[0]?.message?.conversation }));
+    // Log de debug — registra TUDO que chega
+    console.log('[webhook RAW]', JSON.stringify(body).slice(0, 500));
 
     // ── Comandos do Ryan via SEND_MESSAGE ─────────────────────────────────────
     if (body?.event === 'send.message') {
