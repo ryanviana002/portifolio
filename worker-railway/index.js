@@ -231,17 +231,26 @@ async function jobBuscar() {
     if (novos >= vagas * 2) break; // buffer 2x para ter fila suficiente
     if (!await prospectNovo(p.id, p.waNum)) continue;
 
-    // Salva na fila SEM gerar site (preview_url = null)
-    await sbFetch('/wa_prospects', 'POST', {
-      id: p.id,
-      nome: p.nome,
-      categoria: p.categoria,
-      wa_num: p.waNum,
-      telefone: p.telefone,
-      maps_url: p.mapsUrl,
-      foto: p.foto,
-      status: 'pending',
-      updated_at: new Date().toISOString(),
+    // Salva na fila SEM gerar site — usa INSERT puro (sem merge) para nunca sobrescrever contatos existentes
+    await fetch(`${SUPABASE_URL}/rest/v1/wa_prospects`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer': 'resolution=ignore-duplicates,return=minimal',
+      },
+      body: JSON.stringify({
+        id: p.id,
+        nome: p.nome,
+        categoria: p.categoria,
+        wa_num: p.waNum,
+        telefone: p.telefone,
+        maps_url: p.mapsUrl,
+        foto: p.foto,
+        status: 'pending',
+        updated_at: new Date().toISOString(),
+      }),
     }).catch(err => console.error(`Erro ao salvar ${p.nome}:`, err.message));
 
     novos++;
