@@ -182,6 +182,28 @@ async function contarDisparosHoje() {
   return Array.isArray(rows) ? rows.length : 0;
 }
 
+// ─── Contagem de disparos na última hora ─────────────────────────────────────
+async function contarDisparosUltimaHora() {
+  const umaHoraAtras = new Date(Date.now() - 60 * 60 * 1000);
+  const rows = await sbFetch(`/wa_prospects?sent1_at=gte.${umaHoraAtras.toISOString()}&select=id`).catch(() => []);
+  return Array.isArray(rows) ? rows.length : 0;
+}
+
+// ─── Expirar prospects sem resposta após 7 dias ───────────────────────────────
+async function jobExpirarSemResposta() {
+  const sete_dias_atras = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const rows = await sbFetch(
+    `/wa_prospects?status=in.(sent1,replied)&sent1_at=lte.${sete_dias_atras.toISOString()}&select=id,nome`
+  ).catch(() => []);
+  if (!rows?.length) return;
+  for (const p of rows) {
+    await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
+      status: 'ignored', updated_at: new Date().toISOString(),
+    }).catch(() => {});
+  }
+  console.log(`[expirar] ${rows.length} prospects sem resposta marcados como ignored.`);
+}
+
 // ─── Job: busca prospects e enfileira (sem gerar site) ───────────────────────
 async function jobBuscar() {
   console.log(`[${new Date().toLocaleString('pt-BR')}] Buscando prospects...`);
@@ -228,13 +250,17 @@ async function jobBuscar() {
   console.log(`${novos} novos adicionados à fila.`);
 }
 
+const LIMITE_HORA = 10;
+
 // ─── Job: disparo WA (1º msg — apenas texto, sem site) ───────────────────────
 async function jobDisparoLote(limite) {
   console.log(`[${new Date().toLocaleString('pt-BR')}] Disparando lote (${limite})...`);
 
   const dispararHoje = await contarDisparosHoje();
-  const restantes = Math.min(limite, LIMITE_DIA - dispararHoje);
-  if (restantes <= 0) { console.log('Limite diário atingido.'); return; }
+  const dispararHora = await contarDisparosUltimaHora();
+  if (dispararHoje >= LIMITE_DIA)  { console.log('Limite diário atingido.'); return; }
+  if (dispararHora >= LIMITE_HORA) { console.log('Limite por hora atingido.'); return; }
+  const restantes = Math.min(limite, LIMITE_DIA - dispararHoje, LIMITE_HORA - dispararHora);
 
   const pendentes = await sbFetch(
     `/wa_prospects?status=eq.pending&select=*&limit=${restantes}`
@@ -275,20 +301,23 @@ async function jobDisparoLote(limite) {
 }
 
 // ─── Agendamentos (UTC, Brasília = UTC-3) ────────────────────────────────────
-// 07:30 BRT = 10:30 UTC
+// 07:30 BRT = 10:30 UTC — seg a sex + sábado
 cron.schedule('30 10 * * 1-6', jobBuscar);
 
-// 08:00–08:20 BRT (aleatório) = 11:00 UTC + delay
+// 08:00–08:20 BRT (aleatório) = 11:00 UTC — seg a sex + sábado
 cron.schedule('0 11 * * 1-6', () => {
-  const jitter = Math.floor(Math.random() * 20 * 60 * 1000); // até 20min
+  const jitter = Math.floor(Math.random() * 20 * 60 * 1000);
   setTimeout(() => jobDisparoLote(LIMITE_MANHA), jitter);
 });
 
-// 13:00–13:20 BRT (aleatório) = 16:00 UTC + delay
-cron.schedule('0 16 * * 1-6', () => {
-  const jitter = Math.floor(Math.random() * 20 * 60 * 1000); // até 20min
+// 13:00–13:20 BRT (aleatório) = 16:00 UTC — SOMENTE seg a sex (sem sábado tarde)
+cron.schedule('0 16 * * 1-5', () => {
+  const jitter = Math.floor(Math.random() * 20 * 60 * 1000);
   setTimeout(() => jobDisparoLote(LIMITE_TARDE), jitter);
 });
+
+// 06:00 BRT = 09:00 UTC — expira prospects sem resposta em 7 dias
+cron.schedule('0 9 * * *', jobExpirarSemResposta);
 
 // Servidor HTTP para triggers manuais
 const PORT = process.env.PORT || 3000;
@@ -351,5 +380,6 @@ http.createServer(async (req, res) => {
 console.log('🤖 RDCreator Worker iniciado');
 console.log('  Busca:     07:30 BRT (seg-sab)');
 console.log('  Manhã WA:  08:00–08:20 BRT (seg-sab) — 20 msgs');
-console.log('  Tarde WA:  13:00–13:20 BRT (seg-sab) — 20 msgs');
-console.log('  Limite:    40/dia | Delay: 3–8min | Msgs variadas | Cidades: Campinas + 9 vizinhas | Min 25 avaliações');
+console.log('  Tarde WA:  13:00–13:20 BRT (seg-sex) — 20 msgs  [sábado só manhã]');
+console.log('  Expirar:   06:00 BRT (diário) — ignored após 7 dias sem resposta');
+console.log('  Limite:    40/dia | 10/hora | Delay: 3–8min | Msgs variadas');
