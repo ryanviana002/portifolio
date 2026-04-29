@@ -27,12 +27,12 @@ const DELAY_MAX_MS = 480_000;  // 8 min
 
 // ─── Variações da MSG_1 (anti-spam) ─────────────────────────────────────────
 const MSGS_1 = [
-  (nome) => `Olá! Aqui é o Ryan, dev web da RDCreator. Vi a *${nome}* no Google Maps e já montei um rascunho de site pra vocês. Posso mandar?`,
-  (nome) => `Oi! Sou o Ryan, desenvolvedor da RDCreator. Encontrei a *${nome}* no Maps e criei algo que pode interessar. Posso te mostrar?`,
-  (nome) => `Olá! Ryan aqui, da RDCreator. Estava vendo negócios locais no Google e montei um site de exemplo pra *${nome}*. Posso enviar pra vocês verem?`,
-  (nome) => `Oi! Aqui é o Ryan, dev web. Vi a *${nome}* no Maps e preparei uma prévia de site. Quer dar uma olhada?`,
-  (nome) => `Olá! Sou o Ryan da RDCreator, desenvolvedor web. Montei um site de demonstração pra *${nome}* — posso mandar o link?`,
-  (nome) => `Oi, aqui é o Ryan! Encontrei a *${nome}* no Google Maps e criei um modelo de site pra vocês. Posso compartilhar?`,
+  (nome) => `Olá! Aqui é o Ryan, da RDCreator — faço sites para negócios locais. Vi a *${nome}* no Google Maps e já montei um rascunho de site pra vocês. Posso mandar?`,
+  (nome) => `Oi! Sou o Ryan, da RDCreator. Criamos sites para negócios como o de vocês. Encontrei a *${nome}* no Maps e preparei algo — posso te mostrar?`,
+  (nome) => `Olá! Ryan aqui, da RDCreator — criamos sites para negócios locais. Estava vendo empresas no Google e montei um site de exemplo pra *${nome}*. Posso enviar pra vocês verem?`,
+  (nome) => `Oi! Aqui é o Ryan, da RDCreator. A gente cria sites para negócios da região. Vi a *${nome}* no Maps e preparei uma prévia — quer dar uma olhada?`,
+  (nome) => `Olá! Sou o Ryan, da RDCreator — faço sites para negócios locais. Montei um site de demonstração pra *${nome}*, posso mandar o link?`,
+  (nome) => `Oi, aqui é o Ryan da RDCreator! Criamos sites para negócios como o de vocês. Encontrei a *${nome}* no Google Maps e já criei um modelo — posso compartilhar?`,
 ];
 function MSG_1(nome) {
   return MSGS_1[Math.floor(Math.random() * MSGS_1.length)](nome);
