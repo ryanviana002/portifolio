@@ -246,68 +246,65 @@ export default async function handler(req, res) {
     // ── Comandos do Ryan (mensagens enviadas por mim mesmo) ──────────────────
     if (msg.key?.fromMe) {
       const textoCmd = (msg.message?.conversation || msg.message?.extendedTextMessage?.text || '').trim();
-      // Comando: "preview <numero>" ou "prévia <numero>"
-      const matchPreview = textoCmd.match(/^pr[eé]vi[ao]s?\s+(\d{10,13})/i);
-      if (matchPreview) {
-        const numAlvo = matchPreview[1].startsWith('55') ? matchPreview[1] : `55${matchPreview[1]}`;
-        await enviarWA(ALERT_NUM, `🔄 Gerando prévia para *${numAlvo}*...`);
-        try {
-          // Verifica se já tem prospect no banco
-          const existentes = await sbFetch(`/wa_prospects?wa_num=eq.${numAlvo}&select=*&order=updated_at.desc&limit=1`);
-          let prospect = existentes?.[0] || null;
 
-          if (!prospect) {
-            // Cria prospect manual sem maps_url — vai gerar site genérico
-            await enviarWA(ALERT_NUM, `⚠️ Número *${numAlvo}* não está na base. Crie o prospect primeiro via Admin ou informe a URL do Google Maps.\n\nEx: _preview ${numAlvo} https://maps.google.com/..._`);
-            return res.status(200).json({ ok: true });
-          }
-
-          if (prospect.preview_url) {
-            await enviarWA(ALERT_NUM, `✅ Prévia já existe para *${prospect.nome}*:\n\n${prospect.preview_url}`);
-            return res.status(200).json({ ok: true });
-          }
-
-          // Gera e salva o site
-          await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
-          const { nome, previewUrl } = await gerarESalvarSite(prospect);
-          await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: prospect.status === 'generating' ? 'sent1' : prospect.status, updated_at: new Date().toISOString() });
-          await enviarWA(ALERT_NUM, `✅ Prévia gerada para *${nome}* (${numAlvo}):\n\n${previewUrl}\n\n_Encaminhe ao cliente quando quiser._`);
-        } catch (err) {
-          await enviarWA(ALERT_NUM, `❌ Erro ao gerar prévia para ${numAlvo}:\n${err.message}`);
-        }
-        return res.status(200).json({ ok: true });
+      // Normaliza número: remove formatação, garante 55 na frente
+      function normalizarNum(raw) {
+        const digits = raw.replace(/\D/g, '');
+        if (digits.startsWith('55') && digits.length >= 12) return digits;
+        return `55${digits}`;
       }
 
-      // Comando: "preview <numero> <maps_url>"
-      const matchPreviewUrl = textoCmd.match(/^pr[eé]vi[ao]s?\s+(\d{10,13})\s+(https?:\/\/\S+)/i);
-      if (matchPreviewUrl) {
-        const numAlvo = matchPreviewUrl[1].startsWith('55') ? matchPreviewUrl[1] : `55${matchPreviewUrl[1]}`;
-        const mapsUrl = matchPreviewUrl[2];
-        await enviarWA(ALERT_NUM, `🔄 Gerando prévia para *${numAlvo}* com URL do Maps...`);
+      // Comando: "previa <numero>" ou "previa <numero> <maps_url>"
+      // Aceita: (19) 99252-5515 / 19992525515 / 5519992525515 / com ou sem URL
+      const matchPreview = textoCmd.match(/^pr[eé]vi[ao]s?\s+([\d\s\(\)\-\.]{8,}?)(?:\s+(https?:\/\/\S+))?$/i);
+      if (matchPreview) {
+        const numAlvo = normalizarNum(matchPreview[1]);
+        const mapsUrlFornecida = matchPreview[2] || null;
+
+        await enviarWA(ALERT_NUM, `🔄 Processando prévia para *${numAlvo}*...`);
         try {
-          // Upsert do prospect manual
           let existentes = await sbFetch(`/wa_prospects?wa_num=eq.${numAlvo}&select=*&order=updated_at.desc&limit=1`);
-          let prospect = existentes?.[0];
+          let prospect = existentes?.[0] || null;
+          const statusOriginal = prospect?.status;
+
+          if (!prospect && !mapsUrlFornecida) {
+            await enviarWA(ALERT_NUM, `⚠️ *${numAlvo}* não está na base.\n\nInforme a URL do Maps:\n_previa ${numAlvo} https://maps.google.com/..._`);
+            return res.status(200).json({ ok: true });
+          }
+
           if (!prospect) {
+            // Cria prospect manual com a URL fornecida
             const criados = await sbFetch('/wa_prospects', 'POST', {
               id: `manual_${numAlvo}`,
               nome: numAlvo,
               wa_num: numAlvo,
-              maps_url: mapsUrl,
+              maps_url: mapsUrlFornecida,
               status: 'pending',
               updated_at: new Date().toISOString(),
             });
-            prospect = Array.isArray(criados) ? criados[0] : { id: `manual_${numAlvo}`, nome: numAlvo, wa_num: numAlvo, maps_url: mapsUrl };
-          } else {
-            await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { maps_url: mapsUrl, updated_at: new Date().toISOString() });
-            prospect.maps_url = mapsUrl;
+            prospect = Array.isArray(criados) ? criados[0] : { id: `manual_${numAlvo}`, nome: numAlvo, wa_num: numAlvo, maps_url: mapsUrlFornecida, status: 'pending' };
+          } else if (mapsUrlFornecida) {
+            // Atualiza URL se foi fornecida nova
+            await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { maps_url: mapsUrlFornecida, updated_at: new Date().toISOString() });
+            prospect.maps_url = mapsUrlFornecida;
           }
+
+          // Se já tem prévia gerada, devolve o link
+          if (prospect.preview_url && !mapsUrlFornecida) {
+            await enviarWA(ALERT_NUM, `✅ Prévia de *${prospect.nome}*:\n\n${prospect.preview_url}\n\n_Encaminhe ao cliente quando quiser._`);
+            return res.status(200).json({ ok: true });
+          }
+
+          // Gera e salva
           await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
           const { nome, previewUrl } = await gerarESalvarSite(prospect);
-          await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'sent1', updated_at: new Date().toISOString() });
-          await enviarWA(ALERT_NUM, `✅ Prévia gerada para *${nome}* (${numAlvo}):\n\n${previewUrl}\n\n_Encaminhe ao cliente quando quiser._`);
+          await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
+            status: statusOriginal && statusOriginal !== 'generating' ? statusOriginal : 'sent1',
+            updated_at: new Date().toISOString(),
+          });
+          await enviarWA(ALERT_NUM, `✅ Prévia de *${nome}*:\n\n${previewUrl}\n\n_Encaminhe ao cliente quando quiser._`);
         } catch (err) {
-          await enviarWA(ALERT_NUM, `❌ Erro: ${err.message}`);
+          await enviarWA(ALERT_NUM, `❌ Erro ao gerar prévia para ${numAlvo}:\n${err.message}`);
         }
         return res.status(200).json({ ok: true });
       }
