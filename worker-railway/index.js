@@ -19,11 +19,24 @@ const CATEGORIAS = [
   'serralheria', 'marcenaria', 'encanador', 'eletricista', 'pintura residencial',
 ];
 
-const LIMITE_DIA   = 150;
-const LIMITE_MANHA = 75;
-const LIMITE_TARDE = 75;
-const DELAY_MIN_MS = 60_000;
-const DELAY_MAX_MS = 300_000;
+const LIMITE_DIA   = 40;
+const LIMITE_MANHA = 20;
+const LIMITE_TARDE = 20;
+const DELAY_MIN_MS = 180_000;  // 3 min
+const DELAY_MAX_MS = 480_000;  // 8 min
+
+// ─── Variações da MSG_1 (anti-spam) ─────────────────────────────────────────
+const MSGS_1 = [
+  (nome) => `Olá! Aqui é o Ryan, dev web da RDCreator. Vi a *${nome}* no Google Maps e já montei um rascunho de site pra vocês. Posso mandar?`,
+  (nome) => `Oi! Sou o Ryan, desenvolvedor da RDCreator. Encontrei a *${nome}* no Maps e criei algo que pode interessar. Posso te mostrar?`,
+  (nome) => `Olá! Ryan aqui, da RDCreator. Estava vendo negócios locais no Google e montei um site de exemplo pra *${nome}*. Posso enviar pra vocês verem?`,
+  (nome) => `Oi! Aqui é o Ryan, dev web. Vi a *${nome}* no Maps e preparei uma prévia de site. Quer dar uma olhada?`,
+  (nome) => `Olá! Sou o Ryan da RDCreator, desenvolvedor web. Montei um site de demonstração pra *${nome}* — posso mandar o link?`,
+  (nome) => `Oi, aqui é o Ryan! Encontrei a *${nome}* no Google Maps e criei um modelo de site pra vocês. Posso compartilhar?`,
+];
+function MSG_1(nome) {
+  return MSGS_1[Math.floor(Math.random() * MSGS_1.length)](nome);
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -151,9 +164,6 @@ async function prospectNovo(placeId, waNum) {
 }
 
 // ─── Evolution API ───────────────────────────────────────────────────────────
-const MSG_1 = (nome) =>
-  `Olá! Aqui é o Ryan, desenvolvedor web da RDCreator. Vi a *${nome}* no Google Maps e estou montando algo pra vocês. Pode ser que goste — posso mandar?`;
-
 async function enviarWA(numero, mensagem) {
   const r = await fetch(`${EVOLUTION_URL}/message/sendText/${EVOLUTION_INST}`, {
     method: 'POST',
@@ -268,12 +278,17 @@ async function jobDisparoLote(limite) {
 // 07:30 BRT = 10:30 UTC
 cron.schedule('30 10 * * 1-6', jobBuscar);
 
-// 08:00 BRT = 11:00 UTC
-cron.schedule('0 11 * * 1-6', () => jobDisparoLote(LIMITE_MANHA));
+// 08:00–08:20 BRT (aleatório) = 11:00 UTC + delay
+cron.schedule('0 11 * * 1-6', () => {
+  const jitter = Math.floor(Math.random() * 20 * 60 * 1000); // até 20min
+  setTimeout(() => jobDisparoLote(LIMITE_MANHA), jitter);
+});
 
-// 13:00 BRT = 16:00 UTC — hoje (primeira vez) roda às 17:37 UTC
-cron.schedule('37 17 27 4 *', () => jobDisparoLote(LIMITE_TARDE)); // hoje 14:37 BRT
-cron.schedule('0 16 * * 1-6', () => jobDisparoLote(LIMITE_TARDE)); // normal
+// 13:00–13:20 BRT (aleatório) = 16:00 UTC + delay
+cron.schedule('0 16 * * 1-6', () => {
+  const jitter = Math.floor(Math.random() * 20 * 60 * 1000); // até 20min
+  setTimeout(() => jobDisparoLote(LIMITE_TARDE), jitter);
+});
 
 // Servidor HTTP para triggers manuais
 const PORT = process.env.PORT || 3000;
@@ -335,6 +350,6 @@ http.createServer(async (req, res) => {
 
 console.log('🤖 RDCreator Worker iniciado');
 console.log('  Busca:     07:30 BRT (seg-sab)');
-console.log('  Manhã WA:  08:00 BRT (seg-sab) — 75 msgs');
-console.log('  Tarde WA:  13:00 BRT (seg-sab) — 75 msgs');
-console.log('  Limite:    150/dia | Cidades: Campinas + 9 vizinhas | Min 25 avaliações');
+console.log('  Manhã WA:  08:00–08:20 BRT (seg-sab) — 20 msgs');
+console.log('  Tarde WA:  13:00–13:20 BRT (seg-sab) — 20 msgs');
+console.log('  Limite:    40/dia | Delay: 3–8min | Msgs variadas | Cidades: Campinas + 9 vizinhas | Min 25 avaliações');
