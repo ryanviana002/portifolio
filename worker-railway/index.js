@@ -19,9 +19,9 @@ const CATEGORIAS = [
   'serralheria', 'marcenaria', 'encanador', 'eletricista', 'pintura residencial',
 ];
 
-const LIMITE_DIA   = 40;
-const LIMITE_MANHA = 20;
-const LIMITE_TARDE = 20;
+const LIMITE_DIA   = 10;  // aquecimento: semana1=10, semana2=20, semana3=30, semana4=40
+const LIMITE_MANHA = 5;
+const LIMITE_TARDE = 5;
 const DELAY_MIN_MS = 180_000;  // 3 min
 const DELAY_MAX_MS = 480_000;  // 8 min
 
