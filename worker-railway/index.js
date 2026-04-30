@@ -394,23 +394,10 @@ async function jobDisparoLote(limite) {
 }
 
 // ─── Agendamentos (UTC, Brasília = UTC-3) ────────────────────────────────────
-// 07:30 BRT = 10:30 UTC — seg a sex + sábado
-cron.schedule('30 10 * * 1-6', jobBuscar);
-
-// 08:00–08:20 BRT (aleatório) = 11:00 UTC — seg a sex + sábado
-cron.schedule('0 11 * * 1-6', () => {
-  const jitter = Math.floor(Math.random() * 20 * 60 * 1000);
-  setTimeout(() => jobDisparoLote(LIMITE_MANHA), jitter);
-});
-
-// 13:00–13:20 BRT (aleatório) = 16:00 UTC — SOMENTE seg a sex (sem sábado tarde)
-cron.schedule('0 16 * * 1-5', () => {
-  const jitter = Math.floor(Math.random() * 20 * 60 * 1000);
-  setTimeout(() => jobDisparoLote(LIMITE_TARDE), jitter);
-});
-
-// 06:00 BRT = 09:00 UTC — expira prospects sem resposta em 7 dias
-cron.schedule('0 9 * * *', jobExpirarSemResposta);
+// cron.schedule('30 10 * * 1-6', jobBuscar);
+// cron.schedule('0 11 * * 1-6', () => { setTimeout(() => jobDisparoLote(LIMITE_MANHA), Math.floor(Math.random() * 20 * 60 * 1000)); });
+// cron.schedule('0 16 * * 1-5', () => { setTimeout(() => jobDisparoLote(LIMITE_TARDE), Math.floor(Math.random() * 20 * 60 * 1000)); });
+// cron.schedule('0 9 * * *', jobExpirarSemResposta);
 
 // Servidor HTTP para triggers manuais
 const PORT = process.env.PORT || 3000;
