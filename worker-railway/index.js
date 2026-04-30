@@ -27,12 +27,12 @@ const DELAY_MAX_MS = 600_000;  // 10 min
 
 // ─── Variações da MSG_1 (anti-spam) ─────────────────────────────────────────
 const MSGS_1 = [
-  (nome) => `Oi! Sou o Ryan, faço sites para negócios locais. Vi a *${nome}* no Google Maps e já montei um rascunho pra vocês. Posso mandar?`,
-  (nome) => `Oi, tudo bem? Sou o Ryan, faço sites profissionais. Encontrei a *${nome}* no Maps e preparei uma prévia — posso te mostrar?`,
-  (nome) => `Olá! Ryan aqui, faço sites para negócios da região. Estava vendo a *${nome}* no Google e montei um exemplo pra vocês. Posso enviar?`,
-  (nome) => `Oi! Vi a *${nome}* no Maps e já criei um modelo de site pra vocês. Sou o Ryan, faço isso pra negócios locais — posso mandar o link?`,
-  (nome) => `Olá, tudo bem? Sou o Ryan. Encontrei a *${nome}* no Google Maps e montei um site de demonstração. Posso compartilhar pra ver o que acha?`,
-  (nome) => `Oi! Sou o Ryan, faço sites pra negócios como o de vocês. Vi a *${nome}* no Google e já preparei algo — quer dar uma olhada?`,
+  (nome) => `Oi! Sou o Ryan, trabalho com desenvolvimento de sites pra negócios locais. Vi a *${nome}* no Google Maps e queria mostrar o que faço. Teria interesse?`,
+  (nome) => `Olá, tudo bem? Sou o Ryan, faço sites pra negócios locais. Vi a *${nome}* no Maps e queria saber se faz sentido pra vocês. Posso mostrar meu trabalho?`,
+  (nome) => `Olá, como vai? Me chamo Ryan, trabalho com sites pra negócios da região. Apareceu a *${nome}* na minha busca e resolvi entrar em contato. Posso te mostrar o que já fiz?`,
+  (nome) => `Oi, tudo bem? Sou o Ryan, desenvolvo sites pra negócios locais. Vi a *${nome}* no Google Maps — vocês pensaram em ter uma presença online? Posso mandar meu portfólio?`,
+  (nome) => `Olá, tudo bem? Sou o Ryan, faço sites pra negócios da região. Notei a *${nome}* no Maps e achei que poderia fazer sentido. Quer ver o que já desenvolvi?`,
+  (nome) => `Olá, como vai? Trabalho com desenvolvimento de sites pra negócios locais. Vi a *${nome}* no Google e queria mostrar meu trabalho. Teria interesse?`,
 ];
 function MSG_1(nome) {
   return MSGS_1[Math.floor(Math.random() * MSGS_1.length)](nome);
@@ -394,10 +394,10 @@ async function jobDisparoLote(limite) {
 }
 
 // ─── Agendamentos (UTC, Brasília = UTC-3) ────────────────────────────────────
-// cron.schedule('30 10 * * 1-6', jobBuscar);
-// cron.schedule('0 11 * * 1-6', () => { setTimeout(() => jobDisparoLote(LIMITE_MANHA), Math.floor(Math.random() * 20 * 60 * 1000)); });
-// cron.schedule('0 16 * * 1-5', () => { setTimeout(() => jobDisparoLote(LIMITE_TARDE), Math.floor(Math.random() * 20 * 60 * 1000)); });
-// cron.schedule('0 9 * * *', jobExpirarSemResposta);
+cron.schedule('30 10 * * 1-6', jobBuscar);
+cron.schedule('0 11 * * 1-6', () => { setTimeout(() => jobDisparoLote(LIMITE_MANHA), Math.floor(Math.random() * 20 * 60 * 1000)); });
+cron.schedule('0 16 * * 1-5', () => { setTimeout(() => jobDisparoLote(LIMITE_TARDE), Math.floor(Math.random() * 20 * 60 * 1000)); });
+cron.schedule('0 9 * * *', jobExpirarSemResposta);
 
 // Servidor HTTP para triggers manuais
 const PORT = process.env.PORT || 3000;

@@ -11,15 +11,15 @@ const ALERT_NUM       = '5519992525515';
 const ANTHROPIC_KEY   = process.env.ANTHROPIC_API_KEY;
 
 const MSGS_2 = [
-  (nome, link) => `Aqui está:\n\n${link}\n\nMontei esse site pensando na *${nome}*. Fica disponível por 3 dias. O que achou?`,
-  (nome, link) => `Segue o link:\n\n${link}\n\nFiz esse modelo pra *${nome}*. Fica no ar por 3 dias — me conta o que achou!`,
-  (nome, link) => `Aqui o preview:\n\n${link}\n\nCriei isso pra *${nome}* — válido por 3 dias. Gostou?`,
-  (nome, link) => `Pronto, dá uma olhada:\n\n${link}\n\nMontei esse site pra *${nome}*. O que acha?`,
-  (nome, link) => `Aqui está:\n\n${link}\n\nFiz esse modelo especialmente pra *${nome}*. Fica disponível por 3 dias. O que achou?`,
-  (nome, link) => `Segue:\n\n${link}\n\nEsse é o site que preparei pra *${nome}*. Válido por 3 dias — me fala o que achou!`,
+  (nome) => `Esse é meu portfólio: ryancreator.dev\n\nEntrego em até 7 dias, preço fixo, sem mensalidade. Posso fazer um orçamento pra *${nome}*?`,
+  (nome) => `Segue meu portfólio: ryancreator.dev\n\nTrabalho com prazo de até 7 dias e valor fechado, sem surpresa. O que acha pra *${nome}*?`,
+  (nome) => `Aqui está: ryancreator.dev\n\nJá fiz pra vários negócios da região. Entrego em 7 dias, preço fixo. Consigo fazer um orçamento pra vocês?`,
+  (nome) => `ryancreator.dev — pode dar uma olhada lá.\n\nPrazo de até 7 dias, preço fixo, sem mensalidade. Faz sentido pra *${nome}*?`,
+  (nome) => `Meu portfólio: ryancreator.dev\n\nEntrego rápido e com preço fechado. Se quiser, faço um orçamento específico pra *${nome}*?`,
+  (nome) => `Segue: ryancreator.dev\n\nTrabalho com negócios locais, entrego em 7 dias e o valor é fixo. Posso montar uma proposta pra *${nome}*?`,
 ];
-function MSG_2(nome, link) {
-  return MSGS_2[Math.floor(Math.random() * MSGS_2.length)](nome, link);
+function MSG_2(nome) {
+  return MSGS_2[Math.floor(Math.random() * MSGS_2.length)](nome);
 }
 
 async function sbFetch(path, method = 'GET', body) {
@@ -223,119 +223,8 @@ function normalizarNum(raw) {
 
 // ── Processa comandos enviados pelo Ryan para si mesmo ────────────────────────
 async function processarComandoRyan(textoCmd, res) {
-  const matchPreview = textoCmd.match(/^(?:pr[eé]vi[ao]s?|preview)\s+([\d\s\(\)\-\.]{8,}?)(?:\s+(https?:\/\/\S+))?$/i);
-  if (!matchPreview) return res.status(200).json({ ok: true });
-
-  const numAlvo = normalizarNum(matchPreview[1]);
-  const mapsUrlFornecida = matchPreview[2] || null;
-
-  await enviarWA(ALERT_NUM, `🔄 Processando prévia para *${numAlvo}*...`);
-  try {
-    let existentes = await sbFetch(`/wa_prospects?wa_num=eq.${numAlvo}&select=*&order=updated_at.desc&limit=1`);
-    let prospect = existentes?.[0] || null;
-    const statusOriginal = prospect?.status;
-
-    if (!prospect && !mapsUrlFornecida) {
-      await enviarWA(ALERT_NUM, `⚠️ *${numAlvo}* não está na base.\n\nInforme a URL do Maps:\n_previa ${numAlvo} https://maps.google.com/..._`);
-      return res.status(200).json({ ok: true });
-    }
-
-    if (!prospect) {
-      const criados = await sbFetch('/wa_prospects', 'POST', {
-        id: `manual_${numAlvo}`,
-        nome: numAlvo,
-        wa_num: numAlvo,
-        maps_url: mapsUrlFornecida,
-        status: 'pending',
-        updated_at: new Date().toISOString(),
-      });
-      prospect = Array.isArray(criados) ? criados[0] : { id: `manual_${numAlvo}`, nome: numAlvo, wa_num: numAlvo, maps_url: mapsUrlFornecida, status: 'pending' };
-    } else if (mapsUrlFornecida) {
-      await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { maps_url: mapsUrlFornecida, updated_at: new Date().toISOString() });
-      prospect.maps_url = mapsUrlFornecida;
-    }
-
-    if (prospect.preview_url && !mapsUrlFornecida) {
-      await enviarWA(ALERT_NUM, `✅ Prévia de *${prospect.nome}*:\n\n${prospect.preview_url}\n\n_Encaminhe ao cliente quando quiser._`);
-      return res.status(200).json({ ok: true });
-    }
-
-    await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
-    const { nome, previewUrl } = await gerarESalvarSite(prospect);
-    await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
-      status: statusOriginal && statusOriginal !== 'generating' ? statusOriginal : 'sent1',
-      updated_at: new Date().toISOString(),
-    });
-    await enviarWA(ALERT_NUM, `✅ Prévia de *${nome}*:\n\n${previewUrl}\n\n_Encaminhe ao cliente quando quiser._`);
-  } catch (err) {
-    await enviarWA(ALERT_NUM, `❌ Erro ao gerar prévia para ${numAlvo}:\n${err.message}`);
-  }
+  // Sem comandos ativos no momento
   return res.status(200).json({ ok: true });
-}
-
-async function tentarGerarESalvar(prospect, waNum, statusAnterior) {
-  try {
-    const { nome, previewUrl } = await gerarESalvarSite(prospect);
-    return { nome, previewUrl };
-  } catch (err) {
-    await alertar(`⚠️ Erro ao gerar site para *${prospect.nome}*:\n${err.message}\n\nWA: wa.me/${waNum}`);
-    await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
-      status: statusAnterior,
-      updated_at: new Date().toISOString(),
-    }).catch(() => {});
-    return null;
-  }
-}
-
-async function gerarESalvarSite(prospect) {
-  // 1. Check (pega dados do Maps)
-  const checkRes = await fetch(`${VERCEL_URL}/api/preview-check`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ url: prospect.maps_url, placeId: prospect.id }),
-  });
-  const checkData = await checkRes.json();
-  if (!checkRes.ok) throw new Error(checkData.error || 'Erro no check');
-
-  // 2. Gerar HTML via Claude
-  const genRes = await fetch(`${VERCEL_URL}/api/preview`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      url: prospect.maps_url,
-      placeId: prospect.id,
-      prompt: '',
-      modelo: 'haiku',
-      origem: 'worker',
-    }),
-  });
-  const genData = await genRes.json();
-  if (!genRes.ok) throw new Error(genData.error || 'Erro na geração');
-
-  const nome = genData.dados?.nome || checkData.nome || prospect.nome;
-
-  // 3. Salvar preview (sem enfileirar de novo — placeId omitido)
-  const saveRes = await fetch(`${VERCEL_URL}/api/preview-save`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      html: genData.html,
-      nome,
-      categoria: genData.dados?.categoria || prospect.categoria,
-      origem: 'worker',
-    }),
-  });
-  const saveData = await saveRes.json();
-  if (!saveRes.ok) throw new Error(saveData.error || 'Erro ao salvar');
-
-  // 4. Atualiza prospect com o preview gerado
-  await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
-    preview_id: saveData.id,
-    preview_url: saveData.url,
-    updated_at: new Date().toISOString(),
-  });
-
-  return { nome, previewUrl: saveData.url };
 }
 
 // ─── Rate limit em memória (por número, máx 5 req/min) ───────────────────────
@@ -417,7 +306,7 @@ export default async function handler(req, res) {
 
     // Busca prospect ativo
     const prospects = await sbFetch(
-      `/wa_prospects?wa_num=eq.${waNum}&status=in.(sent1,replied,aguardando_ryan,generating)&select=*&order=sent1_at.desc&limit=1`
+      `/wa_prospects?wa_num=eq.${waNum}&status=in.(sent1,replied,aguardando_ryan)&select=*&order=sent1_at.desc&limit=1`
     );
     if (!prospects?.length) return res.status(200).json({ ok: true });
 
@@ -429,9 +318,6 @@ export default async function handler(req, res) {
 
     // Fora da janela de resposta (22h–08h) — ignora silenciosamente
     if (!dentroJanelaResposta()) return res.status(200).json({ ok: true, ignored: 'fora_janela' });
-
-    // Já gerando site — ignora mensagem duplicada
-    if (prospect.status === 'generating') return res.status(200).json({ ok: true, ignored: 'generating' });
 
     // Mídia (figurinha, áudio, imagem, vídeo) — alerta Ryan para responder manualmente
     if (eMidia) {
@@ -464,11 +350,8 @@ export default async function handler(req, res) {
         await alertar(`❓ Pergunta em *${prospect.nome}*:\n"${texto}"\n\nWA: wa.me/${waNum}`);
         return res.status(200).json({ ok: true, aguardando: 'pergunta' });
       }
-      // Interesse — trava status antes de gerar (evita duplicata)
-      await sbFetch(`/wa_prospects?id=eq.${prospect.id}&status=eq.aguardando_ryan`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
-      const r1 = await tentarGerarESalvar(prospect, waNum, 'aguardando_ryan');
-      if (!r1) return res.status(200).json({ ok: true, error: 'geracao_falhou' });
-      await enviarWA(waNum, MSG_2(r1.nome, r1.previewUrl), { simularLeitura: true });
+      // Interesse — envia portfólio direto
+      await enviarWA(waNum, MSG_2(prospect.nome), { simularLeitura: true });
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'sent2', sent2_at: new Date().toISOString(), updated_at: new Date().toISOString() });
       return res.status(200).json({ ok: true, sent2: true, trigger: 'after_question' });
     }
@@ -497,11 +380,8 @@ export default async function handler(req, res) {
         await alertar(`❓ Pergunta em *${prospect.nome}*:\n"${texto}"\n\nWA: wa.me/${waNum}`);
         return res.status(200).json({ ok: true, aguardando: 'pergunta' });
       }
-      // Trava status antes de gerar (evita duplicata)
-      await sbFetch(`/wa_prospects?id=eq.${prospect.id}&status=eq.replied`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
-      const r2 = await tentarGerarESalvar(prospect, waNum, 'replied');
-      if (!r2) return res.status(200).json({ ok: true, error: 'geracao_falhou' });
-      await enviarWA(waNum, MSG_2(r2.nome, r2.previewUrl), { simularLeitura: true });
+      // Interesse — envia portfólio direto
+      await enviarWA(waNum, MSG_2(prospect.nome), { simularLeitura: true });
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
         status: 'sent2',
         sent2_at: new Date().toISOString(),
@@ -552,11 +432,8 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, aguardando: 'pergunta' });
     }
 
-    // Trava status antes de gerar (evita duplicata)
-    await sbFetch(`/wa_prospects?id=eq.${prospect.id}&status=eq.sent1`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
-    const r3 = await tentarGerarESalvar(prospect, waNum, 'sent1');
-    if (!r3) return res.status(200).json({ ok: true, error: 'geracao_falhou' });
-    await enviarWA(waNum, MSG_2(r3.nome, r3.previewUrl), { simularLeitura: true });
+    // Interesse — envia portfólio direto
+    await enviarWA(waNum, MSG_2(prospect.nome), { simularLeitura: true });
     await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
       status: 'sent2',
       sent2_at: new Date().toISOString(),
