@@ -10,8 +10,17 @@ const VERCEL_URL      = process.env.APP_URL || 'https://ryancreator.dev';
 const ALERT_NUM       = '5519992525515';
 const ANTHROPIC_KEY   = process.env.ANTHROPIC_API_KEY;
 
-const MSG_2 = (nome, link) =>
-  `Aqui está 👇\n\n${link}\n\nÉ um preview do site que montei pra *${nome}*. Fica disponível por 3 dias.\n\nO que achou?`;
+const MSGS_2 = [
+  (nome, link) => `Aqui está 👇\n\n${link}\n\nÉ um preview do site que montei pra *${nome}*. Fica disponível por 3 dias.\n\nO que achou?`,
+  (nome, link) => `Pronto, segue o link 😊\n\n${link}\n\nFiz esse modelo pensando na *${nome}*. Fica no ar por 3 dias — me conta o que achou!`,
+  (nome, link) => `Aqui o preview 👇\n\n${link}\n\nMontei isso pra *${nome}* — fica disponível por 3 dias. Gostou?`,
+  (nome, link) => `Feito! Dá uma olhada 👇\n\n${link}\n\nÉ um site de exemplo que criei pra *${nome}*. O que acha?`,
+  (nome, link) => `Segue o link que preparei 🔗\n\n${link}\n\nFiz esse modelo especialmente pra *${nome}*. Fica disponível por 3 dias. O que achou?`,
+  (nome, link) => `Aqui está o que preparei pra vocês 👇\n\n${link}\n\nSite de demonstração da *${nome}* — válido por 3 dias. Me fala o que achou!`,
+];
+function MSG_2(nome, link) {
+  return MSGS_2[Math.floor(Math.random() * MSGS_2.length)](nome, link);
+}
 
 async function sbFetch(path, method = 'GET', body) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1${path}`, {
