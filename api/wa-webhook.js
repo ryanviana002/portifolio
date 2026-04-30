@@ -11,12 +11,12 @@ const ALERT_NUM       = '5519992525515';
 const ANTHROPIC_KEY   = process.env.ANTHROPIC_API_KEY;
 
 const MSGS_2 = [
-  (nome, link) => `Aqui está 👇\n\n${link}\n\nÉ um preview do site que montei pra *${nome}*. Fica disponível por 3 dias.\n\nO que achou?`,
-  (nome, link) => `Pronto, segue o link 😊\n\n${link}\n\nFiz esse modelo pensando na *${nome}*. Fica no ar por 3 dias — me conta o que achou!`,
-  (nome, link) => `Aqui o preview 👇\n\n${link}\n\nMontei isso pra *${nome}* — fica disponível por 3 dias. Gostou?`,
-  (nome, link) => `Feito! Dá uma olhada 👇\n\n${link}\n\nÉ um site de exemplo que criei pra *${nome}*. O que acha?`,
-  (nome, link) => `Segue o link que preparei 🔗\n\n${link}\n\nFiz esse modelo especialmente pra *${nome}*. Fica disponível por 3 dias. O que achou?`,
-  (nome, link) => `Aqui está o que preparei pra vocês 👇\n\n${link}\n\nSite de demonstração da *${nome}* — válido por 3 dias. Me fala o que achou!`,
+  (nome, link) => `Aqui está:\n\n${link}\n\nMontei esse site pensando na *${nome}*. Fica disponível por 3 dias. O que achou?`,
+  (nome, link) => `Segue o link:\n\n${link}\n\nFiz esse modelo pra *${nome}*. Fica no ar por 3 dias — me conta o que achou!`,
+  (nome, link) => `Aqui o preview:\n\n${link}\n\nCriei isso pra *${nome}* — válido por 3 dias. Gostou?`,
+  (nome, link) => `Pronto, dá uma olhada:\n\n${link}\n\nMontei esse site pra *${nome}*. O que acha?`,
+  (nome, link) => `Aqui está:\n\n${link}\n\nFiz esse modelo especialmente pra *${nome}*. Fica disponível por 3 dias. O que achou?`,
+  (nome, link) => `Segue:\n\n${link}\n\nEsse é o site que preparei pra *${nome}*. Válido por 3 dias — me fala o que achou!`,
 ];
 function MSG_2(nome, link) {
   return MSGS_2[Math.floor(Math.random() * MSGS_2.length)](nome, link);
@@ -37,13 +37,55 @@ async function sbFetch(path, method = 'GET', body) {
   return method !== 'PATCH' ? r.json() : null;
 }
 
-async function enviarWA(numero, mensagem) {
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function dentroJanelaResposta() {
+  const agora = new Date();
+  const brt = new Date(agora.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+  const hora = brt.getHours();
+  return hora >= 8 && hora < 22;
+}
+
+async function marcarComoLida(numero, messageId) {
+  if (!messageId) return;
+  await fetch(`${EVOLUTION_URL}/chat/markMessageAsRead/${EVOLUTION_INST}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': EVOLUTION_KEY },
+    body: JSON.stringify({ readMessages: [{ id: messageId, fromMe: false, remoteJid: `${numero}@s.whatsapp.net` }] }),
+  }).catch(() => {});
+}
+
+async function setPresenca(numero, presence) {
+  await fetch(`${EVOLUTION_URL}/chat/presence/${EVOLUTION_INST}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': EVOLUTION_KEY },
+    body: JSON.stringify({ number: numero, presence }),
+  }).catch(() => {});
+}
+
+async function enviarWA(numero, mensagem, { simularLeitura = false } = {}) {
+  // Simula visualização antes de digitar (quando é resposta a cliente)
+  if (simularLeitura) {
+    await setPresenca(numero, 'available');
+    await sleep(3000 + Math.random() * 7000);  // 3–10s "lendo" a mensagem
+  }
+
+  // Online → digitando → envia
+  await setPresenca(numero, 'available');
+  await sleep(1000 + Math.random() * 3000);  // 1–4s online antes de digitar
+
+  const tempoDigitando = Math.min(2000 + mensagem.length * 35, 10000);  // proporcional, máx 10s
+  await setPresenca(numero, 'composing');
+  await sleep(tempoDigitando);
+
   const r = await fetch(`${EVOLUTION_URL}/message/sendText/${EVOLUTION_INST}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'apikey': EVOLUTION_KEY },
-    body: JSON.stringify({ number: numero, text: mensagem, delay: 1500 }),
+    body: JSON.stringify({ number: numero, text: mensagem, delay: 0 }),
   });
   if (!r.ok) throw new Error(await r.text());
+
+  await setPresenca(numero, 'paused');
 }
 
 async function alertar(msg) {
@@ -296,8 +338,27 @@ async function gerarESalvarSite(prospect) {
   return { nome, previewUrl: saveData.url };
 }
 
+// ─── Rate limit em memória (por número, máx 5 req/min) ───────────────────────
+const _rateLimitMap = new Map();
+function checarRateLimit(num) {
+  const agora = Date.now();
+  const entry = _rateLimitMap.get(num) || { count: 0, since: agora };
+  if (agora - entry.since > 60_000) { entry.count = 0; entry.since = agora; }
+  entry.count++;
+  _rateLimitMap.set(num, entry);
+  return entry.count > 5;
+}
+
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
+
+  // Valida secret do webhook (Evolution envia no header)
+  if (WEBHOOK_SECRET) {
+    const secret = req.headers['apikey'] || req.headers['x-webhook-secret'] || req.headers['authorization'];
+    if (secret !== WEBHOOK_SECRET) return res.status(401).json({ error: 'unauthorized' });
+  }
 
   let _prospectNome = null;
   let _waNum = null;
@@ -331,6 +392,7 @@ export default async function handler(req, res) {
     const waNum = msg.key?.remoteJid?.replace('@s.whatsapp.net', '');
     _waNum = waNum;
     if (!waNum) return res.status(200).json({ ok: true });
+    if (checarRateLimit(waNum)) return res.status(200).json({ ok: true, ignored: 'rate_limit' });
 
     // ── Comando do Ryan mandado do celular pessoal para o bot ─────────────────
     if (waNum === ALERT_NUM) {
@@ -362,6 +424,12 @@ export default async function handler(req, res) {
     const prospect = prospects[0];
     _prospectNome = prospect.nome;
 
+    // Marca mensagem como lida
+    marcarComoLida(waNum, msg.key?.id).catch(() => {});
+
+    // Fora da janela de resposta (22h–08h) — ignora silenciosamente
+    if (!dentroJanelaResposta()) return res.status(200).json({ ok: true, ignored: 'fora_janela' });
+
     // Já gerando site — ignora mensagem duplicada
     if (prospect.status === 'generating') return res.status(200).json({ ok: true, ignored: 'generating' });
 
@@ -380,7 +448,7 @@ export default async function handler(req, res) {
       if (tipo === 'ignorar') return res.status(200).json({ ok: true, ignored: 'cumprimento' });
       if (tipo === 'recusa') {
         await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() });
-        if (resposta) await enviarWA(waNum, resposta).catch(() => {});
+        if (resposta) await enviarWA(waNum, resposta, { simularLeitura: true }).catch(() => {});
         return res.status(200).json({ ok: true, ignored: 'recusa' });
       }
       if (tipo === 'pergunta') {
@@ -388,7 +456,7 @@ export default async function handler(req, res) {
         if (respostas_bot < 3) {
           const autoResp = await responderPergunta(texto, prospect.nome);
           if (autoResp) {
-            await enviarWA(waNum, autoResp);
+            await enviarWA(waNum, autoResp, { simularLeitura: true });
             await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { respostas_bot: respostas_bot + 1, updated_at: new Date().toISOString() });
             return res.status(200).json({ ok: true, auto_reply: true });
           }
@@ -400,7 +468,7 @@ export default async function handler(req, res) {
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}&status=eq.aguardando_ryan`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
       const r1 = await tentarGerarESalvar(prospect, waNum, 'aguardando_ryan');
       if (!r1) return res.status(200).json({ ok: true, error: 'geracao_falhou' });
-      await enviarWA(waNum, MSG_2(r1.nome, r1.previewUrl));
+      await enviarWA(waNum, MSG_2(r1.nome, r1.previewUrl), { simularLeitura: true });
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'sent2', sent2_at: new Date().toISOString(), updated_at: new Date().toISOString() });
       return res.status(200).json({ ok: true, sent2: true, trigger: 'after_question' });
     }
@@ -412,7 +480,7 @@ export default async function handler(req, res) {
       if (tipo === 'ignorar') return res.status(200).json({ ok: true, ignored: 'cumprimento' });
       if (tipo === 'recusa') {
         await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() });
-        if (resposta) await enviarWA(waNum, resposta).catch(() => {});
+        if (resposta) await enviarWA(waNum, resposta, { simularLeitura: true }).catch(() => {});
         return res.status(200).json({ ok: true, ignored: 'recusa' });
       }
       if (tipo === 'pergunta') {
@@ -420,7 +488,7 @@ export default async function handler(req, res) {
         if (respostas_bot < 3) {
           const autoResp = await responderPergunta(texto, prospect.nome);
           if (autoResp) {
-            await enviarWA(waNum, autoResp);
+            await enviarWA(waNum, autoResp, { simularLeitura: true });
             await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { respostas_bot: respostas_bot + 1, updated_at: new Date().toISOString() });
             return res.status(200).json({ ok: true, auto_reply: true });
           }
@@ -433,7 +501,7 @@ export default async function handler(req, res) {
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}&status=eq.replied`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
       const r2 = await tentarGerarESalvar(prospect, waNum, 'replied');
       if (!r2) return res.status(200).json({ ok: true, error: 'geracao_falhou' });
-      await enviarWA(waNum, MSG_2(r2.nome, r2.previewUrl));
+      await enviarWA(waNum, MSG_2(r2.nome, r2.previewUrl), { simularLeitura: true });
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
         status: 'sent2',
         sent2_at: new Date().toISOString(),
@@ -466,7 +534,7 @@ export default async function handler(req, res) {
     if (tipo === 'ignorar') return res.status(200).json({ ok: true, ignored: 'cumprimento' });
     if (tipo === 'recusa') {
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() });
-      if (resposta) await enviarWA(waNum, resposta).catch(() => {});
+      if (resposta) await enviarWA(waNum, resposta, { simularLeitura: true }).catch(() => {});
       return res.status(200).json({ ok: true, ignored: 'recusa' });
     }
     if (tipo === 'pergunta') {
@@ -474,7 +542,7 @@ export default async function handler(req, res) {
       if (respostas_bot < 3) {
         const autoResp = await responderPergunta(textoHumano, prospect.nome);
         if (autoResp) {
-          await enviarWA(waNum, autoResp);
+          await enviarWA(waNum, autoResp, { simularLeitura: true });
           await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { respostas_bot: respostas_bot + 1, status: 'replied', updated_at: new Date().toISOString() });
           return res.status(200).json({ ok: true, auto_reply: true });
         }
@@ -488,7 +556,7 @@ export default async function handler(req, res) {
     await sbFetch(`/wa_prospects?id=eq.${prospect.id}&status=eq.sent1`, 'PATCH', { status: 'generating', updated_at: new Date().toISOString() });
     const r3 = await tentarGerarESalvar(prospect, waNum, 'sent1');
     if (!r3) return res.status(200).json({ ok: true, error: 'geracao_falhou' });
-    await enviarWA(waNum, MSG_2(r3.nome, r3.previewUrl));
+    await enviarWA(waNum, MSG_2(r3.nome, r3.previewUrl), { simularLeitura: true });
     await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
       status: 'sent2',
       sent2_at: new Date().toISOString(),

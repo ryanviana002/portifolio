@@ -19,20 +19,20 @@ const CATEGORIAS = [
   'serralheria', 'marcenaria', 'encanador', 'eletricista', 'pintura residencial',
 ];
 
-const LIMITE_DIA   = 10;  // aquecimento: semana1=10, semana2=20, semana3=30, semana4=40
-const LIMITE_MANHA = 5;
-const LIMITE_TARDE = 5;
+const LIMITE_DIA   = 30;  // semana 30, aumentar gradualmente
+const LIMITE_MANHA = 15;
+const LIMITE_TARDE = 15;
 const DELAY_MIN_MS = 180_000;  // 3 min
-const DELAY_MAX_MS = 480_000;  // 8 min
+const DELAY_MAX_MS = 600_000;  // 10 min
 
 // ─── Variações da MSG_1 (anti-spam) ─────────────────────────────────────────
 const MSGS_1 = [
-  (nome) => `Olá! Aqui é o Ryan, da RDCreator — faço sites para negócios locais. Vi a *${nome}* no Google Maps e já montei um rascunho de site pra vocês. Posso mandar?`,
-  (nome) => `Oi! Sou o Ryan, da RDCreator. Criamos sites para negócios como o de vocês. Encontrei a *${nome}* no Maps e preparei algo — posso te mostrar?`,
-  (nome) => `Olá! Ryan aqui, da RDCreator — criamos sites para negócios locais. Estava vendo empresas no Google e montei um site de exemplo pra *${nome}*. Posso enviar pra vocês verem?`,
-  (nome) => `Oi! Aqui é o Ryan, da RDCreator. A gente cria sites para negócios da região. Vi a *${nome}* no Maps e preparei uma prévia — quer dar uma olhada?`,
-  (nome) => `Olá! Sou o Ryan, da RDCreator — faço sites para negócios locais. Montei um site de demonstração pra *${nome}*, posso mandar o link?`,
-  (nome) => `Oi, aqui é o Ryan da RDCreator! Criamos sites para negócios como o de vocês. Encontrei a *${nome}* no Google Maps e já criei um modelo — posso compartilhar?`,
+  (nome) => `Oi! Sou o Ryan, faço sites para negócios locais. Vi a *${nome}* no Google Maps e já montei um rascunho pra vocês. Posso mandar?`,
+  (nome) => `Oi, tudo bem? Sou o Ryan, faço sites profissionais. Encontrei a *${nome}* no Maps e preparei uma prévia — posso te mostrar?`,
+  (nome) => `Olá! Ryan aqui, faço sites para negócios da região. Estava vendo a *${nome}* no Google e montei um exemplo pra vocês. Posso enviar?`,
+  (nome) => `Oi! Vi a *${nome}* no Maps e já criei um modelo de site pra vocês. Sou o Ryan, faço isso pra negócios locais — posso mandar o link?`,
+  (nome) => `Olá, tudo bem? Sou o Ryan. Encontrei a *${nome}* no Google Maps e montei um site de demonstração. Posso compartilhar pra ver o que acha?`,
+  (nome) => `Oi! Sou o Ryan, faço sites pra negócios como o de vocês. Vi a *${nome}* no Google e já preparei algo — quer dar uma olhada?`,
 ];
 function MSG_1(nome) {
   return MSGS_1[Math.floor(Math.random() * MSGS_1.length)](nome);
@@ -164,13 +164,31 @@ async function prospectNovo(placeId, waNum) {
 }
 
 // ─── Evolution API ───────────────────────────────────────────────────────────
+async function setPresenca(numero, presence) {
+  await fetch(`${EVOLUTION_URL}/chat/presence/${EVOLUTION_INST}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': EVOLUTION_KEY },
+    body: JSON.stringify({ number: numero, presence }),
+  }).catch(() => {});
+}
+
 async function enviarWA(numero, mensagem) {
+  // Simula presença humana: online → digitando → envia
+  await setPresenca(numero, 'available');
+  await sleep(1000 + Math.random() * 2000);  // 1–3s online antes de digitar
+
+  const tempoDigitando = Math.min(3000 + mensagem.length * 40, 12000);  // proporcional ao tamanho, máx 12s
+  await setPresenca(numero, 'composing');
+  await sleep(tempoDigitando);
+
   const r = await fetch(`${EVOLUTION_URL}/message/sendText/${EVOLUTION_INST}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'apikey': EVOLUTION_KEY },
-    body: JSON.stringify({ number: numero, text: mensagem, delay: 2000 }),
+    body: JSON.stringify({ number: numero, text: mensagem, delay: 0 }),
   });
   if (!r.ok) throw new Error(await r.text());
+
+  await setPresenca(numero, 'paused');
   return r.json();
 }
 
@@ -259,17 +277,68 @@ async function jobBuscar() {
   console.log(`${novos} novos adicionados à fila.`);
 }
 
-const LIMITE_HORA = 10;
+const LIMITE_HORA   = 8;
+const LIMITE_SEMANA = 150;
+const MAX_RECUSAS_SEGUIDAS = 5;
+
+// ─── Contagem de disparos na semana ──────────────────────────────────────────
+async function contarDisparosSemana() {
+  const seteDiasAtras = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const rows = await sbFetch(`/wa_prospects?sent1_at=gte.${seteDiasAtras.toISOString()}&select=id`).catch(() => []);
+  return Array.isArray(rows) ? rows.length : 0;
+}
+
+// ─── Marcar mensagem como lida ────────────────────────────────────────────────
+async function marcarComoLida(numero, messageId) {
+  if (!messageId) return;
+  await fetch(`${EVOLUTION_URL}/chat/markMessageAsRead/${EVOLUTION_INST}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': EVOLUTION_KEY },
+    body: JSON.stringify({ readMessages: [{ id: messageId, fromMe: false, remoteJid: `${numero}@s.whatsapp.net` }] }),
+  }).catch(() => {});
+}
+
+// ─── Verificar janela de silêncio (22h–08h BRT) ───────────────────────────────
+function dentroJanelaEnvio() {
+  const agora = new Date();
+  const brt = new Date(agora.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+  const hora = brt.getHours();
+  return hora >= 8 && hora < 22;
+}
+
+// ─── Verificar recusas recentes (anti-ban) ────────────────────────────────────
+async function recusasRecentes() {
+  const umaHoraAtras = new Date(Date.now() - 60 * 60 * 1000);
+  const rows = await sbFetch(
+    `/wa_prospects?status=eq.ignored&updated_at=gte.${umaHoraAtras.toISOString()}&select=id`
+  ).catch(() => []);
+  return Array.isArray(rows) ? rows.length : 0;
+}
 
 // ─── Job: disparo WA (1º msg — apenas texto, sem site) ───────────────────────
 async function jobDisparoLote(limite) {
   console.log(`[${new Date().toLocaleString('pt-BR')}] Disparando lote (${limite})...`);
 
-  const dispararHoje = await contarDisparosHoje();
-  const dispararHora = await contarDisparosUltimaHora();
-  if (dispararHoje >= LIMITE_DIA)  { console.log('Limite diário atingido.'); return; }
-  if (dispararHora >= LIMITE_HORA) { console.log('Limite por hora atingido.'); return; }
-  const restantes = Math.min(limite, LIMITE_DIA - dispararHoje, LIMITE_HORA - dispararHora);
+  if (!dentroJanelaEnvio()) { console.log('Fora da janela de envio (22h–08h).'); return; }
+
+  const [dispararHoje, dispararHora, dispararSemana] = await Promise.all([
+    contarDisparosHoje(),
+    contarDisparosUltimaHora(),
+    contarDisparosSemana(),
+  ]);
+
+  if (dispararHoje  >= LIMITE_DIA)    { console.log('Limite diário atingido.'); return; }
+  if (dispararHora  >= LIMITE_HORA)   { console.log('Limite por hora atingido.'); return; }
+  if (dispararSemana >= LIMITE_SEMANA){ console.log('Limite semanal atingido.'); return; }
+
+  const recusas = await recusasRecentes();
+  if (recusas >= MAX_RECUSAS_SEGUIDAS) {
+    await alertar(`Muitas recusas recentes (${recusas}) — disparo pausado automaticamente.`);
+    console.log(`Muitas recusas (${recusas}), pausando.`);
+    return;
+  }
+
+  const restantes = Math.min(limite, LIMITE_DIA - dispararHoje, LIMITE_HORA - dispararHora, LIMITE_SEMANA - dispararSemana);
 
   const pendentes = await sbFetch(
     `/wa_prospects?status=eq.pending&select=*&limit=${restantes}`
@@ -277,9 +346,24 @@ async function jobDisparoLote(limite) {
 
   if (!pendentes?.length) { console.log('Sem prospects na fila.'); return; }
 
-  console.log(`${pendentes.length} para disparar`);
+  // Filtra apenas DDDs da região (SP interior: 11-19, exceto 11=capital)
+  const DDDS_VALIDOS = ['12','13','14','15','16','17','18','19'];
+  const filtrados = pendentes.filter(p => {
+    const ddd = p.wa_num.slice(2, 4);
+    return DDDS_VALIDOS.includes(ddd);
+  });
 
+  console.log(`${filtrados.length} para disparar (${pendentes.length - filtrados.length} filtrados por DDD)`);
+
+  // Marca DDDs inválidos como ignored
   for (const p of pendentes) {
+    const ddd = p.wa_num.slice(2, 4);
+    if (!DDDS_VALIDOS.includes(ddd)) {
+      await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() }).catch(() => {});
+    }
+  }
+
+  for (const p of filtrados) {
     try {
       await enviarWA(p.wa_num, MSG_1(p.nome));
       await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
