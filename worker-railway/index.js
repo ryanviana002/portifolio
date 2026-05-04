@@ -27,15 +27,26 @@ const DELAY_MAX_MS = 600_000;  // 10 min
 
 // ─── Variações da MSG_1 (anti-spam) ─────────────────────────────────────────
 const MSGS_1 = [
-  (nome) => `Oi! Sou o Ryan, trabalho com desenvolvimento de sites pra negócios locais. Vi a *${nome}* no Google Maps e queria mostrar o que faço. Teria interesse?`,
-  (nome) => `Olá, tudo bem? Sou o Ryan, faço sites pra negócios locais. Vi a *${nome}* no Maps e queria saber se faz sentido pra vocês. Posso mostrar meu trabalho?`,
-  (nome) => `Olá, como vai? Me chamo Ryan, trabalho com sites pra negócios da região. Apareceu a *${nome}* na minha busca e resolvi entrar em contato. Posso te mostrar o que já fiz?`,
-  (nome) => `Oi, tudo bem? Sou o Ryan, desenvolvo sites pra negócios locais. Vi a *${nome}* no Google Maps — vocês pensaram em ter uma presença online? Posso mandar meu portfólio?`,
-  (nome) => `Olá, tudo bem? Sou o Ryan, faço sites pra negócios da região. Notei a *${nome}* no Maps e achei que poderia fazer sentido. Quer ver o que já desenvolvi?`,
-  (nome) => `Olá, como vai? Trabalho com desenvolvimento de sites pra negócios locais. Vi a *${nome}* no Google e queria mostrar meu trabalho. Teria interesse?`,
+  (nome, cat) => `Oi! Sou o Ryan, trabalho com sites pra negócios locais. Vi a *${nome}* no Maps — tenho exemplos de como fica pra ${cat} da região. Posso te mostrar?`,
+  (nome, cat) => `Olá, tudo bem? Sou o Ryan, faço sites pra negócios locais. Vi a *${nome}* no Google e tenho cases de ${cat} aqui na região. Vale uma olhada?`,
+  (nome, cat) => `Oi! Vi a *${nome}* no Maps e resolvi entrar em contato. Já fiz pra ${cat} aqui na região e tenho exemplos. Faz sentido pra vocês?`,
+  (nome, cat) => `Olá! Sou o Ryan, desenvolvo sites pra negócios locais. A *${nome}* apareceu na minha busca — tenho exemplos de ${cat} que ficaram bem legais. Posso mandar?`,
+  (nome, cat) => `Oi, tudo bem? Sou o Ryan, trabalho com presença digital pra negócios locais. Vi a *${nome}* no Google — já fiz pra ${cat} na região. Posso te mostrar como ficou?`,
+  (nome, cat) => `Olá, como vai? Sou o Ryan, faço sites pra negócios da região. Notei a *${nome}* no Maps e tenho exemplos de ${cat} que ficaram bem. Você teria 2 minutinhos?`,
 ];
-function MSG_1(nome) {
-  return MSGS_1[Math.floor(Math.random() * MSGS_1.length)](nome);
+function MSG_1(nome, cat) {
+  return MSGS_1[Math.floor(Math.random() * MSGS_1.length)](nome, cat || 'negócios locais');
+}
+
+// ─── Variações da MSG_3 (follow-up 3 dias) ───────────────────────────────────
+const MSGS_3 = [
+  (nome) => `Oi *${nome}*! Passando rapidinho pra deixar o link do meu trabalho: ryancreator.dev\n\nQualquer coisa é só chamar 👋`,
+  (nome) => `Olá *${nome}*! Só deixando o portfólio aqui caso queira dar uma olhada: ryancreator.dev 👋`,
+  (nome) => `Oi! Deixa eu passar o link pra *${nome}*: ryancreator.dev — se surgir interesse é só falar 👋`,
+  (nome) => `Olá *${nome}*! Não sei se a mensagem chegou antes. Meu portfólio: ryancreator.dev — qualquer dúvida pode me chamar 👋`,
+];
+function MSG_3(nome) {
+  return MSGS_3[Math.floor(Math.random() * MSGS_3.length)](nome);
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -207,11 +218,42 @@ async function contarDisparosUltimaHora() {
   return Array.isArray(rows) ? rows.length : 0;
 }
 
+// ─── Follow-up após 3 dias sem resposta ──────────────────────────────────────
+async function jobFollowUp() {
+  console.log(`[${new Date().toLocaleString('pt-BR')}] Follow-up 3 dias...`);
+  if (!dentroJanelaEnvio()) { console.log('Fora da janela.'); return; }
+
+  const tresDiasAtras = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+  const prospects = await sbFetch(
+    `/wa_prospects?status=eq.sent1&sent1_at=lte.${tresDiasAtras.toISOString()}&select=*&limit=10`
+  ).catch(() => []);
+
+  if (!prospects?.length) { console.log('Sem follow-ups pendentes.'); return; }
+
+  for (const p of prospects) {
+    try {
+      await enviarWA(p.wa_num, MSG_3(p.nome));
+      await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
+        status: 'sent3',
+        updated_at: new Date().toISOString(),
+      });
+      console.log(`[follow-up] ✓ ${p.nome}`);
+    } catch (err) {
+      console.error(`[follow-up] Erro ${p.nome}:`, err.message);
+      if (err.message.includes('exists":false') || err.message.includes('not exists')) {
+        await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() }).catch(() => {});
+      }
+    }
+    await sleep(delayAleatorio());
+  }
+  console.log('Follow-up finalizado.');
+}
+
 // ─── Expirar prospects sem resposta após 7 dias ───────────────────────────────
 async function jobExpirarSemResposta() {
   const sete_dias_atras = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   const rows = await sbFetch(
-    `/wa_prospects?status=in.(sent1,replied)&sent1_at=lte.${sete_dias_atras.toISOString()}&select=id,nome`
+    `/wa_prospects?status=in.(sent1,sent3,replied)&sent1_at=lte.${sete_dias_atras.toISOString()}&select=id,nome`
   ).catch(() => []);
   if (!rows?.length) return;
   for (const p of rows) {
@@ -365,7 +407,7 @@ async function jobDisparoLote(limite) {
 
   for (const p of filtrados) {
     try {
-      await enviarWA(p.wa_num, MSG_1(p.nome));
+      await enviarWA(p.wa_num, MSG_1(p.nome, p.categoria));
       await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
         status: 'sent1',
         sent1_at: new Date().toISOString(),
@@ -397,6 +439,7 @@ async function jobDisparoLote(limite) {
 cron.schedule('30 10 * * 1-6', jobBuscar);
 cron.schedule('0 11 * * 1-6', () => { setTimeout(() => jobDisparoLote(LIMITE_MANHA), Math.floor(Math.random() * 20 * 60 * 1000)); });
 cron.schedule('0 16 * * 1-5', () => { setTimeout(() => jobDisparoLote(LIMITE_TARDE), Math.floor(Math.random() * 20 * 60 * 1000)); });
+cron.schedule('0 15 * * 1-6', jobFollowUp);   // 12h BRT — follow-up 3 dias
 cron.schedule('0 9 * * *', jobExpirarSemResposta);
 
 // Servidor HTTP para triggers manuais
@@ -437,7 +480,7 @@ http.createServer(async (req, res) => {
         let enviado = null;
         for (const p of pendentes) {
           try {
-            await enviarWA(p.wa_num, MSG_1(p.nome));
+            await enviarWA(p.wa_num, MSG_1(p.nome, p.categoria));
             await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
               status: 'sent1', sent1_at: new Date().toISOString(), updated_at: new Date().toISOString(),
             });

@@ -13,12 +13,12 @@ const WORKER_URL      = process.env.WORKER_URL;
 const TRIGGER_KEY     = process.env.TRIGGER_KEY || 'familia1@';
 
 const MSGS_2 = [
-  (nome) => `Esse é meu portfólio: ryancreator.dev\n\nEntrego em até 7 dias, preço fixo, sem mensalidade. Posso fazer um orçamento pra *${nome}*?`,
-  (nome) => `Segue meu portfólio: ryancreator.dev\n\nTrabalho com prazo de até 7 dias e valor fechado, sem surpresa. O que acha pra *${nome}*?`,
-  (nome) => `Aqui está: ryancreator.dev\n\nJá fiz pra vários negócios da região. Entrego em 7 dias, preço fixo. Consigo fazer um orçamento pra vocês?`,
-  (nome) => `ryancreator.dev — pode dar uma olhada lá.\n\nPrazo de até 7 dias, preço fixo, sem mensalidade. Faz sentido pra *${nome}*?`,
-  (nome) => `Meu portfólio: ryancreator.dev\n\nEntrego rápido e com preço fechado. Se quiser, faço um orçamento específico pra *${nome}*?`,
-  (nome) => `Segue: ryancreator.dev\n\nTrabalho com negócios locais, entrego em 7 dias e o valor é fixo. Posso montar uma proposta pra *${nome}*?`,
+  (nome) => `Esse é meu portfólio: ryancreator.dev\n\nJá fiz pra mecânica, barbearia, clínica e restaurante aqui na região. Entrego em 7 dias, preço fixo, sem mensalidade.\n\nAgenda com poucas vagas esse mês. Posso fazer um orçamento pra *${nome}*?`,
+  (nome) => `Segue: ryancreator.dev\n\nTrabalho com negócios locais há alguns anos — entrego em 7 dias e o valor é fechado, sem surpresa. Agenda bem corrida agora.\n\nFaz sentido montar uma proposta pra *${nome}*?`,
+  (nome) => `Aqui está: ryancreator.dev\n\nJá atendi vários negócios da região. Entrego em 7 dias, preço fixo, você fica com o site no seu nome.\n\nSó aceito poucos projetos por mês pra garantir qualidade. Consigo encaixar a *${nome}*?`,
+  (nome) => `ryancreator.dev — dá uma olhada lá.\n\nPrazo de 7 dias, preço fixo, sem mensalidade. Já fiz pra negócios locais da região e o retorno costuma aparecer rápido no Google.\n\nFaz sentido pra *${nome}*?`,
+  (nome) => `Meu portfólio: ryancreator.dev\n\nAtendo negócios locais direto, sem intermediário. Entrego em 7 dias com preço fechado. Agenda com poucas vagas esse mês.\n\nQuer que eu faça um orçamento específico pra *${nome}*?`,
+  (nome) => `Segue: ryancreator.dev\n\nJá ajudei negócios da região a aparecerem no Google e receberem mais contatos. 7 dias de prazo, valor fixo.\n\nPosso montar uma proposta pra *${nome}*?`,
 ];
 function MSG_2(nome) {
   return MSGS_2[Math.floor(Math.random() * MSGS_2.length)](nome);
@@ -356,7 +356,7 @@ export default async function handler(req, res) {
 
     // Busca prospect ativo
     const prospects = await sbFetch(
-      `/wa_prospects?wa_num=eq.${waNum}&status=in.(sent1,replied,aguardando_ryan)&select=*&order=sent1_at.desc&limit=1`
+      `/wa_prospects?wa_num=eq.${waNum}&status=in.(sent1,sent3,replied,aguardando_ryan)&select=*&order=sent1_at.desc&limit=1`
     );
     if (!prospects?.length) return res.status(200).json({ ok: true });
 
