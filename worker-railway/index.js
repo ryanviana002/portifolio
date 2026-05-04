@@ -56,9 +56,7 @@ async function proximaCategoria() {
   // Busca qual índice foi usado por último no Supabase
   const rows = await sbFetch('/wa_config?select=valor&id=eq.categoria_idx').catch(() => []);
   const idx = rows?.[0]?.valor ? (parseInt(rows[0].valor) + 1) % CATEGORIAS.length : 0;
-  await sbFetch('/wa_config?id=eq.categoria_idx', 'PATCH', { valor: String(idx), updated_at: new Date().toISOString() }).catch(async () => {
-    await sbFetch('/wa_config', 'POST', { id: 'categoria_idx', valor: String(idx), updated_at: new Date().toISOString() }).catch(() => {});
-  });
+  await sbFetch('/wa_config', 'POST', { id: 'categoria_idx', valor: String(idx), updated_at: new Date().toISOString() }).catch(() => {});
   return CATEGORIAS[idx];
 }
 
