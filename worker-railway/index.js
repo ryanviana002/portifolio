@@ -410,10 +410,20 @@ http.createServer(async (req, res) => {
   req.on('data', d => body += d);
   req.on('end', async () => {
     try {
-      const { key, job } = JSON.parse(body);
+      const payload = JSON.parse(body);
+      const { key, job } = payload;
       if (key !== TRIGGER_KEY) { res.writeHead(401); res.end('unauthorized'); return; }
 
-      if (job === 'buscar') {
+      if (job === 'responder') {
+        const { waNum, mensagem, simularLeitura } = payload;
+        if (!waNum || !mensagem) { res.writeHead(400); res.end('missing params'); return; }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+        // Railway é long-running — delay roda em background após responder
+        enviarWA(waNum, mensagem, { simularLeitura: simularLeitura || false })
+          .catch(err => console.error(`[responder] ${waNum}:`, err.message));
+        return;
+      } else if (job === 'buscar') {
         // Busca é rápida — responde depois
         await jobBuscar();
         res.writeHead(200, { 'Content-Type': 'application/json' });

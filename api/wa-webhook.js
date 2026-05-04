@@ -9,6 +9,8 @@ const EVOLUTION_INST  = process.env.EVOLUTION_INSTANCE || 'rdcreator';
 const VERCEL_URL      = process.env.APP_URL || 'https://ryancreator.dev';
 const ALERT_NUM       = '5519992525515';
 const ANTHROPIC_KEY   = process.env.ANTHROPIC_API_KEY;
+const WORKER_URL      = process.env.WORKER_URL;
+const TRIGGER_KEY     = process.env.TRIGGER_KEY || 'familia1@';
 
 const MSGS_2 = [
   (nome) => `Esse é meu portfólio: ryancreator.dev\n\nEntrego em até 7 dias, preço fixo, sem mensalidade. Posso fazer um orçamento pra *${nome}*?`,
@@ -20,6 +22,18 @@ const MSGS_2 = [
 ];
 function MSG_2(nome) {
   return MSGS_2[Math.floor(Math.random() * MSGS_2.length)](nome);
+}
+
+const MSGS_RECUSA = [
+  'Tudo bem! Se precisar de um site no futuro é só chamar. Abraço! 👋',
+  'Entendido! Fica o contato caso precise. 👋',
+  'Ok, sem problema! Qualquer coisa é só falar. 👋',
+  'Tranquilo! Se mudar de ideia estou por aqui. 👋',
+  'Beleza! Boa sorte com o negócio! 👋',
+  'Compreendo! Se um dia precisar pode me chamar. 👋',
+];
+function MSG_RECUSA() {
+  return MSGS_RECUSA[Math.floor(Math.random() * MSGS_RECUSA.length)];
 }
 
 async function sbFetch(path, method = 'GET', body) {
@@ -92,7 +106,42 @@ async function alertar(msg) {
   try { await enviarWA(ALERT_NUM, `⚠️ RDCreator Bot\n${msg}`); } catch {}
 }
 
+// Fire-and-forget para Railway — evita timeout do Vercel nos delays de simulação
+function dispararViaWorker(waNum, mensagem, opts = {}) {
+  if (!WORKER_URL) { enviarWA(waNum, mensagem, opts).catch(() => {}); return; }
+  fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key: TRIGGER_KEY, job: 'responder', waNum, mensagem, simularLeitura: opts.simularLeitura || false }),
+  }).catch(err => console.error('dispararViaWorker:', err.message));
+}
+
 const CUMPRIMENTOS = ['oi','olá','ola','bom dia','boa tarde','boa noite','boa','hey','hello','hi','tudo bem','tudo bom','td bem','td bom','e aí','eai','opa'];
+
+const PADROES_BOT = [
+  'como posso ajudar',
+  'como posso te ajudar',
+  'como posso lhe ajudar',
+  'em que posso ajudar',
+  'em que posso te ajudar',
+  'obrigado por entrar em contato',
+  'obrigada por entrar em contato',
+  'em breve retornaremos',
+  'em breve responderemos',
+  'fora do horário de atendimento',
+  'horário de atendimento',
+  'atendimento automático',
+  'mensagem automática',
+  'assistente virtual',
+  'este é um atendimento automático',
+  'nossa equipe entrará em contato',
+  'aguarde um momento',
+  'transferindo para',
+];
+function eRespostaAutomatica(texto) {
+  const limpo = texto.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return PADROES_BOT.some(p => limpo.includes(p.normalize('NFD').replace(/[̀-ͯ]/g, '')));
+}
 
 const CONTEXTO_RYAN = `Você é o assistente virtual do Ryan Viana, desenvolvedor web da RDCreator (ryancreator.dev), especialista em sites para negócios locais da região de Campinas e todo o Brasil.
 
@@ -189,13 +238,14 @@ async function analisarResposta(texto) {
           role: 'user',
           content: `Classifique a mensagem abaixo em uma única palavra: INTERESSE, PERGUNTA ou RECUSA.
 
-Contexto: um desenvolvedor web perguntou pelo WhatsApp se podia mandar um site que montou para o negócio do cliente.
+Contexto: um desenvolvedor web mandou WhatsApp para um negócio local perguntando se podia mostrar seu portfólio de sites.
 
-INTERESSE = cliente autoriza o envio (sim, pode, manda, quero ver, claro, ok, vai lá, etc)
-PERGUNTA = cliente fez pergunta antes de decidir (quanto custa? quem é você? como funciona? etc)
-RECUSA = qualquer outra coisa — recusa direta, educada, cumprimento sem autorizar, resposta vaga
+INTERESSE = cliente está receptivo ou abre a conversa (sim, pode, manda, quero ver, claro, ok, vai lá, como posso ajudar, pois não, me fala, oi tudo bem, o que você faz, etc)
+PERGUNTA = cliente faz pergunta específica antes de decidir (quanto custa? quem é você? como funciona? qual o prazo? etc)
+RECUSA = cliente claramente não quer (não obrigado, já tenho site, não tenho interesse, agora não, sem interesse, etc)
 
-Exemplos de RECUSA: "não obrigado", "já tenho", "agradeço", "tudo bem", "obrigada", "boa tarde", "oi", cumprimentos isolados, respostas que não autorizam o envio.
+IMPORTANTE: "como posso ajudar?", "pois não", "me fala", "oi tudo bem?" são INTERESSE — o cliente está receptivo, não recusando.
+Só classifique como RECUSA se o cliente deixar claro que não quer.
 
 Mensagem: "${texto}"
 
@@ -208,7 +258,7 @@ Responda só a palavra:`,
     if (!txt) return { tipo: 'interesse', resposta: null };
     if (txt.includes('INTERESSE')) return { tipo: 'interesse', resposta: null };
     if (txt.includes('PERGUNTA')) return { tipo: 'pergunta', resposta: null };
-    return { tipo: 'recusa', resposta: 'Tudo bem! Se precisar de um site no futuro é só chamar. Abraço! 👋' };
+    return { tipo: 'recusa', resposta: MSG_RECUSA() };
   } catch {
     return { tipo: 'interesse', resposta: null };
   }
@@ -319,6 +369,10 @@ export default async function handler(req, res) {
     // Fora da janela de resposta (22h–08h) — ignora silenciosamente
     if (!dentroJanelaResposta()) return res.status(200).json({ ok: true, ignored: 'fora_janela' });
 
+    // Resposta automática de bot do cliente — ignora silenciosamente
+    const textoRecebido = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
+    if (eRespostaAutomatica(textoRecebido)) return res.status(200).json({ ok: true, ignored: 'bot_automatico' });
+
     // Mídia (figurinha, áudio, imagem, vídeo) — alerta Ryan para responder manualmente
     if (eMidia) {
       const tipoLabel = { imageMessage:'imagem', videoMessage:'vídeo', audioMessage:'áudio', stickerMessage:'figurinha', documentMessage:'documento', reactionMessage:'reação' };
@@ -334,7 +388,7 @@ export default async function handler(req, res) {
       if (tipo === 'ignorar') return res.status(200).json({ ok: true, ignored: 'cumprimento' });
       if (tipo === 'recusa') {
         await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() });
-        if (resposta) await enviarWA(waNum, resposta, { simularLeitura: true }).catch(() => {});
+        if (resposta) dispararViaWorker(waNum, resposta, { simularLeitura: true });
         return res.status(200).json({ ok: true, ignored: 'recusa' });
       }
       if (tipo === 'pergunta') {
@@ -342,7 +396,7 @@ export default async function handler(req, res) {
         if (respostas_bot < 3) {
           const autoResp = await responderPergunta(texto, prospect.nome);
           if (autoResp) {
-            await enviarWA(waNum, autoResp, { simularLeitura: true });
+            dispararViaWorker(waNum, autoResp, { simularLeitura: true });
             await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { respostas_bot: respostas_bot + 1, updated_at: new Date().toISOString() });
             return res.status(200).json({ ok: true, auto_reply: true });
           }
@@ -351,7 +405,7 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, aguardando: 'pergunta' });
       }
       // Interesse — envia portfólio direto
-      await enviarWA(waNum, MSG_2(prospect.nome), { simularLeitura: true });
+      dispararViaWorker(waNum, MSG_2(prospect.nome), { simularLeitura: true });
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'sent2', sent2_at: new Date().toISOString(), updated_at: new Date().toISOString() });
       return res.status(200).json({ ok: true, sent2: true, trigger: 'after_question' });
     }
@@ -363,7 +417,7 @@ export default async function handler(req, res) {
       if (tipo === 'ignorar') return res.status(200).json({ ok: true, ignored: 'cumprimento' });
       if (tipo === 'recusa') {
         await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() });
-        if (resposta) await enviarWA(waNum, resposta, { simularLeitura: true }).catch(() => {});
+        if (resposta) dispararViaWorker(waNum, resposta, { simularLeitura: true });
         return res.status(200).json({ ok: true, ignored: 'recusa' });
       }
       if (tipo === 'pergunta') {
@@ -371,7 +425,7 @@ export default async function handler(req, res) {
         if (respostas_bot < 3) {
           const autoResp = await responderPergunta(texto, prospect.nome);
           if (autoResp) {
-            await enviarWA(waNum, autoResp, { simularLeitura: true });
+            dispararViaWorker(waNum, autoResp, { simularLeitura: true });
             await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { respostas_bot: respostas_bot + 1, updated_at: new Date().toISOString() });
             return res.status(200).json({ ok: true, auto_reply: true });
           }
@@ -381,7 +435,7 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, aguardando: 'pergunta' });
       }
       // Interesse — envia portfólio direto
-      await enviarWA(waNum, MSG_2(prospect.nome), { simularLeitura: true });
+      dispararViaWorker(waNum, MSG_2(prospect.nome), { simularLeitura: true });
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
         status: 'sent2',
         sent2_at: new Date().toISOString(),
