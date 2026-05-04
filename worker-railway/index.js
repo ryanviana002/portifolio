@@ -433,11 +433,33 @@ async function jobDisparoLote(limite) {
   console.log('Lote finalizado.');
 }
 
+// ─── Alerta para ligar quando sent2 fica 2 dias sem fechar ───────────────────
+async function jobAlertarLigar() {
+  const doisDiasAtras = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+  const prospects = await sbFetch(
+    `/wa_prospects?status=eq.sent2&sent2_at=lte.${doisDiasAtras.toISOString()}&select=*`
+  ).catch(() => []);
+
+  if (!prospects?.length) return;
+
+  for (const p of prospects) {
+    await alertar(`📞 Hora de ligar!\n*${p.nome}*\nwa.me/${p.wa_num}\n\nRecebeu o portfólio há 2 dias sem fechar.`);
+    await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
+      status: 'aguardando_ryan',
+      updated_at: new Date().toISOString(),
+    }).catch(() => {});
+    await sleep(2000);
+  }
+
+  console.log(`[alertar-ligar] ${prospects.length} alertas enviados.`);
+}
+
 // ─── Agendamentos (UTC, Brasília = UTC-3) ────────────────────────────────────
 cron.schedule('30 10 * * 1-6', jobBuscar);
 cron.schedule('0 11 * * 1-6', () => { setTimeout(() => jobDisparoLote(LIMITE_MANHA), Math.floor(Math.random() * 20 * 60 * 1000)); });
 cron.schedule('0 16 * * 1-5', () => { setTimeout(() => jobDisparoLote(LIMITE_TARDE), Math.floor(Math.random() * 20 * 60 * 1000)); });
 cron.schedule('0 15 * * 1-6', jobFollowUp);   // 12h BRT — follow-up 3 dias
+cron.schedule('0 17 * * 1-6', jobAlertarLigar); // 14h BRT — alerta pra ligar
 cron.schedule('0 9 * * *', jobExpirarSemResposta);
 
 // Servidor HTTP para triggers manuais

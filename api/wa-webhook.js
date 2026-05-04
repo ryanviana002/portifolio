@@ -12,16 +12,47 @@ const ANTHROPIC_KEY   = process.env.ANTHROPIC_API_KEY;
 const WORKER_URL      = process.env.WORKER_URL;
 const TRIGGER_KEY     = process.env.TRIGGER_KEY || 'familia1@';
 
-const MSGS_2 = [
-  (nome) => `Esse é meu portfólio: ryancreator.dev\n\nJá fiz pra mecânica, barbearia, clínica e restaurante aqui na região. Entrego em 7 dias, preço fixo, sem mensalidade.\n\nAgenda com poucas vagas esse mês. Posso fazer um orçamento pra *${nome}*?`,
-  (nome) => `Segue: ryancreator.dev\n\nTrabalho com negócios locais há alguns anos — entrego em 7 dias e o valor é fechado, sem surpresa. Agenda bem corrida agora.\n\nFaz sentido montar uma proposta pra *${nome}*?`,
-  (nome) => `Aqui está: ryancreator.dev\n\nJá atendi vários negócios da região. Entrego em 7 dias, preço fixo, você fica com o site no seu nome.\n\nSó aceito poucos projetos por mês pra garantir qualidade. Consigo encaixar a *${nome}*?`,
-  (nome) => `ryancreator.dev — dá uma olhada lá.\n\nPrazo de 7 dias, preço fixo, sem mensalidade. Já fiz pra negócios locais da região e o retorno costuma aparecer rápido no Google.\n\nFaz sentido pra *${nome}*?`,
-  (nome) => `Meu portfólio: ryancreator.dev\n\nAtendo negócios locais direto, sem intermediário. Entrego em 7 dias com preço fechado. Agenda com poucas vagas esse mês.\n\nQuer que eu faça um orçamento específico pra *${nome}*?`,
-  (nome) => `Segue: ryancreator.dev\n\nJá ajudei negócios da região a aparecerem no Google e receberem mais contatos. 7 dias de prazo, valor fixo.\n\nPosso montar uma proposta pra *${nome}*?`,
-];
-function MSG_2(nome) {
-  return MSGS_2[Math.floor(Math.random() * MSGS_2.length)](nome);
+function categoriaGrupo(cat) {
+  if (!cat) return 'default';
+  const c = cat.toLowerCase();
+  if (['mecân', 'oficina', 'borracharia', 'elétrica auto', 'funilaria'].some(k => c.includes(k))) return 'automotivo';
+  if (['salão', 'barbearia'].some(k => c.includes(k))) return 'beleza';
+  if (['restaurante', 'lanchonete', 'pizzaria', 'padaria'].some(k => c.includes(k))) return 'alimentacao';
+  if (['clínica', 'dentista', 'farmácia', 'academia', 'pet shop'].some(k => c.includes(k))) return 'saude';
+  if (['encanador', 'eletricista', 'pintura', 'serralheria', 'marcenaria', 'vidraçaria'].some(k => c.includes(k))) return 'servicos';
+  return 'default';
+}
+
+const MSGS_2 = {
+  automotivo: [
+    (nome) => `ryancreator.dev — já fiz pra oficina e mecânica aqui na região.\n\nQuem busca *"mecânica perto de mim"* no Google clica em quem tem site. Sem site, você perde pra concorrência.\n\nQual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
+    (nome) => `Segue: ryancreator.dev\n\nJá fiz pra oficina da região. Cliente que busca no Google prefere quem tem site — passa mais confiança. Entrego em 7 dias, preço fixo.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
+  ],
+  beleza: [
+    (nome) => `ryancreator.dev — já fiz pra salão e barbearia na região.\n\nSite com galeria de fotos + botão de agendamento = clientes novos todo dia, sem depender só do Instagram.\n\nQual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
+    (nome) => `Segue: ryancreator.dev\n\nJá fiz pra barbearia aqui na região. Galeria de fotos, horários e contato direto — tudo num site que aparece no Google.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
+  ],
+  alimentacao: [
+    (nome) => `ryancreator.dev — já fiz pra restaurante e lanchonete da região.\n\nCardápio online + botão de pedido pelo WhatsApp = mais pedidos sem depender só do iFood.\n\nQual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
+    (nome) => `Segue: ryancreator.dev\n\nJá fiz pra restaurante da região. Site com cardápio, fotos e localização — cliente busca no Google e já chega decidido.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
+  ],
+  saude: [
+    (nome) => `ryancreator.dev — já fiz pra clínica e consultório aqui na região.\n\nPaciente busca no Google antes de ligar. Sem site, você perde pra quem aparece primeiro.\n\nQual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
+    (nome) => `Segue: ryancreator.dev\n\nJá fiz pra dentista e clínica da região. Site com serviços, localização e WhatsApp direto — passa confiança e traz paciente novo.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
+  ],
+  servicos: [
+    (nome) => `ryancreator.dev — já fiz pra prestador de serviço da região.\n\nQuem busca *"eletricista perto de mim"* no Google clica em quem tem site. Sem site, você não aparece.\n\nQual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
+    (nome) => `Segue: ryancreator.dev\n\nJá fiz pra prestador de serviço da região. Site com serviços, área de atendimento e WhatsApp — cliente acha você no Google e já entra em contato.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
+  ],
+  default: [
+    (nome) => `ryancreator.dev — já fiz pra vários negócios da região.\n\nEntrego em 7 dias, preço fixo, sem mensalidade. Agenda com poucas vagas esse mês.\n\nQual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
+    (nome) => `Segue: ryancreator.dev\n\nJá ajudei negócios da região a aparecerem no Google e receberem mais contatos. 7 dias de prazo, valor fixo.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
+  ],
+};
+function MSG_2(nome, categoria) {
+  const grupo = categoriaGrupo(categoria);
+  const msgs = MSGS_2[grupo];
+  return msgs[Math.floor(Math.random() * msgs.length)](nome);
 }
 
 const MSGS_RECUSA = [
@@ -405,7 +436,7 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, aguardando: 'pergunta' });
       }
       // Interesse — envia portfólio direto
-      dispararViaWorker(waNum, MSG_2(prospect.nome), { simularLeitura: true });
+      dispararViaWorker(waNum, MSG_2(prospect.nome, prospect.categoria), { simularLeitura: true });
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'sent2', sent2_at: new Date().toISOString(), updated_at: new Date().toISOString() });
       return res.status(200).json({ ok: true, sent2: true, trigger: 'after_question' });
     }
@@ -435,7 +466,7 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, aguardando: 'pergunta' });
       }
       // Interesse — envia portfólio direto
-      dispararViaWorker(waNum, MSG_2(prospect.nome), { simularLeitura: true });
+      dispararViaWorker(waNum, MSG_2(prospect.nome, prospect.categoria), { simularLeitura: true });
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
         status: 'sent2',
         sent2_at: new Date().toISOString(),
