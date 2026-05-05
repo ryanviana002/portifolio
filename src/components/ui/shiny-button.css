@@ -79,6 +79,7 @@
 .shiny-cta span {
   position: relative;
   z-index: 1;
+  color: #ffffff !important;
 }
 
 .shiny-cta:is(:hover, :focus-visible) {
