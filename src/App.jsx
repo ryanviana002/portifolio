@@ -17,7 +17,7 @@ import AudioToggle from './components/AudioToggle';
 import SectionNav from './components/SectionNav';
 import ParticleText from './components/ParticleText';
 import MatrixRain from './components/MatrixRain';
-import SleepMode from './components/SleepMode';
+// import SleepMode from './components/SleepMode';
 import Portal from './components/Portal';
 import BackToTop from './components/BackToTop';
 import ShakeEaster from './components/ShakeEaster';
@@ -260,7 +260,7 @@ function App() {
         ))}
       </div>
 
-      <SleepMode />
+      {/* <SleepMode /> */}
       <BackToTop />
       <ShakeEaster />
 

@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import './Portfolio.css';
 import { ShinyButton } from '@/components/ui/shiny-button';
+import { RadialScrollGallery } from '@/components/ui/portfolio-and-image-gallery';
 
 function TiltCard({ children, style, className }) {
   const cardRef = useRef(null);
@@ -17,9 +18,7 @@ function TiltCard({ children, style, className }) {
     card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
     card.style.transition = 'transform 0.05s ease';
     const shine = card.querySelector('.tilt-shine');
-    if (shine) {
-      shine.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.08), transparent 60%)`;
-    }
+    if (shine) shine.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.08), transparent 60%)`;
   };
 
   const onLeave = () => {
@@ -67,6 +66,7 @@ const projects = [
     tech: ['HTML', 'Tailwind', 'CSS3'],
     color: '#D95D00',
     link: 'https://ryancreator.dev/delega',
+    preview: '/preview-delega.png',
   },
   {
     num: '04',
@@ -76,6 +76,7 @@ const projects = [
     tech: ['React', 'Vite', '4GL', 'CSS3'],
     color: '#9e9eff',
     link: 'https://github.com/ryanviana002',
+    preview: '/preview-github.png',
   },
 ];
 
@@ -98,10 +99,19 @@ export default function Portfolio() {
             Projetos reais, entregues com qualidade e resultado.
           </p>
         </div>
+      </div>
 
-        <div className="portfolio-grid">
-          {projects.map((p, i) => (
-            <TiltCard key={i} className="proj-card" style={{ '--accent-color': p.color }}>
+      <RadialScrollGallery
+        baseRadius={560}
+        mobileRadius={200}
+        scrollDuration={2500}
+        visiblePercentage={38}
+        startTrigger="center center"
+        onItemSelect={(i) => window.open(projects[i].link, '_blank')}
+      >
+        {(hoveredIndex) =>
+          projects.map((p, i) => (
+            <TiltCard key={i} className="proj-card proj-card--radial" style={{ '--accent-color': p.color, width: '300px' }}>
               <div className="proj-thumb">
                 <div className="proj-thumb-bg" />
                 {p.preview ? (
@@ -133,16 +143,16 @@ export default function Portfolio() {
                 <h3 className="proj-name">{p.title}</h3>
                 <p className="proj-desc">{p.desc}</p>
                 <div className="proj-tech">
-                  {p.tech.map(t => (
-                    <span key={t} className="tech-badge">{t}</span>
-                  ))}
+                  {p.tech.map(t => <span key={t} className="tech-badge">{t}</span>)}
                 </div>
               </div>
               <ShinyButton href={p.link} target="_blank" rel="noreferrer">VER MAIS</ShinyButton>
             </TiltCard>
-          ))}
-        </div>
+          ))
+        }
+      </RadialScrollGallery>
 
+      <div className="portfolio-inner">
         <div className="portfolio-cta-row">
           <ShinyButton href="#contato">SOLICITAR ORÇAMENTO</ShinyButton>
         </div>
