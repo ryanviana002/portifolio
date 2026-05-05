@@ -31,15 +31,17 @@ const DELAY_MAX_MS = 600_000;  // 10 min
 
 // ─── Variações da MSG_1 (anti-spam) ─────────────────────────────────────────
 const MSGS_1 = [
-  (nome, cat) => `Oi! Sou o Ryan, trabalho com sites pra negócios locais. Vi a *${nome}* no Maps — tenho exemplos de como fica pra ${cat} da região. Posso te mostrar?`,
-  (nome, cat) => `Olá, tudo bem? Sou o Ryan, faço sites pra negócios locais. Vi a *${nome}* no Google e tenho cases de ${cat} aqui na região. Vale uma olhada?`,
-  (nome, cat) => `Oi! Vi a *${nome}* no Maps e resolvi entrar em contato. Já fiz pra ${cat} aqui na região e tenho exemplos. Faz sentido pra vocês?`,
-  (nome, cat) => `Olá! Sou o Ryan, desenvolvo sites pra negócios locais. A *${nome}* apareceu na minha busca — tenho exemplos de ${cat} que ficaram bem legais. Posso mandar?`,
-  (nome, cat) => `Oi, tudo bem? Sou o Ryan, trabalho com presença digital pra negócios locais. Vi a *${nome}* no Google — já fiz pra ${cat} na região. Posso te mostrar como ficou?`,
-  (nome, cat) => `Olá, como vai? Sou o Ryan, faço sites pra negócios da região. Notei a *${nome}* no Maps e tenho exemplos de ${cat} que ficaram bem. Você teria 2 minutinhos?`,
+  (nome, cat, r, rv) => `Oi! Sou o Ryan, trabalho com sites pra negócios locais. Vi que a *${nome}* tem ${r} ⭐ e ${rv} avaliações no Google — ótima reputação. Um site ajudaria a converter isso em ainda mais clientes. Posso te mostrar?`,
+  (nome, cat, r, rv) => `Olá! Sou o Ryan, faço sites pra negócios locais. Vi a *${nome}* no Maps com ${r} ⭐ e ${rv} avaliações — negócio com essa nota merecia aparecer mais no Google. Tenho exemplos de ${cat} da região. Vale uma olhada?`,
+  (nome, cat, r, rv) => `Oi, tudo bem? Sou o Ryan, desenvolvo sites pra negócios locais. A *${nome}* apareceu na minha busca com ${rv} avaliações e ${r} ⭐ — vocês claramente têm bom atendimento. Já fiz pra ${cat} aqui na região. Faz sentido pra vocês?`,
+  (nome, cat, r, rv) => `Olá! Vi a *${nome}* no Maps — ${r} ⭐ com ${rv} avaliações, impressionante. Sou o Ryan, faço sites pra negócios locais. Um site coloca essa reputação na frente quando alguém busca no Google. Posso te mostrar?`,
+  (nome, cat, r, rv) => `Oi! Sou o Ryan, trabalho com presença digital pra negócios locais. Vi a *${nome}* com ${r} ⭐ e ${rv} avaliações — com um site, vocês apareceriam no topo quando alguém buscar ${cat} na região. Posso te mostrar como ficou pra outros?`,
+  (nome, cat, r, rv) => `Olá, como vai? Sou o Ryan, faço sites pra negócios da região. Notei a *${nome}* no Maps — ${rv} avaliações e ${r} ⭐ mostra que vocês são referência. Um site faria essa reputação trabalhar pra trazer mais clientes. Teria 2 minutinhos?`,
 ];
-function MSG_1(nome, cat) {
-  return MSGS_1[Math.floor(Math.random() * MSGS_1.length)](nome, cat || 'negócios locais');
+function MSG_1(nome, cat, rating, reviewCount) {
+  const r = rating ? rating.toFixed(1) : '4.5';
+  const rv = reviewCount || 50;
+  return MSGS_1[Math.floor(Math.random() * MSGS_1.length)](nome, cat || 'negócios locais', r, rv);
 }
 
 // ─── Variações da MSG_3 (follow-up 3 dias) ───────────────────────────────────
@@ -165,6 +167,8 @@ async function buscarProspects(categoria) {
       foto: p.photos?.[0]?.name
         ? `https://places.googleapis.com/v1/${p.photos[0].name}/media?maxWidthPx=200&key=${PLACES_KEY}`
         : null,
+      rating: p.rating || null,
+      reviewCount: p.userRatingCount || 0,
     };
   });
 }
@@ -318,6 +322,8 @@ async function jobBuscar() {
         telefone: p.telefone,
         maps_url: p.mapsUrl,
         foto: p.foto,
+        rating: p.rating,
+        review_count: p.reviewCount,
         status: 'pending',
         updated_at: new Date().toISOString(),
       }),
@@ -417,7 +423,7 @@ async function jobDisparoLote(limite) {
 
   for (const p of filtrados) {
     try {
-      await enviarWA(p.wa_num, MSG_1(p.nome, p.categoria));
+      await enviarWA(p.wa_num, MSG_1(p.nome, p.categoria, p.rating, p.review_count));
       await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
         status: 'sent1',
         sent1_at: new Date().toISOString(),
@@ -512,7 +518,7 @@ http.createServer(async (req, res) => {
         let enviado = null;
         for (const p of pendentes) {
           try {
-            await enviarWA(p.wa_num, MSG_1(p.nome, p.categoria));
+            await enviarWA(p.wa_num, MSG_1(p.nome, p.categoria, p.rating, p.review_count));
             await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
               status: 'sent1', sent1_at: new Date().toISOString(), updated_at: new Date().toISOString(),
             });
