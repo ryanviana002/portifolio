@@ -432,7 +432,7 @@ export default async function handler(req, res) {
 
     // Busca prospect ativo
     const prospects = await sbFetch(
-      `/wa_prospects?wa_num=eq.${waNum}&status=in.(sent1,sent3,replied,aguardando_ryan)&select=*&order=sent1_at.desc&limit=1`
+      `/wa_prospects?wa_num=eq.${waNum}&status=in.(sent1,sent2,sent3,replied,aguardando_ryan)&select=*&order=sent1_at.desc&limit=1`
     );
     if (!prospects?.length) return res.status(200).json({ ok: true });
 
@@ -518,6 +518,23 @@ export default async function handler(req, res) {
         updated_at: new Date().toISOString(),
       });
       return res.status(200).json({ ok: true, sent2: true, trigger: 'second_message' });
+    }
+
+    // Prospect viu o portfólio e respondeu — alerta Ryan para ligar
+    if (prospect.status === 'sent2') {
+      const texto = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
+      if (eRespostaAutomatica(texto)) return res.status(200).json({ ok: true, ignored: 'bot_automatico' });
+      const { tipo, resposta } = await analisarResposta(texto);
+      if (tipo === 'ignorar') return res.status(200).json({ ok: true, ignored: 'cumprimento' });
+      if (tipo === 'recusa') {
+        await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() });
+        if (resposta) dispararViaWorker(waNum, resposta, { simularLeitura: true });
+        return res.status(200).json({ ok: true, ignored: 'recusa' });
+      }
+      // Interesse ou pergunta — alerta Ryan para ligar
+      await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'aguardando_ryan', updated_at: new Date().toISOString() });
+      await alertar(`🔥 *${prospect.nome}* respondeu após ver o portfólio!\n\n"${texto}"\n\nwa.me/${waNum}`);
+      return res.status(200).json({ ok: true, aguardando: 'ligar' });
     }
 
     // Primeira resposta — calcular delay
