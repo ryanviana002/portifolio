@@ -10,13 +10,17 @@ const EVOLUTION_INST = process.env.EVOLUTION_INSTANCE || 'rdcreator';
 const PLACES_KEY     = process.env.GOOGLE_PLACES_API_KEY;
 const ALERT_NUM      = '5519992525515';
 
+// Sempre buscadas todo dia
+const CATEGORIAS_FIXAS = ['mecânica automotiva', 'oficina mecânica', 'elétrica automotiva'];
+
+// Rotativa — uma por dia
 const CATEGORIAS = [
-  'mecânica automotiva', 'oficina mecânica', 'salão de beleza', 'barbearia',
+  'salão de beleza', 'barbearia',
   'restaurante', 'pizzaria', 'pet shop',
   'clínica médica', 'dentista',
   'advocacia', 'imobiliária',
-  'elétrica automotiva', 'vidraçaria',
-  'serralheria', 'marcenaria', 'encanador', 'eletricista', 'pintura residencial',
+  'vidraçaria', 'serralheria', 'marcenaria',
+  'encanador', 'eletricista', 'pintura residencial',
 ];
 
 const LIMITE_DIA   = 30;  // semana 30, aumentar gradualmente
@@ -270,23 +274,30 @@ async function jobBuscar() {
   const vagas = LIMITE_DIA - dispararHoje;
   if (vagas <= 0) { console.log('Limite diário atingido.'); return; }
 
-  const categoria = await proximaCategoria();
-  console.log(`Categoria: ${categoria}`);
+  const rotativa = await proximaCategoria();
+  const categoriasDia = [...CATEGORIAS_FIXAS, rotativa];
+  console.log(`Categorias: ${categoriasDia.join(', ')}`);
 
-  let prospects;
-  try {
-    prospects = await buscarProspects(categoria);
-  } catch (err) {
-    console.error('Erro Places:', err.message);
-    await alertar(`Erro Google Places API:\n${err.message}`);
-    return;
+  let prospects = [];
+  for (const categoria of categoriasDia) {
+    try {
+      const encontrados = await buscarProspects(categoria);
+      prospects = prospects.concat(encontrados);
+      console.log(`${categoria}: ${encontrados.length} encontrados`);
+    } catch (err) {
+      console.error(`Erro Places (${categoria}):`, err.message);
+      await alertar(`Erro Google Places API (${categoria}):\n${err.message}`);
+    }
   }
 
-  console.log(`${prospects.length} encontrados`);
+  // Deduplica por id
+  const vistos = new Set();
+  prospects = prospects.filter(p => { if (vistos.has(p.id)) return false; vistos.add(p.id); return true; });
+  console.log(`Total: ${prospects.length} encontrados`);
 
   let novos = 0;
   for (const p of prospects) {
-    if (novos >= vagas * 2) break; // buffer 2x para ter fila suficiente
+    if (novos >= vagas * 2) break;
     if (!await prospectNovo(p.id, p.waNum)) continue;
 
     // Salva na fila SEM gerar site — usa INSERT puro (sem merge) para nunca sobrescrever contatos existentes
