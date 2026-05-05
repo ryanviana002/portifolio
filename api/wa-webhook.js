@@ -480,13 +480,13 @@ export default async function handler(req, res) {
         await alertar(`❓ Pergunta em *${prospect.nome}*:\n"${texto}"\n\nWA: wa.me/${waNum}`);
         return res.status(200).json({ ok: true, aguardando: 'pergunta' });
       }
-      // Interesse — envia portfólio direto
-      dispararViaWorker(waNum, MSG_2(prospect.nome, prospect.categoria), { simularLeitura: true });
-      await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'sent2', sent2_at: new Date().toISOString(), updated_at: new Date().toISOString() });
-      return res.status(200).json({ ok: true, sent2: true, trigger: 'after_question' });
+      // Interesse após aguardar Ryan — alerta, não envia MSG_2 de novo
+      await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'aguardando_ryan', updated_at: new Date().toISOString() });
+      await alertar(`🔥 *${prospect.nome}* quer fechar!\n\nwa.me/${waNum}`);
+      return res.status(200).json({ ok: true, aguardando: 'interesse' });
     }
 
-    // Prospect em "replied" = já recebeu resposta de bot antes, agora é humano
+    // Prospect em "replied" = já recebeu resposta de bot antes
     if (prospect.status === 'replied') {
       const texto = msg.message?.conversation || msg.message?.extendedTextMessage?.text || '';
       const { tipo, resposta } = await analisarResposta(texto);
@@ -502,7 +502,8 @@ export default async function handler(req, res) {
           const autoResp = await responderPergunta(texto, prospect.nome);
           if (autoResp) {
             dispararViaWorker(waNum, autoResp, { simularLeitura: true });
-            await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { respostas_bot: respostas_bot + 1, updated_at: new Date().toISOString() });
+            // Após responder pergunta → aguardando_ryan: próxima msg vai pra você
+            await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { respostas_bot: respostas_bot + 1, status: 'aguardando_ryan', updated_at: new Date().toISOString() });
             return res.status(200).json({ ok: true, auto_reply: true });
           }
         }
@@ -510,7 +511,7 @@ export default async function handler(req, res) {
         await alertar(`❓ Pergunta em *${prospect.nome}*:\n"${texto}"\n\nWA: wa.me/${waNum}`);
         return res.status(200).json({ ok: true, aguardando: 'pergunta' });
       }
-      // Interesse — envia portfólio direto
+      // Interesse — envia portfólio
       dispararViaWorker(waNum, MSG_2(prospect.nome, prospect.categoria), { simularLeitura: true });
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
         status: 'sent2',
