@@ -149,6 +149,12 @@ function dispararViaWorker(waNum, mensagem, opts = {}) {
 
 const CUMPRIMENTOS = ['oi','olá','ola','bom dia','boa tarde','boa noite','boa','hey','hello','hi','tudo bem','tudo bom','td bem','td bom','e aí','eai','opa'];
 
+const PALAVRAS_VALOR = ['valor','preço','preco','quanto','custa','custo','plano','planos','parcela','parcelado','mensalidade','pagamento','pagar','proposta','orçamento','orcamento','investimento','desconto'];
+function ePerguntaDeValor(texto) {
+  const limpo = texto.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return PALAVRAS_VALOR.some(p => limpo.includes(p));
+}
+
 const PADROES_BOT = [
   'como posso ajudar',
   'como posso te ajudar',
@@ -252,8 +258,10 @@ Se a pergunta for sobre desconto/negociação de preço, loja virtual/e-commerce
 async function analisarResposta(texto) {
   if (!texto?.trim()) return { tipo: 'ignorar', resposta: null };
   const limpo = texto.trim().toLowerCase().replace(/[!?.,']/g, '').trim();
-  // Ignora SOMENTE se a mensagem inteira for um cumprimento
+  // Ignora se for cumprimento (exato ou mensagem curta que começa com cumprimento)
+  const palavras = limpo.split(/\s+/).length;
   if (CUMPRIMENTOS.includes(limpo)) return { tipo: 'ignorar', resposta: null };
+  if (palavras <= 6 && CUMPRIMENTOS.some(c => limpo.startsWith(c))) return { tipo: 'ignorar', resposta: null };
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -271,12 +279,12 @@ async function analisarResposta(texto) {
 
 Contexto: um desenvolvedor web mandou WhatsApp para um negócio local perguntando se podia mostrar seu portfólio de sites.
 
-INTERESSE = cliente está receptivo ou abre a conversa (sim, pode, manda, quero ver, claro, ok, vai lá, como posso ajudar, pois não, me fala, oi tudo bem, o que você faz, etc)
-PERGUNTA = cliente faz pergunta específica antes de decidir (quanto custa? quem é você? como funciona? qual o prazo? etc)
-RECUSA = cliente claramente não quer (não obrigado, já tenho site, não tenho interesse, agora não, sem interesse, etc)
+INTERESSE = cliente autoriza o envio ou quer saber mais (sim, pode, manda, quero ver, claro, ok, vai lá, como posso ajudar, pois não, me fala, o que você faz, etc)
+PERGUNTA = cliente faz pergunta antes de decidir (quem é você? como funciona? qual o prazo? tem contrato? etc)
+RECUSA = cliente não quer ou responde só com saudação sem pedir nada (não obrigado, já tenho site, tudo bem obrigado, boa tarde, etc)
 
-IMPORTANTE: "como posso ajudar?", "pois não", "me fala", "oi tudo bem?" são INTERESSE — o cliente está receptivo, não recusando.
-Só classifique como RECUSA se o cliente deixar claro que não quer.
+IMPORTANTE: saudações puras sem pedido ("tudo bem?", "td bem ryan", "oi tudo bem e vc?") são RECUSA — não autorizam nada.
+Só classifique como INTERESSE se o cliente claramente quer ver ou saber mais.
 
 Mensagem: "${texto}"
 
@@ -293,6 +301,27 @@ Responda só a palavra:`,
   } catch {
     return { tipo: 'interesse', resposta: null };
   }
+}
+
+// Trata pergunta: valor → alerta Ryan; outros → bot responde (máx 3x) → alerta Ryan
+async function tratarPergunta(texto, prospect, waNum) {
+  if (ePerguntaDeValor(texto)) {
+    await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'aguardando_ryan', updated_at: new Date().toISOString() }).catch(() => {});
+    await alertar(`💰 *${prospect.nome}* perguntou sobre valor:\n"${texto}"\n\nwa.me/${waNum}`);
+    return 'valor';
+  }
+  const respostas_bot = (prospect.respostas_bot || 0);
+  if (respostas_bot < 3) {
+    const autoResp = await responderPergunta(texto, prospect.nome);
+    if (autoResp) {
+      dispararViaWorker(waNum, autoResp, { simularLeitura: true });
+      await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { respostas_bot: respostas_bot + 1, status: 'aguardando_ryan', updated_at: new Date().toISOString() }).catch(() => {});
+      return 'auto_reply';
+    }
+  }
+  await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'aguardando_ryan', updated_at: new Date().toISOString() }).catch(() => {});
+  await alertar(`❓ Pergunta em *${prospect.nome}*:\n"${texto}"\n\nwa.me/${waNum}`);
+  return 'pergunta';
 }
 
 // ── Normaliza número para formato 55XXXXXXXXXXX ───────────────────────────────
@@ -468,17 +497,8 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, ignored: 'recusa' });
       }
       if (tipo === 'pergunta') {
-        const respostas_bot = (prospect.respostas_bot || 0);
-        if (respostas_bot < 3) {
-          const autoResp = await responderPergunta(texto, prospect.nome);
-          if (autoResp) {
-            dispararViaWorker(waNum, autoResp, { simularLeitura: true });
-            await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { respostas_bot: respostas_bot + 1, updated_at: new Date().toISOString() });
-            return res.status(200).json({ ok: true, auto_reply: true });
-          }
-        }
-        await alertar(`❓ Pergunta em *${prospect.nome}*:\n"${texto}"\n\nWA: wa.me/${waNum}`);
-        return res.status(200).json({ ok: true, aguardando: 'pergunta' });
+        const resultado = await tratarPergunta(texto, prospect, waNum);
+        return res.status(200).json({ ok: true, aguardando: resultado });
       }
       // Interesse após aguardar Ryan — alerta, não envia MSG_2 de novo
       await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'aguardando_ryan', updated_at: new Date().toISOString() });
@@ -497,19 +517,8 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, ignored: 'recusa' });
       }
       if (tipo === 'pergunta') {
-        const respostas_bot = (prospect.respostas_bot || 0);
-        if (respostas_bot < 3) {
-          const autoResp = await responderPergunta(texto, prospect.nome);
-          if (autoResp) {
-            dispararViaWorker(waNum, autoResp, { simularLeitura: true });
-            // Após responder pergunta → aguardando_ryan: próxima msg vai pra você
-            await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { respostas_bot: respostas_bot + 1, status: 'aguardando_ryan', updated_at: new Date().toISOString() });
-            return res.status(200).json({ ok: true, auto_reply: true });
-          }
-        }
-        await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'aguardando_ryan', updated_at: new Date().toISOString() });
-        await alertar(`❓ Pergunta em *${prospect.nome}*:\n"${texto}"\n\nWA: wa.me/${waNum}`);
-        return res.status(200).json({ ok: true, aguardando: 'pergunta' });
+        const resultado = await tratarPergunta(texto, prospect, waNum);
+        return res.status(200).json({ ok: true, aguardando: resultado });
       }
       // Interesse — envia portfólio
       dispararViaWorker(waNum, MSG_2(prospect.nome, prospect.categoria), { simularLeitura: true });
@@ -566,22 +575,12 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, ignored: 'recusa' });
     }
     if (tipo === 'pergunta') {
-      const respostas_bot = (prospect.respostas_bot || 0);
-      if (respostas_bot < 3) {
-        const autoResp = await responderPergunta(textoHumano, prospect.nome);
-        if (autoResp) {
-          await enviarWA(waNum, autoResp, { simularLeitura: true });
-          await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { respostas_bot: respostas_bot + 1, status: 'replied', updated_at: new Date().toISOString() });
-          return res.status(200).json({ ok: true, auto_reply: true });
-        }
-      }
-      await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', { status: 'aguardando_ryan', updated_at: new Date().toISOString() });
-      await alertar(`❓ Pergunta em *${prospect.nome}*:\n"${textoHumano}"\n\nWA: wa.me/${waNum}`);
-      return res.status(200).json({ ok: true, aguardando: 'pergunta' });
+      const resultado = await tratarPergunta(textoHumano, prospect, waNum);
+      return res.status(200).json({ ok: true, aguardando: resultado });
     }
 
     // Interesse — envia portfólio direto
-    await enviarWA(waNum, MSG_2(prospect.nome), { simularLeitura: true });
+    dispararViaWorker(waNum, MSG_2(prospect.nome, prospect.categoria), { simularLeitura: true });
     await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
       status: 'sent2',
       sent2_at: new Date().toISOString(),
