@@ -12,10 +12,10 @@ const ALERT_NUM      = '5519992525515';
 
 const CATEGORIAS = [
   'mecânica automotiva', 'oficina mecânica', 'salão de beleza', 'barbearia',
-  'restaurante', 'lanchonete', 'pizzaria', 'padaria', 'pet shop',
-  'academia', 'clínica médica', 'dentista', 'farmácia', 'mercado',
-  'advocacia', 'imobiliária', 'escola', 'curso profissionalizante',
-  'borracharia', 'elétrica automotiva', 'funilaria', 'vidraçaria',
+  'restaurante', 'pizzaria', 'pet shop',
+  'clínica médica', 'dentista',
+  'advocacia', 'imobiliária',
+  'elétrica automotiva', 'vidraçaria',
   'serralheria', 'marcenaria', 'encanador', 'eletricista', 'pintura residencial',
 ];
 
