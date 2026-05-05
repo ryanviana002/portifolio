@@ -25,28 +25,28 @@ function categoriaGrupo(cat) {
 
 const MSGS_2 = {
   automotivo: [
-    (nome) => `ryancreator.dev — já fiz pra oficina e mecânica aqui na região.\n\nQuem busca *"mecânica perto de mim"* no Google clica em quem tem site. Sem site, você perde pra concorrência.\n\nQual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
-    (nome) => `Segue: ryancreator.dev\n\nJá fiz pra oficina da região. Cliente que busca no Google prefere quem tem site — passa mais confiança. Entrego em 7 dias, preço fixo.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
+    (nome) => `ryancreator.dev — já fiz pra oficina e mecânica aqui na região.\n\nQuem busca *"mecânica perto de mim"* no Google clica em quem tem site. Sem site, você perde pra concorrência.\n\nA partir de R$697, parcelado em até 12x. Qual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
+    (nome) => `Segue: ryancreator.dev\n\nJá fiz pra oficina da região. Cliente que busca no Google prefere quem tem site — passa mais confiança. Entrego em 7 dias, a partir de R$697.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
   ],
   beleza: [
-    (nome) => `ryancreator.dev — já fiz pra salão e barbearia na região.\n\nSite com galeria de fotos + botão de agendamento = clientes novos todo dia, sem depender só do Instagram.\n\nQual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
-    (nome) => `Segue: ryancreator.dev\n\nJá fiz pra barbearia aqui na região. Galeria de fotos, horários e contato direto — tudo num site que aparece no Google.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
+    (nome) => `ryancreator.dev — já fiz pra salão e barbearia na região.\n\nSite com galeria de fotos + botão de agendamento = clientes novos todo dia, sem depender só do Instagram.\n\nA partir de R$697, parcelado em até 12x. Qual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
+    (nome) => `Segue: ryancreator.dev\n\nJá fiz pra barbearia aqui na região. Galeria de fotos, horários e contato direto — tudo num site que aparece no Google. A partir de R$697.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
   ],
   alimentacao: [
-    (nome) => `ryancreator.dev — já fiz pra restaurante e lanchonete da região.\n\nCardápio online + botão de pedido pelo WhatsApp = mais pedidos sem depender só do iFood.\n\nQual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
-    (nome) => `Segue: ryancreator.dev\n\nJá fiz pra restaurante da região. Site com cardápio, fotos e localização — cliente busca no Google e já chega decidido.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
+    (nome) => `ryancreator.dev — já fiz pra restaurante e pizzaria da região.\n\nCardápio online + botão de pedido pelo WhatsApp = mais pedidos sem depender só do iFood.\n\nA partir de R$697, parcelado em até 12x. Qual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
+    (nome) => `Segue: ryancreator.dev\n\nJá fiz pra restaurante da região. Site com cardápio, fotos e localização — cliente busca no Google e já chega decidido. A partir de R$697.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
   ],
   saude: [
-    (nome) => `ryancreator.dev — já fiz pra clínica e consultório aqui na região.\n\nPaciente busca no Google antes de ligar. Sem site, você perde pra quem aparece primeiro.\n\nQual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
-    (nome) => `Segue: ryancreator.dev\n\nJá fiz pra dentista e clínica da região. Site com serviços, localização e WhatsApp direto — passa confiança e traz paciente novo.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
+    (nome) => `ryancreator.dev — já fiz pra clínica e consultório aqui na região.\n\nPaciente busca no Google antes de ligar. Sem site, você perde pra quem aparece primeiro.\n\nA partir de R$697, parcelado em até 12x. Qual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
+    (nome) => `Segue: ryancreator.dev\n\nJá fiz pra dentista e clínica da região. Site com serviços, localização e WhatsApp direto — passa confiança e traz paciente novo. A partir de R$697.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
   ],
   servicos: [
-    (nome) => `ryancreator.dev — já fiz pra prestador de serviço da região.\n\nQuem busca *"eletricista perto de mim"* no Google clica em quem tem site. Sem site, você não aparece.\n\nQual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
-    (nome) => `Segue: ryancreator.dev\n\nJá fiz pra prestador de serviço da região. Site com serviços, área de atendimento e WhatsApp — cliente acha você no Google e já entra em contato.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
+    (nome) => `ryancreator.dev — já fiz pra prestador de serviço da região.\n\nQuem busca *"eletricista perto de mim"* no Google clica em quem tem site. Sem site, você não aparece.\n\nA partir de R$697, parcelado em até 12x. Qual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
+    (nome) => `Segue: ryancreator.dev\n\nJá fiz pra prestador de serviço da região. Site com serviços, área de atendimento e WhatsApp — cliente acha você no Google. A partir de R$697.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
   ],
   default: [
-    (nome) => `ryancreator.dev — já fiz pra vários negócios da região.\n\nEntrego em 7 dias, preço fixo, sem mensalidade. Agenda com poucas vagas esse mês.\n\nQual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
-    (nome) => `Segue: ryancreator.dev\n\nJá ajudei negócios da região a aparecerem no Google e receberem mais contatos. 7 dias de prazo, valor fixo.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
+    (nome) => `ryancreator.dev — já fiz pra vários negócios da região.\n\nEntrego em 7 dias, preço fixo, sem mensalidade. A partir de R$697, parcelado em até 12x. Agenda com poucas vagas esse mês.\n\nQual o melhor horário pra conversar 10 min sobre a *${nome}*?`,
+    (nome) => `Segue: ryancreator.dev\n\nJá ajudei negócios da região a aparecerem no Google. 7 dias de prazo, a partir de R$697, parcelado em até 12x.\n\nQual o melhor horário pra conversar rapidinho sobre a *${nome}*?`,
   ],
 };
 function MSG_2(nome, categoria) {
@@ -302,9 +302,54 @@ function normalizarNum(raw) {
   return `55${digits}`;
 }
 
+// Envia resposta rápida pro Ryan sem delay de simulação
+async function responderRyan(texto) {
+  await fetch(`${EVOLUTION_URL}/message/sendText/${EVOLUTION_INST}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': EVOLUTION_KEY },
+    body: JSON.stringify({ number: ALERT_NUM, text: texto, delay: 500 }),
+  }).catch(() => {});
+}
+
 // ── Processa comandos enviados pelo Ryan para si mesmo ────────────────────────
 async function processarComandoRyan(textoCmd, res) {
-  // Sem comandos ativos no momento
+  const cmd = textoCmd.trim();
+  const cmdLower = cmd.toLowerCase();
+
+  if (cmdLower.startsWith('/fechar ') || cmdLower.startsWith('/pular ')) {
+    const acao = cmdLower.startsWith('/fechar') ? 'fechar' : 'pular';
+    const arg = cmd.slice(acao === 'fechar' ? 8 : 7).trim();
+    const digits = arg.replace(/\D/g, '');
+    const waNum = digits.length >= 10 ? (digits.startsWith('55') ? digits : `55${digits}`) : null;
+
+    let prospect = null;
+    if (waNum) {
+      const rows = await sbFetch(`/wa_prospects?wa_num=eq.${waNum}&select=*&limit=1`).catch(() => []);
+      prospect = rows?.[0];
+    }
+
+    if (!prospect) {
+      await responderRyan(`❌ Prospect não encontrado: ${arg}`);
+      return res.status(200).json({ ok: true });
+    }
+
+    const novoStatus = acao === 'fechar' ? 'cliente' : 'ignored';
+    await sbFetch(`/wa_prospects?id=eq.${prospect.id}`, 'PATCH', {
+      status: novoStatus,
+      updated_at: new Date().toISOString(),
+    }).catch(() => {});
+
+    const emoji = acao === 'fechar' ? '✅' : '⏭';
+    const label = acao === 'fechar' ? 'marcado como cliente 🎉' : 'ignorado';
+    await responderRyan(`${emoji} *${prospect.nome}* ${label}`);
+    return res.status(200).json({ ok: true });
+  }
+
+  if (cmdLower === '/ajuda' || cmdLower === '/help') {
+    await responderRyan(`*Comandos disponíveis:*\n\n/fechar 5519999999999 — marca como cliente\n/pular 5519999999999 — ignora o prospect`);
+    return res.status(200).json({ ok: true });
+  }
+
   return res.status(200).json({ ok: true });
 }
 

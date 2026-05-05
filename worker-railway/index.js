@@ -142,7 +142,8 @@ async function buscarProspects(categoria) {
     !temSiteProprio(p.websiteUri) &&
     p.businessStatus === 'OPERATIONAL' &&
     temWA(p.nationalPhoneNumber) &&
-    (p.userRatingCount || 0) >= 25
+    (p.userRatingCount || 0) >= 25 &&
+    (p.rating || 0) >= 4.0
   );
   const vistos = new Set();
   return filtrados.filter(p => {
