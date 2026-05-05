@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import './Sobre.css';
+import { ShinyButton } from '@/components/ui/shiny-button';
 
 const techs = [
   {
@@ -244,7 +245,7 @@ export default function Sobre() {
                 <span className="stat-label">Foco em resultado</span>
               </div>
             </div>
-            <a href="#contato" className="sobre-cta" onClick={e => { e.preventDefault(); window.dispatchEvent(new Event('rdc:portal')); }}>INICIAR UM PROJETO</a>
+            <ShinyButton href="#contato" onClick={e => { e.preventDefault(); window.dispatchEvent(new Event('rdc:portal')); }}>INICIAR UM PROJETO</ShinyButton>
           </div>
         </div>
       </div>

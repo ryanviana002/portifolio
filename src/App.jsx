@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
+import { ShinyButton } from './components/ui/shiny-button';
 import { Analytics } from '@vercel/analytics/react';
 import './App.css';
 import Navbar from './components/Navbar';
@@ -38,9 +39,9 @@ function WaPopup({ onClose }) {
         <div className="wa-popup-icon"><WaIcon /></div>
         <h3 className="wa-popup-title">Fale comigo no WhatsApp</h3>
         <p className="wa-popup-desc">Tire suas dúvidas, solicite um orçamento ou inicie seu projeto agora mesmo.</p>
-        <a href="https://wa.me/5519994175385" target="_blank" rel="noreferrer" className="wa-popup-btn" onClick={onClose}>
+        <ShinyButton href="https://wa.me/5519994175385" target="_blank" rel="noreferrer" onClick={onClose}>
           ABRIR WHATSAPP
-        </a>
+        </ShinyButton>
       </div>
     </div>
   );

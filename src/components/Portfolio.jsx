@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import './Portfolio.css';
+import { ShinyButton } from '@/components/ui/shiny-button';
 
 function TiltCard({ children, style, className }) {
   const cardRef = useRef(null);
@@ -137,15 +138,13 @@ export default function Portfolio() {
                   ))}
                 </div>
               </div>
-              <a href={p.link} target="_blank" rel="noreferrer" className="proj-cta">VER MAIS</a>
+              <ShinyButton href={p.link} target="_blank" rel="noreferrer">VER MAIS</ShinyButton>
             </TiltCard>
           ))}
         </div>
 
         <div className="portfolio-cta-row">
-          <a href="#contato" className="portfolio-main-cta">
-            SOLICITAR ORÇAMENTO
-          </a>
+          <ShinyButton href="#contato">SOLICITAR ORÇAMENTO</ShinyButton>
         </div>
       </div>
     </section>

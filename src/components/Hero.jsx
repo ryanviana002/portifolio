@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import './Hero.css';
+import { ShinyButton } from '@/components/ui/shiny-button';
 
 const TERMINAL_STEPS = [
   { type: 'cmd', text: 'npm create rdc-project@latest' },
@@ -629,14 +630,11 @@ export default function Hero() {
           <p className="hero-sub">
             Design que vende. Código que funciona.
           </p>
-          <a href="/preview" className="hero-preview-btn">
+          <ShinyButton href="/preview" className="shiny-always">
             Visualizar meu futuro site
-          </a>
+          </ShinyButton>
         </div>
 
-        <div className="hero-logo-wrap">
-          <TerminalIcon />
-        </div>
       </div>
 
 
