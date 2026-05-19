@@ -710,3 +710,21 @@ console.log('  Limite:    40/dia | 10/hora | Delay: 3–8min | Msgs variadas');
 
 await jobRelatorioPresenca();
 process.exit(0);
+
+app.get('/trigger-presenca', async (req, res) => {
+  try {
+    await jobRelatorioPresenca();
+
+    res.json({
+      ok: true
+    });
+
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      ok: false,
+      error: err.message
+    });
+  }
+});
