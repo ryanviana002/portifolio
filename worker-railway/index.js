@@ -611,8 +611,7 @@ const semCadastro = doUltimoEncontro.filter(r => {
     return `• ${nome} | ${numero || 'sem número'} | ${status}`;
   });
 
-  const dataFormatada = ultimaSexta.toLocaleDateString('pt-BR');
-  const mensagem = `Relatório do último encontro Hangout — ${dataFormatada}\n${linhas.join('\n')}`;
+  const mensagem = `Relatório do último encontro Hangout — ${dataAlvo}\n${linhas.join('\n')}`;
 
   if (!EVOLUTION_URL || !EVOLUTION_KEY) { console.error('[presenca] EVOLUTION_URL/KEY não configurados'); return; }
 
