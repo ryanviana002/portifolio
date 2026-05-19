@@ -563,17 +563,10 @@ async function jobRelatorioPresenca() {
   console.log('[presenca] total rows:', rows.length);
   console.log('[presenca] primeira célula A:', JSON.stringify(rows[rows.length - 1]?.[0]));
 
-  // Última sexta-feira (segunda - 3 dias)
-const ultimaSexta = new Date();
-
-while (ultimaSexta.getDay() !== 5) {
-  ultimaSexta.setDate(ultimaSexta.getDate() - 1);
-}
-
-const sextaFormatada =
-  `${String(ultimaSexta.getDate()).padStart(2, '0')}/${
-    String(ultimaSexta.getMonth() + 1).padStart(2, '0')
-  }/${ultimaSexta.getFullYear()}`;
+  // Última sexta-feira — segunda sempre é hoje - 3
+  const ultimaSexta = new Date();
+  ultimaSexta.setDate(ultimaSexta.getDate() - 3);
+  const sextaFormatada = `${String(ultimaSexta.getDate()).padStart(2, '0')}/${String(ultimaSexta.getMonth() + 1).padStart(2, '0')}/${ultimaSexta.getFullYear()}`;
 
 const doUltimoEncontro = rows.filter(r => {
   if (!r[0]) return false;
