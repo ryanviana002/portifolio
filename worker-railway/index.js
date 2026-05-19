@@ -547,7 +547,7 @@ async function jobAlertarLigar() {
 }
 
 // ─── Relatório de Presença ────────────────────────────────────────────────────
-async function jobRelatorioPresenca() {
+async function jobRelatorioPresenca(force = false) {
   console.log('[presenca] iniciando leitura do Sheets...');
   if (!GOOGLE_API_KEY) { console.error('[presenca] GOOGLE_API_KEY não configurado'); return; }
 
@@ -559,25 +559,19 @@ async function jobRelatorioPresenca() {
   const rows = data.values || [];
   if (!rows.length) { console.log('[presenca] planilha vazia'); return; }
 
-  // DEBUG — remover após confirmar
-  console.log('[presenca] total rows:', rows.length);
-  console.log('[presenca] primeira célula A:', JSON.stringify(rows[rows.length - 1]?.[0]));
+  // Data do encontro: segunda - 2 = sábado; force = data mais recente da planilha
+  let dataAlvo;
+  if (force) {
+    const datas = rows.filter(r => r[0]).map(r => r[0].split(' ')[0]);
+    dataAlvo = datas[datas.length - 1];
+    console.log('[presenca] force — data mais recente:', dataAlvo);
+  } else {
+    const sabado = new Date();
+    sabado.setDate(sabado.getDate() - 2);
+    dataAlvo = `${String(sabado.getDate()).padStart(2, '0')}/${String(sabado.getMonth() + 1).padStart(2, '0')}/${sabado.getFullYear()}`;
+  }
 
-  // Última sexta-feira — segunda sempre é hoje - 3
-  const ultimaSexta = new Date();
-  ultimaSexta.setDate(ultimaSexta.getDate() - 3);
-  const sextaFormatada = `${String(ultimaSexta.getDate()).padStart(2, '0')}/${String(ultimaSexta.getMonth() + 1).padStart(2, '0')}/${ultimaSexta.getFullYear()}`;
-
-const doUltimoEncontro = rows.filter(r => {
-  if (!r[0]) return false;
-
-  const dataBr = r[0].split(' ')[0];
-
-  return dataBr === sextaFormatada;
-});
-  
-  console.log('[presenca] sextaFormatada:', sextaFormatada);
-  console.log('[presenca] dataBr última row:', rows[rows.length - 1]?.[0]?.split(' ')[0]);
+  const doUltimoEncontro = rows.filter(r => r[0] && r[0].split(' ')[0] === dataAlvo);
 
   if (!doUltimoEncontro.length) {
     console.log('[presenca] nenhum dado da última sexta — nada enviado');
@@ -699,7 +693,7 @@ http.createServer(async (req, res) => {
       } else if (job === 'presenca') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true, job }));
-        jobRelatorioPresenca().catch(err => console.error('[presenca]', err.message));
+        jobRelatorioPresenca(payload.force === true).catch(err => console.error('[presenca]', err.message));
       } else {
         res.writeHead(200); res.end(JSON.stringify({ ok: true, job }));
         if (job === 'disparar') await jobDisparoLote(LIMITE_TARDE);
