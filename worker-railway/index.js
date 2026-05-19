@@ -10,18 +10,35 @@ const EVOLUTION_INST = process.env.EVOLUTION_INSTANCE || 'rdcreator';
 const PLACES_KEY     = process.env.GOOGLE_PLACES_API_KEY;
 const ALERT_NUM      = '5519992525515';
 
-// Sempre buscadas todo dia
-const CATEGORIAS_FIXAS = ['mecânica automotiva', 'oficina mecânica', 'elétrica automotiva'];
-
-// Rotativa — uma por dia
-const CATEGORIAS = [
-  'salão de beleza', 'barbearia',
-  'restaurante', 'pizzaria', 'pet shop',
-  'clínica médica', 'dentista',
-  'advocacia', 'imobiliária',
-  'vidraçaria', 'serralheria', 'marcenaria',
-  'encanador', 'eletricista', 'pintura residencial',
+// Tier A+ — buscado todo dia (fecha rápido, carência digital alta)
+const CATEGORIAS_AUTO = [
+  'oficina mecânica',
+  'centro automotivo',
+  'ar condicionado automotivo',
+  'funilaria e pintura',
+  'auto elétrica',
+  'mecânica diesel',
+  'câmbio automático',
+  'injeção eletrônica',
+  'suspensão e freios',
 ];
+
+// Tier A — rotação seg/qua/sex (ticket melhor ou menor concorrência digital)
+const CATEGORIAS_AUTO_A = [
+  'martelinho de ouro',
+  'radiadores automotivos',
+  'escapamento automotivo',
+  'alinhamento e balanceamento',
+  'estética automotiva',
+  'detalhamento automotivo',
+  'vitrificação automotiva',
+  'retífica de motores',
+  'vidraçaria automotiva',
+  'tapeçaria automotiva',
+  'película automotiva',
+  'oficina de motos',
+];
+
 
 const LIMITE_DIA   = 30;  // semana 30, aumentar gradualmente
 const LIMITE_MANHA = 15;
@@ -29,42 +46,59 @@ const LIMITE_TARDE = 15;
 const DELAY_MIN_MS = 180_000;  // 3 min
 const DELAY_MAX_MS = 600_000;  // 10 min
 
-// ─── Variações da MSG_1 (anti-spam) ─────────────────────────────────────────
-const MSGS_1 = [
-  (nome, cat, r, rv) => `Oi! Sou o Ryan, trabalho com sites pra negócios locais. Vi que a *${nome}* tem ${r} ⭐ e ${rv} avaliações no Google — ótima reputação. Um site ajudaria a converter isso em ainda mais clientes. Posso te mostrar?`,
-  (nome, cat, r, rv) => `Olá! Sou o Ryan, faço sites pra negócios locais. Vi a *${nome}* no Maps com ${r} ⭐ e ${rv} avaliações — negócio com essa nota merecia aparecer mais no Google. Tenho exemplos de ${cat} da região. Vale uma olhada?`,
-  (nome, cat, r, rv) => `Oi, tudo bem? Sou o Ryan, desenvolvo sites pra negócios locais. A *${nome}* apareceu na minha busca com ${rv} avaliações e ${r} ⭐ — vocês claramente têm bom atendimento. Já fiz pra ${cat} aqui na região. Faz sentido pra vocês?`,
-  (nome, cat, r, rv) => `Olá! Vi a *${nome}* no Maps — ${r} ⭐ com ${rv} avaliações, impressionante. Sou o Ryan, faço sites pra negócios locais. Um site coloca essa reputação na frente quando alguém busca no Google. Posso te mostrar?`,
-  (nome, cat, r, rv) => `Oi! Sou o Ryan, trabalho com presença digital pra negócios locais. Vi a *${nome}* com ${r} ⭐ e ${rv} avaliações — com um site, vocês apareceriam no topo quando alguém buscar ${cat} na região. Posso te mostrar como ficou pra outros?`,
-  (nome, cat, r, rv) => `Olá, como vai? Sou o Ryan, faço sites pra negócios da região. Notei a *${nome}* no Maps — ${rv} avaliações e ${r} ⭐ mostra que vocês são referência. Um site faria essa reputação trabalhar pra trazer mais clientes. Teria 2 minutinhos?`,
+// ─── MSG_1 automotivo ─────────────────────────────────────────────────────────
+const MSGS_1_AUTO = [
+  // 1. Concorrente com nota menor aparece antes
+  (nome, r, rv) => `Oi! Vi a *${nome}* no Google agora — ${r}⭐ com ${rv} avaliações, reputação muito boa 👏\n\nSou o Ryan, trabalho com presença digital para oficinas aqui da região.\n\nPercebi que algumas oficinas com nota menor aparecem antes de vocês nas buscas por terem o perfil mais ativo e estruturado. Isso faz muita diferença na hora que o cliente escolhe pra onde vai levar o carro.\n\nQuer que eu te mostre o que dá pra melhorar?`,
+  // 2. Cliente decidindo pelo celular agora
+  (nome, r, rv) => `Oi! Pesquisei oficinas aqui da região e a *${nome}* apareceu com ${r}⭐ e ${rv} avaliações.\n\nSou o Ryan, ajudo oficinas a aparecerem melhor no Google e gerar mais contato pelo WhatsApp.\n\nHoje a maioria das pessoas escolhe a oficina direto pelo celular — quem aparece primeiro e passa mais confiança leva o cliente. Com algumas mudanças no perfil do Google dá pra mudar isso bastante.\n\nPosso te mostrar alguns pontos?`,
+  // 3. Reputação forte não sendo convertida
+  (nome, r, rv) => `Oi! A *${nome}* tem ${rv} avaliações e ${r}⭐ no Google — esse nível de reputação é raro.\n\nMeu nome é Ryan, trabalho com presença digital só pra oficinas e centros automotivos.\n\nO problema é que muita gente pesquisa "oficina perto de mim" e acaba escolhendo outra — não porque é melhor, mas porque aparece mais forte no Google. Com a reputação que vocês já têm, dá pra converter muito mais.\n\nQuer ver como ficaria?`,
+  // 4. Google Meu Negócio com pontos perdendo cliente
+  (nome, r, rv) => `Oi! Vi a *${nome}* no Maps com ${r}⭐ e ${rv} avaliações — nota ótima.\n\nSou o Ryan, cuido da presença no Google de oficinas aqui da região.\n\nSó de olhar o perfil de vocês, vi alguns pontos que tão deixando cliente escapar — serviços não listados, fotos paradas, horários… São ajustes simples que fazem diferença na hora que o cliente tá decidindo.\n\nPosso te enviar um exemplo do que faço?`,
+  // 5. Ser referência da região
+  (nome, r, rv) => `Oi! Tudo bem? Dei uma pesquisada em oficinas da região e a *${nome}* se destacou com ${r}⭐ e ${rv} avaliações.\n\nMe chamo Ryan, trabalho com presença digital pra oficinas — Google, WhatsApp e posicionamento local.\n\nCom o que vocês já têm de reputação, dá pra ser a referência da região nas buscas. Quem pesquisa oficina por aqui deveria encontrar vocês em primeiro.\n\nQuer que eu te mostre como isso funciona?`,
 ];
+
+
+function eAutoMotivo(cat) {
+  if (!cat) return false;
+  const c = cat.toLowerCase();
+  return [
+    'mecân', 'oficina', 'elétrica auto', 'auto elétri', 'funilari', 'ar condicionado auto',
+    'diesel', 'câmbio', 'injeção', 'suspensão', 'freio', 'martelinho', 'radiador',
+    'escapamento', 'alinhamento', 'balanceamento', 'estética auto', 'detalhamento',
+    'vitrificaç', 'retífica', 'tapeçaria auto', 'película auto', 'insulfilm',
+    'vidraçaria auto', 'centro automotivo', 'auto center', 'moto',
+  ].some(k => c.includes(k));
+}
+
 function MSG_1(nome, cat, rating, reviewCount) {
   const r = rating ? rating.toFixed(1) : '4.5';
   const rv = reviewCount || 50;
-  return MSGS_1[Math.floor(Math.random() * MSGS_1.length)](nome, cat || 'negócios locais', r, rv);
+  return MSGS_1_AUTO[Math.floor(Math.random() * MSGS_1_AUTO.length)](nome, r, rv);
 }
 
-// ─── Variações da MSG_3 (follow-up 3 dias) ───────────────────────────────────
-const MSGS_3 = [
-  (nome) => `Oi *${nome}*! Passando rapidinho pra deixar o link do meu trabalho: ryancreator.dev\n\nQualquer coisa é só chamar 👋`,
-  (nome) => `Olá *${nome}*! Só deixando o portfólio aqui caso queira dar uma olhada: ryancreator.dev 👋`,
-  (nome) => `Oi! Deixa eu passar o link pra *${nome}*: ryancreator.dev — se surgir interesse é só falar 👋`,
-  (nome) => `Olá *${nome}*! Não sei se a mensagem chegou antes. Meu portfólio: ryancreator.dev — qualquer dúvida pode me chamar 👋`,
+// ─── MSG_3 follow-up (automotivo especialista / outros genérico) ──────────────
+const MSGS_3_AUTO = [
+  (nome) => `Oi *${nome}*! Passando rapidinho — sou especialista em sites pra mecânicas e oficinas. Meu portfólio: ryancreator.dev\n\nQualquer coisa é só chamar 👋`,
+  (nome) => `Olá *${nome}*! Trabalho só com o setor automotivo — deixa o link aqui: ryancreator.dev\n\nSe fizer sentido no futuro pode me chamar 👋`,
+  (nome) => `Oi! Deixa o portfólio aqui pra *${nome}*: ryancreator.dev — já fiz pra mecânicas e oficinas da região. Qualquer dúvida é só falar 👋`,
 ];
 function MSG_3(nome) {
-  return MSGS_3[Math.floor(Math.random() * MSGS_3.length)](nome);
+  return MSGS_3_AUTO[Math.floor(Math.random() * MSGS_3_AUTO.length)](nome);
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 function delayAleatorio() { return DELAY_MIN_MS + Math.floor(Math.random() * (DELAY_MAX_MS - DELAY_MIN_MS)); }
-async function proximaCategoria() {
-  // Busca qual índice foi usado por último no Supabase
-  const rows = await sbFetch('/wa_config?select=valor&id=eq.categoria_idx').catch(() => []);
-  const idx = rows?.[0]?.valor ? (parseInt(rows[0].valor) + 1) % CATEGORIAS.length : 0;
-  await sbFetch('/wa_config', 'POST', { id: 'categoria_idx', valor: String(idx), updated_at: new Date().toISOString() }).catch(() => {});
-  return CATEGORIAS[idx];
+async function proximaCategoria(chave, lista) {
+  const rows = await sbFetch(`/wa_config?select=valor&id=eq.${chave}`).catch(() => []);
+  const idx = rows?.[0]?.valor ? (parseInt(rows[0].valor) + 1) % lista.length : 0;
+  await sbFetch('/wa_config', 'POST', { id: chave, valor: String(idx), updated_at: new Date().toISOString() }).catch(() => {});
+  return lista[idx];
 }
+const proximaCategoriaAutoA = () => proximaCategoria('auto_a_idx', CATEGORIAS_AUTO_A);
 
 async function sbFetch(path, method = 'GET', body) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1${path}`, {
@@ -95,19 +129,43 @@ async function alertar(msg) {
 const CAMPO_MASK = 'places.id,places.displayName,places.primaryTypeDisplayName,places.formattedAddress,places.websiteUri,places.nationalPhoneNumber,places.rating,places.userRatingCount,places.businessStatus,places.googleMapsUri,places.photos';
 const NAO_E_SITE = ['instagram.com','facebook.com','fb.com','wa.me','whatsapp.com','linktr.ee','linktree.com','beacons.ai','bio.link','ifood.com.br','rappi.com','uber.com','booking.com','tripadvisor','twitter.com','x.com','tiktok.com','youtube.com','google.com/maps','maps.google.com','waze.com'];
 
-const CIDADES = [
-  // Campinas (grid 3x3)
-  { nome: 'Campinas SP',              pontos: [[-22.8600,-47.1000],[-22.8600,-47.0600],[-22.8600,-47.0200],[-22.9000,-47.1000],[-22.9000,-47.0600],[-22.9000,-47.0200],[-22.9400,-47.1000],[-22.9400,-47.0600],[-22.9400,-47.0200]] },
-  // Cidades vizinhas (ponto central)
-  { nome: 'Sumaré SP',                pontos: [[-22.8219,-47.2669]] },
-  { nome: 'Hortolândia SP',           pontos: [[-22.8578,-47.2197]] },
-  { nome: 'Santa Bárbara d\'Oeste SP',pontos: [[-22.7536,-47.4136]] },
-  { nome: 'Americana SP',             pontos: [[-22.7386,-47.3319]] },
-  { nome: 'Indaiatuba SP',            pontos: [[-23.0903,-47.2192]] },
-  { nome: 'Valinhos SP',              pontos: [[-22.9703,-46.9961]] },
-  { nome: 'Vinhedo SP',               pontos: [[-23.0297,-46.9753]] },
-  { nome: 'Paulínia SP',              pontos: [[-22.7619,-47.1547]] },
-  { nome: 'Nova Odessa SP',           pontos: [[-22.7811,-47.2986]] },
+// ─── Região de Campinas (buscada todo dia) ────────────────────────────────────
+const CIDADES_LOCAL = [
+  { nome: 'Campinas SP',               pontos: [[-22.8600,-47.1000],[-22.8600,-47.0600],[-22.8600,-47.0200],[-22.9000,-47.1000],[-22.9000,-47.0600],[-22.9000,-47.0200],[-22.9400,-47.1000],[-22.9400,-47.0600],[-22.9400,-47.0200]] },
+  { nome: 'Sumaré SP',                 pontos: [[-22.8219,-47.2669]] },
+  { nome: 'Hortolândia SP',            pontos: [[-22.8578,-47.2197]] },
+  { nome: 'Santa Bárbara d\'Oeste SP', pontos: [[-22.7536,-47.4136]] },
+  { nome: 'Americana SP',              pontos: [[-22.7386,-47.3319]] },
+  { nome: 'Indaiatuba SP',             pontos: [[-23.0903,-47.2192]] },
+  { nome: 'Valinhos SP',               pontos: [[-22.9703,-46.9961]] },
+  { nome: 'Vinhedo SP',                pontos: [[-23.0297,-46.9753]] },
+  { nome: 'Paulínia SP',               pontos: [[-22.7619,-47.1547]] },
+  { nome: 'Nova Odessa SP',            pontos: [[-22.7811,-47.2986]] },
+  { nome: 'Piracicaba SP',             pontos: [[-22.7253,-47.6492]] },
+  { nome: 'Limeira SP',                pontos: [[-22.5647,-47.4014]] },
+  { nome: 'Rio Claro SP',              pontos: [[-22.4149,-47.5651]] },
+  { nome: 'Jundiaí SP',                pontos: [[-23.1864,-46.8836]] },
+  { nome: 'Itatiba SP',                pontos: [[-23.0053,-46.8389]] },
+  { nome: 'Araras SP',                 pontos: [[-22.3569,-47.3839]] },
+];
+
+// ─── Interior SP — expansão quando local estiver esgotado ────────────────────
+const CIDADES_SP = [
+  { nome: 'Ribeirão Preto SP',         pontos: [[-21.1699,-47.8099],[-21.1699,-47.7699],[-21.2099,-47.8099],[-21.2099,-47.7699]] },
+  { nome: 'São José dos Campos SP',    pontos: [[-23.1794,-45.8869],[-23.2194,-45.8869]] },
+  { nome: 'Sorocaba SP',               pontos: [[-23.5015,-47.4526],[-23.5015,-47.4026]] },
+  { nome: 'São José do Rio Preto SP',  pontos: [[-20.8197,-49.3794],[-20.8597,-49.3794]] },
+  { nome: 'Bauru SP',                  pontos: [[-22.3246,-49.0961]] },
+  { nome: 'Franca SP',                 pontos: [[-20.5386,-47.4008]] },
+  { nome: 'Taubaté SP',                pontos: [[-23.0261,-45.5558]] },
+  { nome: 'São Carlos SP',             pontos: [[-21.9794,-47.8906]] },
+  { nome: 'Araraquara SP',             pontos: [[-21.7945,-48.1756]] },
+  { nome: 'Marília SP',                pontos: [[-22.2133,-49.9458]] },
+  { nome: 'Araçatuba SP',              pontos: [[-21.2094,-50.4428]] },
+  { nome: 'Presidente Prudente SP',    pontos: [[-22.1256,-51.3889]] },
+  { nome: 'Botucatu SP',               pontos: [[-22.8869,-48.4450]] },
+  { nome: 'Guaratinguetá SP',          pontos: [[-22.8167,-45.1939]] },
+  { nome: 'Ourinhos SP',               pontos: [[-22.9789,-49.8697]] },
 ];
 
 function temSiteProprio(uri) {
@@ -120,8 +178,8 @@ function temWA(phone) {
   return d.length === 11 && d.slice(2).startsWith('9');
 }
 
-async function buscarProspects(categoria) {
-  const chamadas = CIDADES.flatMap(({ nome: cidade, pontos }) =>
+async function buscarProspects(categoria, cidades) {
+  const chamadas = cidades.flatMap(({ nome: cidade, pontos }) =>
     pontos.map(([lat, lng]) =>
       fetch('https://places.googleapis.com/v1/places:searchText', {
         method: 'POST',
@@ -239,7 +297,7 @@ async function jobFollowUp() {
 
   for (const p of prospects) {
     try {
-      await enviarWA(p.wa_num, MSG_3(p.nome));
+      await enviarWA(p.wa_num, MSG_3(p.nome, p.categoria));
       await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
         status: 'sent3',
         updated_at: new Date().toISOString(),
@@ -279,60 +337,73 @@ async function jobBuscar() {
   const vagas = LIMITE_DIA - dispararHoje;
   if (vagas <= 0) { console.log('Limite diário atingido.'); return; }
 
-  const rotativa = await proximaCategoria();
-  const categoriasDia = [...CATEGORIAS_FIXAS, rotativa];
-  console.log(`Categorias: ${categoriasDia.join(', ')}`);
+  // A+ todo dia; Tier A e Outros só seg/qua/sex (uma rotativa de cada)
+  const brtBuscar = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+  const categoriasDia = [...CATEGORIAS_AUTO];
+  if ([1, 3, 5].includes(brtBuscar.getDay())) {
+    const rotA = await proximaCategoriaAutoA();
+    categoriasDia.push(rotA);
+    console.log(`Categorias: A+(${CATEGORIAS_AUTO.length}) + ${rotA} (Tier A)`);
+  } else {
+    console.log(`Categorias: A+(${CATEGORIAS_AUTO.length})`);
+  }
 
-  let prospects = [];
-  for (const categoria of categoriasDia) {
-    try {
-      const encontrados = await buscarProspects(categoria);
-      prospects = prospects.concat(encontrados);
-      console.log(`${categoria}: ${encontrados.length} encontrados`);
-    } catch (err) {
-      console.error(`Erro Places (${categoria}):`, err.message);
-      await alertar(`Erro Google Places API (${categoria}):\n${err.message}`);
+  const LIMIAR_EXPANSAO = 15; // se local achar menos de X novos, expande pro estado
+
+  async function buscarESalvar(cidades, limite) {
+    let prospects = [];
+    for (const categoria of categoriasDia) {
+      try {
+        const encontrados = await buscarProspects(categoria, cidades);
+        prospects = prospects.concat(encontrados);
+        console.log(`  ${categoria} (${cidades === CIDADES_LOCAL ? 'local' : 'SP'}): ${encontrados.length}`);
+      } catch (err) {
+        console.error(`Erro Places (${categoria}):`, err.message);
+        await alertar(`Erro Google Places API (${categoria}):\n${err.message}`);
+      }
     }
+    // Deduplica por id
+    const vistos = new Set();
+    prospects = prospects.filter(p => { if (vistos.has(p.id)) return false; vistos.add(p.id); return true; });
+
+    let novos = 0;
+    for (const p of prospects) {
+      if (novos >= limite) break;
+      if (!await prospectNovo(p.id, p.waNum)) continue;
+      await fetch(`${SUPABASE_URL}/rest/v1/wa_prospects`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Prefer': 'resolution=ignore-duplicates,return=minimal',
+        },
+        body: JSON.stringify({
+          id: p.id, nome: p.nome, categoria: p.categoria,
+          wa_num: p.waNum, telefone: p.telefone, maps_url: p.mapsUrl,
+          foto: p.foto, rating: p.rating, review_count: p.reviewCount,
+          status: 'pending', updated_at: new Date().toISOString(),
+        }),
+      }).catch(err => console.error(`Erro ao salvar ${p.nome}:`, err.message));
+      novos++;
+    }
+    return novos;
   }
 
-  // Deduplica por id
-  const vistos = new Set();
-  prospects = prospects.filter(p => { if (vistos.has(p.id)) return false; vistos.add(p.id); return true; });
-  console.log(`Total: ${prospects.length} encontrados`);
+  // Fase 1: região local
+  console.log('Fase 1: região de Campinas...');
+  let novos = await buscarESalvar(CIDADES_LOCAL, vagas * 2);
+  console.log(`Local: ${novos} novos`);
 
-  let novos = 0;
-  for (const p of prospects) {
-    if (novos >= vagas * 2) break;
-    if (!await prospectNovo(p.id, p.waNum)) continue;
-
-    // Salva na fila SEM gerar site — usa INSERT puro (sem merge) para nunca sobrescrever contatos existentes
-    await fetch(`${SUPABASE_URL}/rest/v1/wa_prospects`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Prefer': 'resolution=ignore-duplicates,return=minimal',
-      },
-      body: JSON.stringify({
-        id: p.id,
-        nome: p.nome,
-        categoria: p.categoria,
-        wa_num: p.waNum,
-        telefone: p.telefone,
-        maps_url: p.mapsUrl,
-        foto: p.foto,
-        rating: p.rating,
-        review_count: p.reviewCount,
-        status: 'pending',
-        updated_at: new Date().toISOString(),
-      }),
-    }).catch(err => console.error(`Erro ao salvar ${p.nome}:`, err.message));
-
-    novos++;
+  // Fase 2: interior SP se local estiver esgotado
+  if (novos < LIMIAR_EXPANSAO) {
+    console.log(`Poucos novos localmente (${novos}) — expandindo para interior SP...`);
+    const novosSP = await buscarESalvar(CIDADES_SP, vagas * 2 - novos);
+    novos += novosSP;
+    console.log(`Interior SP: ${novosSP} novos`);
   }
 
-  console.log(`${novos} novos adicionados à fila.`);
+  console.log(`Total: ${novos} novos adicionados à fila.`);
 }
 
 const LIMITE_HORA   = 8;
