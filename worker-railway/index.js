@@ -606,10 +606,14 @@ const semCadastro = doUltimoEncontro.filter(r => {
   }
 
   const linhas = semCadastro.map(r => {
-    const nome      = r[1] || 'Sem nome';
-    const numero    = (r[2] || '').replace(/\D/g, '');
+    const nome        = r[1] || 'Sem nome';
+    const numero      = (r[2] || '').replace(/\D/g, '');
     const primeiraVez = (r[3] || '').toLowerCase().includes('sim');
-    const status    = primeiraVez ? 'Primeira vez e não tem cadastro' : 'Não tem cadastro';
+    const temCadastro = !((r[4] || '').toLowerCase().includes('não') || (r[4] || '').toLowerCase().includes('nao') || r[4] === '');
+    let status;
+    if (primeiraVez && !temCadastro) status = 'Primeira vez e não tem cadastro';
+    else if (primeiraVez)            status = 'Primeira vez';
+    else                             status = 'Não tem cadastro';
     return `• ${nome} | ${numero || 'sem número'} | ${status}`;
   });
 
@@ -712,23 +716,3 @@ console.log('  Tarde WA:  13:00–13:20 BRT (seg-sex) — 20 msgs  [sábado só 
 console.log('  Expirar:   06:00 BRT (diário) — ignored após 7 dias sem resposta');
 console.log('  Limite:    40/dia | 10/hora | Delay: 3–8min | Msgs variadas');
 
-await jobRelatorioPresenca();
-process.exit(0);
-
-app.get('/trigger-presenca', async (req, res) => {
-  try {
-    await jobRelatorioPresenca();
-
-    res.json({
-      ok: true
-    });
-
-  } catch (err) {
-    console.error(err);
-
-    res.status(500).json({
-      ok: false,
-      error: err.message
-    });
-  }
-});
