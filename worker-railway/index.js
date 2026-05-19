@@ -559,6 +559,10 @@ async function jobRelatorioPresenca() {
   const rows = data.values || [];
   if (!rows.length) { console.log('[presenca] planilha vazia'); return; }
 
+  // DEBUG — remover após confirmar
+  console.log('[presenca] total rows:', rows.length);
+  console.log('[presenca] primeira célula A:', JSON.stringify(rows[rows.length - 1]?.[0]));
+
   // Última sexta-feira (segunda - 3 dias)
 const ultimaSexta = new Date();
 
@@ -579,6 +583,9 @@ const doUltimoEncontro = rows.filter(r => {
   return dataBr === sextaFormatada;
 });
   
+  console.log('[presenca] sextaFormatada:', sextaFormatada);
+  console.log('[presenca] dataBr última row:', rows[rows.length - 1]?.[0]?.split(' ')[0]);
+
   if (!doUltimoEncontro.length) {
     console.log('[presenca] nenhum dado da última sexta — nada enviado');
     return;
