@@ -9,6 +9,9 @@ const EVOLUTION_KEY  = process.env.EVOLUTION_KEY;
 const EVOLUTION_INST = process.env.EVOLUTION_INSTANCE || 'rdcreator';
 const PLACES_KEY     = process.env.GOOGLE_PLACES_API_KEY;
 const ALERT_NUM      = '5519992525515';
+const SHEETS_ID      = '1H9nNzoJUTIKd07eInNR7jSJUj-U5fNyZMzuRg_1Y5qY';
+const LIDER_NUM      = '5519992734341';
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
 // Tier A+ — buscado todo dia (fecha rápido, carência digital alta)
 const CATEGORIAS_AUTO = [
@@ -543,7 +546,83 @@ async function jobAlertarLigar() {
   console.log(`[alertar-ligar] ${prospects.length} alertas enviados.`);
 }
 
+// ─── Relatório de Presença ────────────────────────────────────────────────────
+async function jobRelatorioPresenca() {
+  console.log('[presenca] iniciando leitura do Sheets...');
+  if (!GOOGLE_API_KEY) { console.error('[presenca] GOOGLE_API_KEY não configurado'); return; }
+
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/Respostas%20ao%20formul%C3%A1rio%201!A2:E?key=${GOOGLE_API_KEY}`;
+  const resp = await fetch(url);
+  if (!resp.ok) { console.error('[presenca] erro Sheets API:', await resp.text()); return; }
+  const data = await resp.json();
+
+  const rows = data.values || [];
+  if (!rows.length) { console.log('[presenca] planilha vazia'); return; }
+
+  // Última sexta-feira (segunda - 3 dias)
+  const ultimaSexta = new Date();
+  ultimaSexta.setDate(ultimaSexta.getDate() - 4);
+  const sextaStr = ultimaSexta.toDateString();
+
+const doUltimoEncontro = rows.filter(r => {
+  if (!r[0]) return false;
+
+  const dataBr = r[0].split(' ')[0]; // pega só data
+  const [dia, mes, ano] = dataBr.split('/');
+
+  const data = new Date(`${ano}-${mes}-${dia}`);
+
+  return data.toDateString() === sextaStr;
+});
+  
+  if (!doUltimoEncontro.length) {
+    console.log('[presenca] nenhum dado da última sexta — nada enviado');
+    return;
+  }
+
+  // Filtrar quem não tem cadastro (col E = "Não")
+const semCadastro = doUltimoEncontro.filter(r => {
+  const temCadastro = (r[4] || '').toLowerCase();
+  const primeiraVez = (r[3] || '').toLowerCase();
+
+  const naoTemCadastro =
+    temCadastro.includes('não') ||
+    temCadastro.includes('nao') ||
+    temCadastro === '';
+
+  const ehPrimeiraVez =
+    primeiraVez.includes('sim');
+
+  return naoTemCadastro || ehPrimeiraVez;
+});
+
+  if (!semCadastro.length) {
+    console.log('[presenca] todos têm cadastro — nenhuma mensagem enviada');
+    return;
+  }
+
+  const linhas = semCadastro.map(r => {
+    const nome      = r[1] || 'Sem nome';
+    const numero    = (r[2] || '').replace(/\D/g, '');
+    const primeiraVez = (r[3] || '').toLowerCase().includes('sim');
+    const status    = primeiraVez ? 'Primeira vez e não tem cadastro' : 'Não tem cadastro';
+    return `• ${nome} | ${numero || 'sem número'} | ${status}`;
+  });
+
+  const dataFormatada = ultimaSexta.toLocaleDateString('pt-BR');
+  const mensagem = `Relatório do último encontro Hangout — ${dataFormatada}\n${linhas.join('\n')}`;
+
+  await fetch(`${EVOLUTION_URL}/message/sendText/${EVOLUTION_INST}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': EVOLUTION_KEY },
+    body: JSON.stringify({ number: LIDER_NUM, text: mensagem, delay: 500 }),
+  });
+
+  console.log(`[presenca] relatório enviado — ${semCadastro.length} pessoa(s) sem cadastro`);
+}
+
 // ─── Agendamentos (UTC, Brasília = UTC-3) ────────────────────────────────────
+cron.schedule('0 15 * * 1', jobRelatorioPresenca);  // seg 12h BRT
 cron.schedule('30 10 * * 1-6', jobBuscar);
 cron.schedule('0 11 * * 1-6', () => { setTimeout(() => jobDisparoLote(LIMITE_MANHA), Math.floor(Math.random() * 20 * 60 * 1000)); });
 cron.schedule('0 16 * * 1-5', () => { setTimeout(() => jobDisparoLote(LIMITE_TARDE), Math.floor(Math.random() * 20 * 60 * 1000)); });
@@ -607,6 +686,10 @@ http.createServer(async (req, res) => {
           res.writeHead(200); res.end(JSON.stringify({ ok: true, done: true })); return;
         }
         res.writeHead(200); res.end(JSON.stringify({ ok: true, nome: enviado.nome }));
+      } else if (job === 'presenca') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, job }));
+        jobRelatorioPresenca().catch(err => console.error('[presenca]', err.message));
       } else {
         res.writeHead(200); res.end(JSON.stringify({ ok: true, job }));
         if (job === 'disparar') await jobDisparoLote(LIMITE_TARDE);
@@ -624,3 +707,6 @@ console.log('  Manhã WA:  08:00–08:20 BRT (seg-sab) — 20 msgs');
 console.log('  Tarde WA:  13:00–13:20 BRT (seg-sex) — 20 msgs  [sábado só manhã]');
 console.log('  Expirar:   06:00 BRT (diário) — ignored após 7 dias sem resposta');
 console.log('  Limite:    40/dia | 10/hora | Delay: 3–8min | Msgs variadas');
+
+await jobRelatorioPresenca();
+process.exit(0);

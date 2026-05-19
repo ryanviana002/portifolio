@@ -45,7 +45,23 @@
       "Bash(rtk read *)",
       "Bash(rtk cd *)",
       "Bash(rtk mkdir *)",
-      "Bash(rtk ls *)"
+      "Bash(rtk ls *)",
+      "Bash(rtk find *)",
+      "Bash(xargs grep *)",
+      "Bash(rtk sed *)",
+      "Bash(python3 -m json.tool)",
+      "Bash(rtk open *)",
+      "Bash(rtk)",
+      "Bash(curl -s -X POST https://evolution-api-production-c39a.up.railway.app/webhook/set/rdcreator -H 'Content-Type: application/json' -H 'apikey: rdc_evo_2024secret' -d '{ *)",
+      "Bash(git checkout *)",
+      "Bash(python3 -c ' *)",
+      "Read(//Users/ryan/Projetos Claude/WebSites/delegapage/**)",
+      "Read(//Users/ryan/Projetos Claude/Agentes Claude/agentes-rdc/**)",
+      "WebSearch",
+      "WebFetch(domain:21st.dev)",
+      "WebFetch(domain:cdn.21st.dev)",
+      "Bash(grep -oE '\"[^\"]{10,200}\"')",
+      "Bash(rtk wc *)"
     ]
   }
 }
