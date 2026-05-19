@@ -566,17 +566,17 @@ while (ultimaSexta.getDay() !== 5) {
   ultimaSexta.setDate(ultimaSexta.getDate() - 1);
 }
 
-const sextaStr = ultimaSexta.toDateString();
+const sextaFormatada =
+  `${String(ultimaSexta.getDate()).padStart(2, '0')}/${
+    String(ultimaSexta.getMonth() + 1).padStart(2, '0')
+  }/${ultimaSexta.getFullYear()}`;
 
 const doUltimoEncontro = rows.filter(r => {
   if (!r[0]) return false;
 
   const dataBr = r[0].split(' ')[0];
-  const [dia, mes, ano] = dataBr.split('/');
 
-  const data = new Date(`${ano}-${mes}-${dia}`);
-
-  return data.toDateString() === sextaStr;
+  return dataBr === sextaFormatada;
 });
   
   if (!doUltimoEncontro.length) {
