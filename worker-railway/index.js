@@ -51,16 +51,16 @@ const DELAY_MAX_MS = 600_000;  // 10 min
 
 // ─── MSG_1 automotivo ─────────────────────────────────────────────────────────
 const MSGS_1_AUTO = [
-  // 1. Concorrente com nota menor aparece antes
-  (nome, r, rv) => `Oi! Vi a *${nome}* no Google agora — ${r}⭐ com ${rv} avaliações, reputação muito boa 👏\n\nSou o Ryan, trabalho com presença digital para oficinas aqui da região.\n\nPercebi que algumas oficinas com nota menor aparecem antes de vocês nas buscas por terem o perfil mais ativo e estruturado. Isso faz muita diferença na hora que o cliente escolhe pra onde vai levar o carro.\n\nQuer que eu te mostre o que dá pra melhorar?`,
-  // 2. Cliente decidindo pelo celular agora
-  (nome, r, rv) => `Oi! Pesquisei oficinas aqui da região e a *${nome}* apareceu com ${r}⭐ e ${rv} avaliações.\n\nSou o Ryan, ajudo oficinas a aparecerem melhor no Google e gerar mais contato pelo WhatsApp.\n\nHoje a maioria das pessoas escolhe a oficina direto pelo celular — quem aparece primeiro e passa mais confiança leva o cliente. Com algumas mudanças no perfil do Google dá pra mudar isso bastante.\n\nPosso te mostrar alguns pontos?`,
-  // 3. Reputação forte não sendo convertida
-  (nome, r, rv) => `Oi! A *${nome}* tem ${rv} avaliações e ${r}⭐ no Google — esse nível de reputação é raro.\n\nMeu nome é Ryan, trabalho com presença digital só pra oficinas e centros automotivos.\n\nO problema é que muita gente pesquisa "oficina perto de mim" e acaba escolhendo outra — não porque é melhor, mas porque aparece mais forte no Google. Com a reputação que vocês já têm, dá pra converter muito mais.\n\nQuer ver como ficaria?`,
-  // 4. Google Meu Negócio com pontos perdendo cliente
-  (nome, r, rv) => `Oi! Vi a *${nome}* no Maps com ${r}⭐ e ${rv} avaliações — nota ótima.\n\nSou o Ryan, cuido da presença no Google de oficinas aqui da região.\n\nSó de olhar o perfil de vocês, vi alguns pontos que tão deixando cliente escapar — serviços não listados, fotos paradas, horários… São ajustes simples que fazem diferença na hora que o cliente tá decidindo.\n\nPosso te enviar um exemplo do que faço?`,
-  // 5. Ser referência da região
-  (nome, r, rv) => `Oi! Tudo bem? Dei uma pesquisada em oficinas da região e a *${nome}* se destacou com ${r}⭐ e ${rv} avaliações.\n\nMe chamo Ryan, trabalho com presença digital pra oficinas — Google, WhatsApp e posicionamento local.\n\nCom o que vocês já têm de reputação, dá pra ser a referência da região nas buscas. Quem pesquisa oficina por aqui deveria encontrar vocês em primeiro.\n\nQuer que eu te mostre como isso funciona?`,
+  // 1. Avaliações + potencial nas buscas
+  (nome, r, rv) => `Oi! Vi a *${nome}* no Google — ${rv} avaliações, isso é difícil de construir 👏\n\nSou o Ryan. Trabalho com oficinas aqui da região ajudando a aparecer melhor no Google e no Maps quando o cliente pesquisa.\n\nAcho que vocês têm potencial pra aparecer ainda mais nas buscas locais com o que já construíram.\n\nPosso te mostrar um exemplo rápido?`,
+  // 2. Concorrente com nota menor aparece antes
+  (nome, r, rv) => `Oi! Vi a *${nome}* no Google — ${r}⭐ e ${rv} avaliações. Nota muito boa 👏\n\nSou o Ryan. Ajudo oficinas da região a se destacarem no Google e no Maps pra chegar em mais clientes.\n\nTenho algumas ideias de como vocês poderiam aparecer ainda mais nas buscas da região.\n\nQuer dar uma olhada?`,
+  // 3. Cliente decidindo pelo celular
+  (nome, r, rv) => `Oi! Pesquisei oficinas aqui da região e a *${nome}* apareceu com ${rv} avaliações e ${r}⭐ — difícil ter isso 👏\n\nSou o Ryan. Ajudo oficinas a se destacarem no Google e aparecerem na frente quando alguém pesquisar na região.\n\nHoje quem procura oficina pelo celular decide em segundos — e com essa reputação dá pra capturar muito mais desses clientes.\n\nPosso te enviar um exemplo?`,
+  // 4. Visibilidade no Maps
+  (nome, r, rv) => `Oi! Vi a *${nome}* no Maps com ${r}⭐ e ${rv} avaliações — reputação muito boa 👏\n\nSou o Ryan. Trabalho com oficinas aqui da região pra fortalecerem a presença no Google e aparecerem na frente das buscas locais.\n\nTenho algumas ideias do que dá pra fazer com o perfil de vocês pra chegar em mais clientes.\n\nPosso te mostrar um exemplo rápido?`,
+  // 5. Referência da região
+  (nome, r, rv) => `Oi! A *${nome}* tem ${rv} avaliações no Google — ${r}⭐. Construíram uma reputação que poucos têm 👏\n\nSou o Ryan. Ajudo oficinas aqui da região a se tornarem referência nas buscas do Google e do Maps.\n\nCom o que vocês já têm, dá pra ser a primeira opção quando alguém pesquisar oficina por aqui.\n\nQuer ver como ficaria?`,
 ];
 
 
