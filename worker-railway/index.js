@@ -620,6 +620,8 @@ const semCadastro = doUltimoEncontro.filter(r => {
   const dataFormatada = ultimaSexta.toLocaleDateString('pt-BR');
   const mensagem = `Relatório do último encontro Hangout — ${dataFormatada}\n${linhas.join('\n')}`;
 
+  if (!EVOLUTION_URL || !EVOLUTION_KEY) { console.error('[presenca] EVOLUTION_URL/KEY não configurados'); return; }
+
   await fetch(`${EVOLUTION_URL}/message/sendText/${EVOLUTION_INST}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'apikey': EVOLUTION_KEY },
