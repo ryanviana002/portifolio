@@ -608,10 +608,10 @@ const semCadastro = doUltimoEncontro.filter(r => {
     if (primeiraVez && !temCadastro) status = 'Primeira vez e não tem cadastro';
     else if (primeiraVez)            status = 'Primeira vez';
     else                             status = 'Não tem cadastro';
-    return `• ${nome} | ${numero || 'sem número'} | ${status}`;
+    return `• *${nome}*\n  ${numero || 'sem número'} — ${status}`;
   });
 
-  const mensagem = `Relatório do último encontro Hangout — ${dataAlvo}\n${linhas.join('\n')}`;
+  const mensagem = `📋 *Hangout — ${dataAlvo}*\n\n${linhas.join('\n\n')}`;
 
   if (!EVOLUTION_URL || !EVOLUTION_KEY) { console.error('[presenca] EVOLUTION_URL/KEY não configurados'); return; }
 
