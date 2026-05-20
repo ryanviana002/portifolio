@@ -305,6 +305,11 @@ async function jobFollowUp() {
   if (!prospects?.length) { console.log('Sem follow-ups pendentes.'); return; }
 
   for (const p of prospects) {
+    // Ignora prospects não-automotivos que vieram de buscas antigas
+    if (!eAutoMotivo(p.categoria)) {
+      await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() }).catch(() => {});
+      continue;
+    }
     try {
       await enviarWA(p.wa_num, MSG_3(p.nome, p.categoria));
       await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
