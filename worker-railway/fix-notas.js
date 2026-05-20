@@ -60,7 +60,9 @@ async function main() {
       historico.push({ nome, tel, datas: [data] });
     }
   }
-  console.log(`${historico.length} pessoas no histórico.`);
+  // Todas as datas únicas de encontros (ordem cronológica)
+  const todasDatas = [...new Set(formsRows.filter(r => r[0]).map(r => r[0].split(' ')[0]))].sort();
+  console.log(`${historico.length} pessoas | ${todasDatas.length} encontros: ${todasDatas.join(', ')}`);
 
   // 2. Lê membros da planilha
   const token = await getAccessToken();
@@ -73,8 +75,8 @@ async function main() {
   const rowData = (await mRes.json()).sheets?.[0]?.data?.[0]?.rowData || [];
   const membros = rowData.map((row, i) => ({
     rowIndex: 5 + i,
-    nome: row.values?.[1]?.userEnteredValue?.stringValue || '',
-    tel:  row.values?.[2]?.userEnteredValue?.stringValue || '',
+    nome: row.values?.[2]?.userEnteredValue?.stringValue || '',
+    tel:  String(row.values?.[3]?.userEnteredValue?.stringValue || row.values?.[3]?.userEnteredValue?.numberValue || ''),
   })).filter(m => m.nome);
 
   console.log(`${membros.length} membros na planilha.`);
@@ -87,7 +89,7 @@ async function main() {
     const h = historico.find(p => normTel(p.tel) === normTel(membro.tel) && nomeMatch(membro.nome, p.nome));
     if (!h) continue;
 
-    const nota = h.datas.sort().join('\n');
+    const nota = todasDatas.map(d => (h.datas.includes(d) ? '✅' : '❌') + ' ' + d).join('\n');
     requests.push({
       updateCells: {
         rows: [{ values: [{ note: nota }] }],
@@ -96,8 +98,8 @@ async function main() {
           sheetId: MEMBERS_GID,
           startRowIndex: membro.rowIndex,
           endRowIndex: membro.rowIndex + 1,
-          startColumnIndex: 4,
-          endColumnIndex: 5,
+          startColumnIndex: 5,
+          endColumnIndex: 6,
         },
       },
     });
