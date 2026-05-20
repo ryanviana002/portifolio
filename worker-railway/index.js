@@ -614,10 +614,10 @@ async function jobAtualizarMembros(force = false) {
 
   const membros = rowData.map((row, i) => ({
     rowIndex: 5 + i,
-    nome: row.values?.[1]?.userEnteredValue?.stringValue || '',
-    tel:  row.values?.[2]?.userEnteredValue?.stringValue || '',
-    freq: row.values?.[4]?.userEnteredValue?.numberValue || 0,
-    nota: row.values?.[4]?.note || '',
+    nome: row.values?.[2]?.userEnteredValue?.stringValue || '',
+    tel:  String(row.values?.[3]?.userEnteredValue?.stringValue || row.values?.[3]?.userEnteredValue?.numberValue || ''),
+    freq: row.values?.[5]?.userEnteredValue?.numberValue || 0,
+    nota: row.values?.[5]?.note || '',
   })).filter(m => m.nome);
 
   const updates = [], novos = [];
@@ -638,11 +638,11 @@ async function jobAtualizarMembros(force = false) {
       updates.push({ updateCells: {
         rows: [{ values: [{ userEnteredValue: { numberValue: novaFreq }, note: novaNota }] }],
         fields: 'userEnteredValue,note',
-        range: { sheetId: MEMBERS_GID, startRowIndex: match.rowIndex, endRowIndex: match.rowIndex+1, startColumnIndex: 4, endColumnIndex: 5 },
+        range: { sheetId: MEMBERS_GID, startRowIndex: match.rowIndex, endRowIndex: match.rowIndex+1, startColumnIndex: 5, endColumnIndex: 6 },
       }});
       console.log(`[membros] ✓ ${match.nome} → freq ${novaFreq}`);
     } else {
-      novos.push(['', nomeForm, telForm, telForm ? `https://wa.me/55${telForm}` : '', 1, temCadastro ? 'Sim' : 'Não', '', '']);
+      novos.push(['', '', nomeForm, telForm, telForm ? `https://wa.me/55${telForm}` : '', 1, temCadastro ? 'SIM' : 'NÃO', '', '']);
       console.log(`[membros] + novo: ${nomeForm}`);
     }
   }
@@ -666,7 +666,7 @@ async function jobAtualizarMembros(force = false) {
       if (firstRow) {
         const noteReqs = novos.map((_, i) => ({ updateCells: {
           rows: [{ values: [{ note: dataAlvo }] }], fields: 'note',
-          range: { sheetId: MEMBERS_GID, startRowIndex: parseInt(firstRow)-1+i, endRowIndex: parseInt(firstRow)+i, startColumnIndex: 4, endColumnIndex: 5 },
+          range: { sheetId: MEMBERS_GID, startRowIndex: parseInt(firstRow)-1+i, endRowIndex: parseInt(firstRow)+i, startColumnIndex: 5, endColumnIndex: 6 },
         }}));
         await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, {
           method: 'POST', headers: authHdr, body: JSON.stringify({ requests: noteReqs }),
@@ -675,11 +675,11 @@ async function jobAtualizarMembros(force = false) {
       console.log(`[membros] ${novos.length} novo(s) adicionado(s)`);
     }
   }
-  // Incrementa B2 (contador de encontros)
-  const b2Res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!B2')}?key=${GOOGLE_API_KEY}`);
-  const b2Data = await b2Res.json();
-  const qtdAtual = parseInt(b2Data.values?.[0]?.[0] || '0') || 0;
-  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!B2')}?valueInputOption=RAW`, {
+  // Incrementa K5 (contador de encontros)
+  const k5Res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!K5')}`, { headers: authHdr });
+  const k5Data = await k5Res.json();
+  const qtdAtual = parseInt(k5Data.values?.[0]?.[0] || '0') || 0;
+  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!K5')}?valueInputOption=RAW`, {
     method: 'PUT', headers: authHdr, body: JSON.stringify({ values: [[qtdAtual + 1]] }),
   });
   console.log(`[membros] encontros: ${qtdAtual} → ${qtdAtual + 1}`);
@@ -706,8 +706,8 @@ async function jobFixNotas() {
   const rowData = (await mRes.json()).sheets?.[0]?.data?.[0]?.rowData || [];
   const membros = rowData.map((row, i) => ({
     rowIndex: 5 + i,
-    nome: row.values?.[1]?.userEnteredValue?.stringValue || '',
-    tel:  row.values?.[2]?.userEnteredValue?.stringValue || '',
+    nome: row.values?.[2]?.userEnteredValue?.stringValue || '',
+    tel:  String(row.values?.[3]?.userEnteredValue?.stringValue || row.values?.[3]?.userEnteredValue?.numberValue || ''),
   })).filter(m => m.nome);
   const requests = [];
   for (const membro of membros) {
@@ -715,7 +715,7 @@ async function jobFixNotas() {
     if (!h) continue;
     requests.push({ updateCells: {
       rows: [{ values: [{ note: h.datas.sort().join('\n') }] }], fields: 'note',
-      range: { sheetId: MEMBERS_GID, startRowIndex: membro.rowIndex, endRowIndex: membro.rowIndex+1, startColumnIndex: 4, endColumnIndex: 5 },
+      range: { sheetId: MEMBERS_GID, startRowIndex: membro.rowIndex, endRowIndex: membro.rowIndex+1, startColumnIndex: 5, endColumnIndex: 6 },
     }});
   }
   if (!requests.length) { console.log('[fix-notas] nenhuma nota para aplicar'); return; }
@@ -728,7 +728,7 @@ async function jobSetupFormatacao() {
   console.log('[setup-formatacao] iniciando...');
   const token = await getAccessToken();
   const authHdr = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-  const range = { sheetId: MEMBERS_GID, startRowIndex: 5, endRowIndex: 1000, startColumnIndex: 5, endColumnIndex: 8 };
+  const range = { sheetId: MEMBERS_GID, startRowIndex: 5, endRowIndex: 1000, startColumnIndex: 6, endColumnIndex: 9 };
   const requests = [
     { addConditionalFormatRule: { rule: { ranges: [range], booleanRule: { condition: { type: 'TEXT_EQ', values: [{ userEnteredValue: 'Sim' }] }, format: { backgroundColor: { red: 0.204, green: 0.659, blue: 0.325 }, textFormat: { foregroundColor: { red: 1, green: 1, blue: 1 } } } } }, index: 0 } },
     { addConditionalFormatRule: { rule: { ranges: [range], booleanRule: { condition: { type: 'TEXT_EQ', values: [{ userEnteredValue: 'Não' }] }, format: { backgroundColor: { red: 0.796, green: 0.196, blue: 0.196 }, textFormat: { foregroundColor: { red: 1, green: 1, blue: 1 } } } } }, index: 1 } },
@@ -743,8 +743,8 @@ async function jobSetupPlanilha() {
   const token = await getAccessToken();
   const authHdr = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
   const requests = [
-    { setBasicFilter: { filter: { range: { sheetId: MEMBERS_GID, startRowIndex: 4, endRowIndex: 1000, startColumnIndex: 0, endColumnIndex: 8 } } } },
-    { sortRange: { range: { sheetId: MEMBERS_GID, startRowIndex: 5, endRowIndex: 1000, startColumnIndex: 0, endColumnIndex: 8 }, sortSpecs: [{ dimensionIndex: 1, sortOrder: 'ASCENDING' }] } },
+    { setBasicFilter: { filter: { range: { sheetId: MEMBERS_GID, startRowIndex: 4, endRowIndex: 1000, startColumnIndex: 2, endColumnIndex: 9 } } } },
+    { sortRange: { range: { sheetId: MEMBERS_GID, startRowIndex: 5, endRowIndex: 1000, startColumnIndex: 0, endColumnIndex: 9 }, sortSpecs: [{ dimensionIndex: 2, sortOrder: 'ASCENDING' }] } },
   ];
   const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, { method: 'POST', headers: authHdr, body: JSON.stringify({ requests }) });
   if (!r.ok) console.error('[setup-planilha] erro:', await r.text());
