@@ -484,19 +484,15 @@ async function jobDisparoLote(limite) {
 
   if (!pendentes?.length) { console.log('Sem prospects na fila.'); return; }
 
-  // Filtra apenas DDDs da região (SP interior: 11-19, exceto 11=capital)
+  // Filtra DDDs e categorias não-automotivas
   const DDDS_VALIDOS = ['12','13','14','15','16','17','18','19'];
-  const filtrados = pendentes.filter(p => {
-    const ddd = p.wa_num.slice(2, 4);
-    return DDDS_VALIDOS.includes(ddd);
-  });
+  const filtrados = pendentes.filter(p => DDDS_VALIDOS.includes(p.wa_num.slice(2, 4)) && eAutoMotivo(p.categoria));
 
-  console.log(`${filtrados.length} para disparar (${pendentes.length - filtrados.length} filtrados por DDD)`);
+  console.log(`${filtrados.length} para disparar (${pendentes.length - filtrados.length} filtrados por DDD/categoria)`);
 
-  // Marca DDDs inválidos como ignored
+  // Marca inválidos como ignored
   for (const p of pendentes) {
-    const ddd = p.wa_num.slice(2, 4);
-    if (!DDDS_VALIDOS.includes(ddd)) {
+    if (!DDDS_VALIDOS.includes(p.wa_num.slice(2, 4)) || !eAutoMotivo(p.categoria)) {
       await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', { status: 'ignored', updated_at: new Date().toISOString() }).catch(() => {});
     }
   }
@@ -627,7 +623,7 @@ async function jobAtualizarMembros(force = false) {
     const temCadastro = (form[4] || '').toLowerCase().includes('sim');
 
     const match = membros.find(m =>
-      (telForm && normTel(m.tel) === normTel(telForm)) || nomeMatch(nomeForm, m.nome)
+      normTel(m.tel) === normTel(telForm) && nomeMatch(nomeForm, m.nome)
     );
 
     if (match) {
@@ -674,6 +670,15 @@ async function jobAtualizarMembros(force = false) {
       console.log(`[membros] ${novos.length} novo(s) adicionado(s)`);
     }
   }
+  // Incrementa B2 (contador de encontros)
+  const b2Res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!B2')}?key=${GOOGLE_API_KEY}`);
+  const b2Data = await b2Res.json();
+  const qtdAtual = parseInt(b2Data.values?.[0]?.[0] || '0') || 0;
+  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!B2')}?valueInputOption=RAW`, {
+    method: 'PUT', headers: authHdr, body: JSON.stringify({ values: [[qtdAtual + 1]] }),
+  });
+  console.log(`[membros] encontros: ${qtdAtual} → ${qtdAtual + 1}`);
+
   console.log('[membros] concluído.');
 }
 
@@ -800,7 +805,7 @@ http.createServer(async (req, res) => {
         const DDDS_VALIDOS = ['12','13','14','15','16','17','18','19'];
         (async () => {
           const pendentes = await sbFetch('/wa_prospects?status=eq.pending&select=*&limit=20').catch(() => []);
-          const filtrados = (pendentes || []).filter(p => DDDS_VALIDOS.includes(p.wa_num.slice(2, 4)));
+          const filtrados = (pendentes || []).filter(p => DDDS_VALIDOS.includes(p.wa_num.slice(2, 4)) && eAutoMotivo(p.categoria));
           for (const p of filtrados) {
             try {
               await enviarWA(p.wa_num, MSG_1(p.nome, p.categoria, p.rating, p.review_count));
