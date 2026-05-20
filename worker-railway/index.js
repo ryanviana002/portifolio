@@ -662,40 +662,37 @@ http.createServer(async (req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true, job }));
       } else if (job === 'disparar1') {
-        // Dispara UMA mensagem e retorna — tenta até achar número válido
-        const pendentes = await sbFetch('/wa_prospects?status=eq.pending&select=*&limit=10').catch(() => []);
-        if (!pendentes?.length) {
-          res.writeHead(200); res.end(JSON.stringify({ ok: true, done: true })); return;
-        }
-        let enviado = null;
-        for (const p of pendentes) {
-          try {
-            await enviarWA(p.wa_num, MSG_1(p.nome, p.categoria, p.rating, p.review_count));
-            await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
-              status: 'sent1', sent1_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-            });
-            console.log(`✓ ${p.nome} (${p.wa_num})`);
-            enviado = p;
-            break;
-          } catch (err) {
-            // Número não existe no WA — ignora e tenta próximo
-            console.log(`✗ ${p.nome} (${p.wa_num}): ${err.message}`);
-            await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
-              status: 'ignored', updated_at: new Date().toISOString(),
-            }).catch(() => {});
+        // Responde imediatamente — disparo roda em background com delays
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+        const DDDS_VALIDOS = ['12','13','14','15','16','17','18','19'];
+        (async () => {
+          const pendentes = await sbFetch('/wa_prospects?status=eq.pending&select=*&limit=20').catch(() => []);
+          const filtrados = (pendentes || []).filter(p => DDDS_VALIDOS.includes(p.wa_num.slice(2, 4)));
+          for (const p of filtrados) {
+            try {
+              await enviarWA(p.wa_num, MSG_1(p.nome, p.categoria, p.rating, p.review_count));
+              await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
+                status: 'sent1', sent1_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+              });
+              console.log(`✓ ${p.nome} (${p.wa_num})`);
+              break;
+            } catch (err) {
+              console.log(`✗ ${p.nome} (${p.wa_num}): ${err.message}`);
+              await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
+                status: 'ignored', updated_at: new Date().toISOString(),
+              }).catch(() => {});
+            }
           }
-        }
-        if (!enviado) {
-          res.writeHead(200); res.end(JSON.stringify({ ok: true, done: true })); return;
-        }
-        res.writeHead(200); res.end(JSON.stringify({ ok: true, nome: enviado.nome }));
+        })().catch(err => console.error('[disparar1]', err.message));
+        return;
       } else if (job === 'presenca') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true, job }));
         jobRelatorioPresenca(payload.force === true).catch(err => console.error('[presenca]', err.message));
       } else {
         res.writeHead(200); res.end(JSON.stringify({ ok: true, job }));
-        if (job === 'disparar') await jobDisparoLote(LIMITE_TARDE);
+        if (job === 'disparar') jobDisparoLote(LIMITE_TARDE).catch(err => console.error('[disparar]', err.message));
       }
     } catch (e) {
       console.error('HTTP trigger error:', e.message);
