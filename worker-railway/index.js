@@ -835,7 +835,7 @@ cron.schedule('15 15 * * 1', jobAtualizarMembros);   // seg 12h15 BRT
 cron.schedule('30 10 * * 1-6', jobBuscar);
 cron.schedule('0 11 * * 1-6', () => { setTimeout(() => jobDisparoLote(LIMITE_MANHA), Math.floor(Math.random() * 20 * 60 * 1000)); });
 cron.schedule('0 16 * * 1-5', () => { setTimeout(() => jobDisparoLote(LIMITE_TARDE), Math.floor(Math.random() * 20 * 60 * 1000)); });
-cron.schedule('0 15 * * 1-6', jobFollowUp);   // 12h BRT — follow-up 3 dias
+// follow-up desativado
 cron.schedule('0 9 * * *', jobExpirarSemResposta);
 
 // Servidor HTTP para triggers manuais
