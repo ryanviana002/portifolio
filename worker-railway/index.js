@@ -682,6 +682,70 @@ async function jobAtualizarMembros(force = false) {
   console.log('[membros] concluído.');
 }
 
+// ─── Setup: Notas, Formatação, Filtro ────────────────────────────────────────
+async function jobFixNotas() {
+  console.log('[fix-notas] iniciando...');
+  const formsRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/Respostas%20ao%20formul%C3%A1rio%201!A2:E?key=${GOOGLE_API_KEY}`);
+  const formsRows = (await formsRes.json()).values || [];
+  const historico = [];
+  for (const row of formsRows) {
+    const nome = row[1] || '', tel = (row[2] || '').replace(/\D/g, ''), data = (row[0] || '').split(' ')[0];
+    if (!nome || !data) continue;
+    const match = historico.find(p => normTel(p.tel) === normTel(tel) && nomeMatch(nome, p.nome));
+    if (match) { if (!match.datas.includes(data)) match.datas.push(data); }
+    else historico.push({ nome, tel, datas: [data] });
+  }
+  const token = await getAccessToken();
+  const authHdr = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const mRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}?ranges=${encodeURIComponent(MEMBERS_TAB+'!A6:H')}&fields=sheets.data.rowData.values.userEnteredValue`, { headers: authHdr });
+  const rowData = (await mRes.json()).sheets?.[0]?.data?.[0]?.rowData || [];
+  const membros = rowData.map((row, i) => ({
+    rowIndex: 5 + i,
+    nome: row.values?.[1]?.userEnteredValue?.stringValue || '',
+    tel:  row.values?.[2]?.userEnteredValue?.stringValue || '',
+  })).filter(m => m.nome);
+  const requests = [];
+  for (const membro of membros) {
+    const h = historico.find(p => normTel(p.tel) === normTel(membro.tel) && nomeMatch(membro.nome, p.nome));
+    if (!h) continue;
+    requests.push({ updateCells: {
+      rows: [{ values: [{ note: h.datas.sort().join('\n') }] }], fields: 'note',
+      range: { sheetId: MEMBERS_GID, startRowIndex: membro.rowIndex, endRowIndex: membro.rowIndex+1, startColumnIndex: 4, endColumnIndex: 5 },
+    }});
+  }
+  if (!requests.length) { console.log('[fix-notas] nenhuma nota para aplicar'); return; }
+  const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, { method: 'POST', headers: authHdr, body: JSON.stringify({ requests }) });
+  if (!r.ok) console.error('[fix-notas] erro:', await r.text());
+  else console.log(`[fix-notas] ✅ ${requests.length} notas aplicadas`);
+}
+
+async function jobSetupFormatacao() {
+  console.log('[setup-formatacao] iniciando...');
+  const token = await getAccessToken();
+  const authHdr = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const range = { sheetId: MEMBERS_GID, startRowIndex: 5, endRowIndex: 1000, startColumnIndex: 5, endColumnIndex: 8 };
+  const requests = [
+    { addConditionalFormatRule: { rule: { ranges: [range], booleanRule: { condition: { type: 'TEXT_EQ', values: [{ userEnteredValue: 'Sim' }] }, format: { backgroundColor: { red: 0.204, green: 0.659, blue: 0.325 }, textFormat: { foregroundColor: { red: 1, green: 1, blue: 1 } } } } }, index: 0 } },
+    { addConditionalFormatRule: { rule: { ranges: [range], booleanRule: { condition: { type: 'TEXT_EQ', values: [{ userEnteredValue: 'Não' }] }, format: { backgroundColor: { red: 0.796, green: 0.196, blue: 0.196 }, textFormat: { foregroundColor: { red: 1, green: 1, blue: 1 } } } } }, index: 1 } },
+  ];
+  const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, { method: 'POST', headers: authHdr, body: JSON.stringify({ requests }) });
+  if (!r.ok) console.error('[setup-formatacao] erro:', await r.text());
+  else console.log('[setup-formatacao] ✅ Sim=verde, Não=vermelho aplicado');
+}
+
+async function jobSetupPlanilha() {
+  console.log('[setup-planilha] iniciando...');
+  const token = await getAccessToken();
+  const authHdr = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const requests = [
+    { setBasicFilter: { filter: { range: { sheetId: MEMBERS_GID, startRowIndex: 4, endRowIndex: 1000, startColumnIndex: 0, endColumnIndex: 8 } } } },
+    { sortRange: { range: { sheetId: MEMBERS_GID, startRowIndex: 5, endRowIndex: 1000, startColumnIndex: 0, endColumnIndex: 8 }, sortSpecs: [{ dimensionIndex: 1, sortOrder: 'ASCENDING' }] } },
+  ];
+  const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, { method: 'POST', headers: authHdr, body: JSON.stringify({ requests }) });
+  if (!r.ok) console.error('[setup-planilha] erro:', await r.text());
+  else console.log('[setup-planilha] ✅ Filtro e ordem alfabética aplicados');
+}
+
 // ─── Relatório de Presença ────────────────────────────────────────────────────
 async function jobRelatorioPresenca(force = false) {
   console.log('[presenca] iniciando leitura do Sheets...');
@@ -827,6 +891,18 @@ http.createServer(async (req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true, job }));
         jobAtualizarMembros(payload.force === true).catch(err => console.error('[membros]', err.message));
+      } else if (job === 'fix-notas') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, job }));
+        jobFixNotas().catch(err => console.error('[fix-notas]', err.message));
+      } else if (job === 'setup-formatacao') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, job }));
+        jobSetupFormatacao().catch(err => console.error('[setup-formatacao]', err.message));
+      } else if (job === 'setup-planilha') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, job }));
+        jobSetupPlanilha().catch(err => console.error('[setup-planilha]', err.message));
       } else if (job === 'presenca') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true, job }));
