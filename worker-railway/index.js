@@ -923,6 +923,28 @@ http.createServer(async (req, res) => {
   });
 }).listen(PORT, () => console.log(`  HTTP trigger: porta ${PORT}`));
 
+// ─── Startup: recupera jobs perdidos por redeploy ─────────────────────────────
+(async () => {
+  await new Promise(r => setTimeout(r, 5000)); // aguarda 5s o worker estabilizar
+  if (!dentroJanelaEnvio()) return;
+
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const disparosHoje = await contarDisparosHoje().catch(() => 0);
+  const buscasHoje = await sbFetch(
+    `/wa_prospects?created_at=gte.${hoje.toISOString()}&select=id&limit=1`
+  ).catch(() => []);
+
+  if (!buscasHoje?.length) {
+    console.log('[startup] busca não rodou hoje — executando agora...');
+    await jobBuscar().catch(err => console.error('[startup] buscar:', err.message));
+  }
+
+  if (disparosHoje === 0) {
+    console.log('[startup] disparo não rodou hoje — executando agora...');
+    jobDisparoLote(LIMITE_MANHA).catch(err => console.error('[startup] disparo:', err.message));
+  }
+})();
+
 console.log('🤖 RDCreator Worker iniciado');
 console.log('  Busca:     07:30 BRT (seg-sab)');
 console.log('  Manhã WA:  08:00–08:20 BRT (seg-sab) — 20 msgs');
