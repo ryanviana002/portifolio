@@ -9,9 +9,15 @@ const EVOLUTION_KEY  = process.env.EVOLUTION_KEY;
 const EVOLUTION_INST = process.env.EVOLUTION_INSTANCE || 'rdcreator';
 const PLACES_KEY     = process.env.GOOGLE_PLACES_API_KEY;
 const ALERT_NUM      = '5519992525515';
-const SHEETS_ID      = '1H9nNzoJUTIKd07eInNR7jSJUj-U5fNyZMzuRg_1Y5qY';
-const LIDER_NUM      = '5519992734341';
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+const SHEETS_ID       = '1H9nNzoJUTIKd07eInNR7jSJUj-U5fNyZMzuRg_1Y5qY';
+const LIDER_NUM       = '5519992734341';
+const GOOGLE_API_KEY  = process.env.GOOGLE_API_KEY;
+const MEMBERS_ID      = '1j-8XDi2N_5new-zuwnNmkl_-05Pnwry0mwl4N3WIoKc';
+const MEMBERS_TAB     = 'Discipulos';
+const MEMBERS_GID     = 0;
+const G_CLIENT_ID     = process.env.GOOGLE_CLIENT_ID;
+const G_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const G_REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
 
 // Tier A+ — buscado todo dia (fecha rápido, carência digital alta)
 const CATEGORIAS_AUTO = [
@@ -546,6 +552,131 @@ async function jobAlertarLigar() {
   console.log(`[alertar-ligar] ${prospects.length} alertas enviados.`);
 }
 
+// ─── OAuth2 + Helpers de membros ─────────────────────────────────────────────
+async function getAccessToken() {
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: G_CLIENT_ID, client_secret: G_CLIENT_SECRET,
+      refresh_token: G_REFRESH_TOKEN, grant_type: 'refresh_token',
+    }),
+  });
+  const data = await res.json();
+  if (!data.access_token) throw new Error('OAuth2 falhou: ' + JSON.stringify(data));
+  return data.access_token;
+}
+
+function normNome(s) {
+  return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z\s]/g, '').trim();
+}
+function normTel(s) { return (s || '').replace(/\D/g, '').slice(-8); }
+function nomeMatch(a, b) {
+  const na = normNome(a), nb = normNome(b);
+  return na.split(' ').filter(p => p.length > 2).some(p => nb.includes(p)) ||
+         nb.split(' ').filter(p => p.length > 2).some(p => na.includes(p));
+}
+
+async function lerFormsSabado(force) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/Respostas%20ao%20formul%C3%A1rio%201!A2:E?key=${GOOGLE_API_KEY}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(await res.text());
+  const rows = (await res.json()).values || [];
+  let dataAlvo;
+  if (force) {
+    dataAlvo = rows.filter(r => r[0]).map(r => r[0].split(' ')[0]).pop();
+  } else {
+    const s = new Date(); s.setDate(s.getDate() - 2);
+    dataAlvo = `${String(s.getDate()).padStart(2,'0')}/${String(s.getMonth()+1).padStart(2,'0')}/${s.getFullYear()}`;
+  }
+  return { rows: rows.filter(r => r[0] && r[0].split(' ')[0] === dataAlvo), dataAlvo };
+}
+
+// ─── Atualização de Membros ───────────────────────────────────────────────────
+async function jobAtualizarMembros(force = false) {
+  console.log('[membros] iniciando...');
+  if (!G_CLIENT_ID || !G_CLIENT_SECRET || !G_REFRESH_TOKEN) { console.error('[membros] OAuth2 não configurado'); return; }
+  if (!GOOGLE_API_KEY) { console.error('[membros] GOOGLE_API_KEY não configurado'); return; }
+
+  const { rows: doSabado, dataAlvo } = await lerFormsSabado(force);
+  if (!doSabado.length) { console.log('[membros] nenhum dado do sábado'); return; }
+  console.log(`[membros] ${doSabado.length} presentes em ${dataAlvo}`);
+
+  const token = await getAccessToken();
+  const authHdr = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+  // Lê membros + notas
+  const mUrl = `https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}?ranges=${encodeURIComponent(MEMBERS_TAB+'!A6:H')}&fields=sheets.data.rowData.values.userEnteredValue,sheets.data.rowData.values.note`;
+  const mRes = await fetch(mUrl, { headers: authHdr });
+  if (!mRes.ok) { console.error('[membros] erro leitura:', await mRes.text()); return; }
+  const rowData = (await mRes.json()).sheets?.[0]?.data?.[0]?.rowData || [];
+
+  const membros = rowData.map((row, i) => ({
+    rowIndex: 5 + i,
+    nome: row.values?.[1]?.userEnteredValue?.stringValue || '',
+    tel:  row.values?.[2]?.userEnteredValue?.stringValue || '',
+    freq: row.values?.[4]?.userEnteredValue?.numberValue || 0,
+    nota: row.values?.[4]?.note || '',
+  })).filter(m => m.nome);
+
+  const updates = [], novos = [];
+
+  for (const form of doSabado) {
+    const nomeForm = form[1] || '';
+    const telForm  = (form[2] || '').replace(/\D/g, '');
+    const temCadastro = (form[4] || '').toLowerCase().includes('sim');
+
+    const match = membros.find(m =>
+      (telForm && normTel(m.tel) === normTel(telForm)) || nomeMatch(nomeForm, m.nome)
+    );
+
+    if (match) {
+      const novaFreq = (match.freq || 0) + 1;
+      const novaNota = match.nota ? `${match.nota}\n${dataAlvo}` : dataAlvo;
+      match.freq = novaFreq;
+      updates.push({ updateCells: {
+        rows: [{ values: [{ userEnteredValue: { numberValue: novaFreq }, note: novaNota }] }],
+        fields: 'userEnteredValue,note',
+        range: { sheetId: MEMBERS_GID, startRowIndex: match.rowIndex, endRowIndex: match.rowIndex+1, startColumnIndex: 4, endColumnIndex: 5 },
+      }});
+      console.log(`[membros] ✓ ${match.nome} → freq ${novaFreq}`);
+    } else {
+      novos.push(['', nomeForm, telForm, telForm ? `https://wa.me/55${telForm}` : '', 1, temCadastro ? 'Sim' : 'Não', '', '']);
+      console.log(`[membros] + novo: ${nomeForm}`);
+    }
+  }
+
+  if (updates.length) {
+    const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, {
+      method: 'POST', headers: authHdr, body: JSON.stringify({ requests: updates }),
+    });
+    if (!r.ok) console.error('[membros] erro batchUpdate:', await r.text());
+    else console.log(`[membros] ${updates.length} atualizado(s)`);
+  }
+
+  if (novos.length) {
+    const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!A:H')}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, {
+      method: 'POST', headers: authHdr, body: JSON.stringify({ values: novos }),
+    });
+    const rd = await r.json();
+    if (!r.ok) { console.error('[membros] erro append:', JSON.stringify(rd)); }
+    else {
+      const firstRow = rd.updates?.updatedRange?.match(/(\d+):/)?.[1];
+      if (firstRow) {
+        const noteReqs = novos.map((_, i) => ({ updateCells: {
+          rows: [{ values: [{ note: dataAlvo }] }], fields: 'note',
+          range: { sheetId: MEMBERS_GID, startRowIndex: parseInt(firstRow)-1+i, endRowIndex: parseInt(firstRow)+i, startColumnIndex: 4, endColumnIndex: 5 },
+        }}));
+        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, {
+          method: 'POST', headers: authHdr, body: JSON.stringify({ requests: noteReqs }),
+        });
+      }
+      console.log(`[membros] ${novos.length} novo(s) adicionado(s)`);
+    }
+  }
+  console.log('[membros] concluído.');
+}
+
 // ─── Relatório de Presença ────────────────────────────────────────────────────
 async function jobRelatorioPresenca(force = false) {
   console.log('[presenca] iniciando leitura do Sheets...');
@@ -625,7 +756,8 @@ const semCadastro = doUltimoEncontro.filter(r => {
 }
 
 // ─── Agendamentos (UTC, Brasília = UTC-3) ────────────────────────────────────
-cron.schedule('0 15 * * 1', jobRelatorioPresenca);  // seg 12h BRT
+cron.schedule('0 15 * * 1', jobRelatorioPresenca);   // seg 12h BRT
+cron.schedule('15 15 * * 1', jobAtualizarMembros);   // seg 12h15 BRT
 cron.schedule('30 10 * * 1-6', jobBuscar);
 cron.schedule('0 11 * * 1-6', () => { setTimeout(() => jobDisparoLote(LIMITE_MANHA), Math.floor(Math.random() * 20 * 60 * 1000)); });
 cron.schedule('0 16 * * 1-5', () => { setTimeout(() => jobDisparoLote(LIMITE_TARDE), Math.floor(Math.random() * 20 * 60 * 1000)); });
@@ -686,6 +818,10 @@ http.createServer(async (req, res) => {
           }
         })().catch(err => console.error('[disparar1]', err.message));
         return;
+      } else if (job === 'membros') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, job }));
+        jobAtualizarMembros(payload.force === true).catch(err => console.error('[membros]', err.message));
       } else if (job === 'presenca') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true, job }));
