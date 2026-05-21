@@ -62,11 +62,11 @@ function saudacao() {
 }
 
 const MSGS_1_AUTO = [
-  (nome) => `${saudacao()}! Trabalhei no Google de uma oficina aqui da região e eles passaram a receber mais clientes das buscas. Vi a ${nome} e achei que vocês podem crescer nisso também. Tem interesse?`,
-  (nome) => `${saudacao()}! Ajudei uma oficina aqui da região a aparecer melhor no Google e no Maps. Desde então eles recebem mais contatos de clientes novos. Vi a ${nome} e acho que dá pra fazer o mesmo. Posso te mostrar?`,
-  (nome) => `${saudacao()}! Sou o Ryan, trabalho com presença digital pra oficinas da região. Recentemente uma oficina aqui começou a aparecer na frente das buscas do Google e o movimento aumentou. Vi a ${nome} e achei que vale uma conversa. Tem interesse?`,
-  (nome) => `${saudacao()}! Vi a ${nome} no Google. Trabalho ajudando oficinas da região a aparecerem melhor nas buscas locais — site, perfil do Google, Maps. Uma que atendi recentemente aumentou bastante o contato de clientes novos. Posso te contar como funciona?`,
-  (nome) => `${saudacao()}! Trabalho com oficinas aqui da região melhorando a presença no Google e no Maps. Atendi uma recentemente e eles passaram a receber mais clientes pelas buscas. Vi a ${nome} e achei que faz sentido conversar. Tem interesse?`,
+  (nome) => `${saudacao()}! Trabalhei no Google de uma oficina aqui da região e eles passaram a receber mais clientes das buscas. Tem interesse em ter o mesmo na ${nome}?`,
+  (nome) => `${saudacao()}! Ajudei uma oficina aqui da região a aparecer melhor no Google e no Maps. Desde então eles recebem mais contatos de clientes novos. Tem interesse em ter o mesmo resultado aí na ${nome}?`,
+  (nome) => `${saudacao()}! Sou o Ryan, trabalho com presença digital pra oficinas da região. Recentemente uma oficina aqui começou a aparecer na frente das buscas do Google e o movimento aumentou bastante. Tem interesse em ter o mesmo na ${nome}?`,
+  (nome) => `${saudacao()}! Trabalho ajudando oficinas da região a aparecerem melhor nas buscas locais — site, perfil do Google, Maps. Uma que atendi recentemente aumentou bastante o contato de clientes novos. Tem interesse em ter o mesmo resultado na ${nome}?`,
+  (nome) => `${saudacao()}! Atendi uma oficina aqui da região e eles passaram a receber mais clientes pelas buscas do Google e do Maps. Tem interesse em ter o mesmo resultado na ${nome}?`,
 ];
 
 
