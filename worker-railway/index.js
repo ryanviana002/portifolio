@@ -391,7 +391,7 @@ async function jobBuscar() {
   console.log(`Total: ${novos} novos adicionados à fila.`);
 }
 
-const LIMITE_HORA   = 8;
+const LIMITE_HORA   = 15;
 const LIMITE_SEMANA = 150;
 const MAX_RECUSAS_SEGUIDAS = 5;
 
@@ -475,7 +475,7 @@ async function jobDisparoLote(limite) {
 
   for (const p of filtrados) {
     try {
-      await enviarWA(p.wa_num, MSG_1(p.nome, p.categoria, p.rating, p.review_count));
+      await enviarWA(p.wa_num, MSG_1(p.nome));
       await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
         status: 'sent1',
         sent1_at: new Date().toISOString(),
@@ -848,7 +848,7 @@ http.createServer(async (req, res) => {
           const filtrados = (pendentes || []).filter(p => DDDS_VALIDOS.includes(p.wa_num.slice(2, 4)) && eAutoMotivo(p.categoria));
           for (const p of filtrados) {
             try {
-              await enviarWA(p.wa_num, MSG_1(p.nome, p.categoria, p.rating, p.review_count));
+              await enviarWA(p.wa_num, MSG_1(p.nome));
               await sbFetch(`/wa_prospects?id=eq.${p.id}`, 'PATCH', {
                 status: 'sent1', sent1_at: new Date().toISOString(), updated_at: new Date().toISOString(),
               });
