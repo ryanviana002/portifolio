@@ -258,9 +258,12 @@ async function enviarWA(numero, mensagem) {
 
 // ─── Contagem de disparos hoje ───────────────────────────────────────────────
 async function contarDisparosHoje() {
-  const hoje = new Date();
-  hoje.setHours(0,0,0,0);
-  const rows = await sbFetch(`/wa_prospects?sent1_at=gte.${hoje.toISOString()}&select=id`).catch(() => []);
+  const brt = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+  const inicioDia = new Date(brt);
+  inicioDia.setHours(0,0,0,0);
+  const diff = new Date() - brt;
+  const inicioDiaUTC = new Date(inicioDia.getTime() - diff);
+  const rows = await sbFetch(`/wa_prospects?sent1_at=gte.${inicioDiaUTC.toISOString()}&select=id`).catch(() => []);
   return Array.isArray(rows) ? rows.length : 0;
 }
 
@@ -352,7 +355,7 @@ async function jobBuscar() {
       try {
         const encontrados = await buscarProspects(categoria, cidades);
         prospects = prospects.concat(encontrados);
-        console.log(`  ${categoria} (${cidades === CIDADES_LOCAL ? 'local' : 'SP'}): ${encontrados.length}`);
+        console.log(`  ${categoria}: ${encontrados.length}`);
       } catch (err) {
         console.error(`Erro Places (${categoria}):`, err.message);
         await alertar(`Erro Google Places API (${categoria}):\n${err.message}`);
