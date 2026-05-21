@@ -11,6 +11,8 @@
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/delega", "dest": "/delega/index.html" },
     { "src": "/delega/(.*)", "dest": "/delega/$1" },
+    { "src": "/estocao", "dest": "/estocao/index.html" },
+    { "src": "/estocao/(.*)", "dest": "/estocao/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
