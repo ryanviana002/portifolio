@@ -135,7 +135,7 @@ async function alertar(msg) {
 }
 
 // ─── Google Places ───────────────────────────────────────────────────────────
-const CAMPO_MASK = 'places.id,places.displayName,places.primaryTypeDisplayName,places.formattedAddress,places.websiteUri,places.nationalPhoneNumber,places.rating,places.userRatingCount,places.businessStatus,places.googleMapsUri,places.photos';
+const CAMPO_MASK = 'places.id,places.displayName,places.primaryTypeDisplayName,places.formattedAddress,places.websiteUri,places.nationalPhoneNumber,places.rating,places.userRatingCount,places.businessStatus';
 const NAO_E_SITE = ['instagram.com','facebook.com','fb.com','wa.me','whatsapp.com','linktr.ee','linktree.com','beacons.ai','bio.link','ifood.com.br','rappi.com','uber.com','booking.com','tripadvisor','twitter.com','x.com','tiktok.com','youtube.com','google.com/maps','maps.google.com','waze.com'];
 
 // ─── Região de Campinas (buscada todo dia) ────────────────────────────────────
@@ -395,7 +395,7 @@ async function jobBuscar() {
         body: JSON.stringify({
           id: p.id, nome: p.nome, categoria: p.categoria,
           wa_num: p.waNum, telefone: p.telefone, maps_url: p.mapsUrl,
-          foto: p.foto, rating: p.rating, review_count: p.reviewCount,
+          rating: p.rating, review_count: p.reviewCount,
           status: 'pending', updated_at: new Date().toISOString(),
         }),
       }).catch(err => console.error(`Erro ao salvar ${p.nome}:`, err.message));
@@ -925,22 +925,24 @@ http.createServer(async (req, res) => {
 
 // ─── Startup: recupera jobs perdidos por redeploy ─────────────────────────────
 (async () => {
-  await new Promise(r => setTimeout(r, 5000)); // aguarda 5s o worker estabilizar
+  await new Promise(r => setTimeout(r, 5000));
   if (!dentroJanelaEnvio()) return;
 
-  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const hoje = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+  const chaveHoje = `buscar_${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-${String(hoje.getDate()).padStart(2,'0')}`;
+
+  const jaRodou = await sbFetch(`/wa_config?select=id&id=eq.${chaveHoje}`).catch(() => []);
+  if (jaRodou?.length) { console.log('[startup] busca já rodou hoje — pulando.'); return; }
+
+  // Marca como rodado ANTES de executar — evita duplo disparo em redeploys simultâneos
+  await sbFetch('/wa_config', 'POST', { id: chaveHoje, valor: '1', updated_at: new Date().toISOString() }).catch(() => {});
+
+  console.log('[startup] busca não rodou hoje — executando...');
+  await jobBuscar().catch(err => console.error('[startup] buscar:', err.message));
+
   const disparosHoje = await contarDisparosHoje().catch(() => 0);
-  const buscasHoje = await sbFetch(
-    `/wa_prospects?created_at=gte.${hoje.toISOString()}&select=id&limit=1`
-  ).catch(() => []);
-
-  if (!buscasHoje?.length) {
-    console.log('[startup] busca não rodou hoje — executando agora...');
-    await jobBuscar().catch(err => console.error('[startup] buscar:', err.message));
-  }
-
   if (disparosHoje === 0) {
-    console.log('[startup] disparo não rodou hoje — executando agora...');
+    console.log('[startup] disparo não rodou hoje — executando...');
     jobDisparoLote(LIMITE_MANHA).catch(err => console.error('[startup] disparo:', err.message));
   }
 })();
