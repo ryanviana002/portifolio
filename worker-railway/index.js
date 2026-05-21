@@ -329,6 +329,13 @@ async function jobExpirarSemResposta() {
 async function jobBuscar() {
   console.log(`[${new Date().toLocaleString('pt-BR')}] Buscando prospects...`);
 
+  const estoque = await sbFetch('/wa_prospects?status=eq.pending&select=id').catch(() => []);
+  const estoqueAtual = Array.isArray(estoque) ? estoque.length : 0;
+  if (estoqueAtual >= 50) {
+    console.log(`Estoque ok (${estoqueAtual} pending) — pulando busca.`);
+    return;
+  }
+
   const dispararHoje = await contarDisparosHoje();
   const vagas = LIMITE_DIA - dispararHoje;
   if (vagas <= 0) { console.log('Limite diário atingido.'); return; }
