@@ -56,17 +56,17 @@ const DELAY_MIN_MS = 180_000;  // 3 min
 const DELAY_MAX_MS = 600_000;  // 10 min
 
 // ─── MSG_1 automotivo ─────────────────────────────────────────────────────────
+function saudacao() {
+  const h = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' })).getHours();
+  return h < 12 ? 'Bom dia' : 'Boa tarde';
+}
+
 const MSGS_1_AUTO = [
-  // 1. Avaliações + potencial nas buscas
-  (nome, r, rv) => `Oi! Vi a *${nome}* no Google — ${rv} avaliações, isso é difícil de construir 👏\n\nSou o Ryan. Trabalho com oficinas aqui da região ajudando a aparecer melhor no Google e no Maps quando o cliente pesquisa.\n\nAcho que vocês têm potencial pra aparecer ainda mais nas buscas locais com o que já construíram.\n\nPosso te mostrar um exemplo rápido?`,
-  // 2. Concorrente com nota menor aparece antes
-  (nome, r, rv) => `Oi! Vi a *${nome}* no Google — ${r}⭐ e ${rv} avaliações. Nota muito boa 👏\n\nSou o Ryan. Ajudo oficinas da região a se destacarem no Google e no Maps pra chegar em mais clientes.\n\nTenho algumas ideias de como vocês poderiam aparecer ainda mais nas buscas da região.\n\nQuer dar uma olhada?`,
-  // 3. Cliente decidindo pelo celular
-  (nome, r, rv) => `Oi! Pesquisei oficinas aqui da região e a *${nome}* apareceu com ${rv} avaliações e ${r}⭐ — difícil ter isso 👏\n\nSou o Ryan. Ajudo oficinas a se destacarem no Google e aparecerem na frente quando alguém pesquisar na região.\n\nHoje quem procura oficina pelo celular decide em segundos — e com essa reputação dá pra capturar muito mais desses clientes.\n\nPosso te enviar um exemplo?`,
-  // 4. Visibilidade no Maps
-  (nome, r, rv) => `Oi! Vi a *${nome}* no Maps com ${r}⭐ e ${rv} avaliações — reputação muito boa 👏\n\nSou o Ryan. Trabalho com oficinas aqui da região pra fortalecerem a presença no Google e aparecerem na frente das buscas locais.\n\nTenho algumas ideias do que dá pra fazer com o perfil de vocês pra chegar em mais clientes.\n\nPosso te mostrar um exemplo rápido?`,
-  // 5. Referência da região
-  (nome, r, rv) => `Oi! A *${nome}* tem ${rv} avaliações no Google — ${r}⭐. Construíram uma reputação que poucos têm 👏\n\nSou o Ryan. Ajudo oficinas aqui da região a se tornarem referência nas buscas do Google e do Maps.\n\nCom o que vocês já têm, dá pra ser a primeira opção quando alguém pesquisar oficina por aqui.\n\nQuer ver como ficaria?`,
+  (nome) => `${saudacao()}! Trabalhei no Google de uma oficina aqui da região e eles passaram a receber mais clientes das buscas. Vi a ${nome} e achei que vocês podem crescer nisso também. Tem interesse?`,
+  (nome) => `${saudacao()}! Ajudei uma oficina aqui da região a aparecer melhor no Google e no Maps. Desde então eles recebem mais contatos de clientes novos. Vi a ${nome} e acho que dá pra fazer o mesmo. Posso te mostrar?`,
+  (nome) => `${saudacao()}! Sou o Ryan, trabalho com presença digital pra oficinas da região. Recentemente uma oficina aqui começou a aparecer na frente das buscas do Google e o movimento aumentou. Vi a ${nome} e achei que vale uma conversa. Tem interesse?`,
+  (nome) => `${saudacao()}! Vi a ${nome} no Google. Trabalho ajudando oficinas da região a aparecerem melhor nas buscas locais — site, perfil do Google, Maps. Uma que atendi recentemente aumentou bastante o contato de clientes novos. Posso te contar como funciona?`,
+  (nome) => `${saudacao()}! Trabalho com oficinas aqui da região melhorando a presença no Google e no Maps. Atendi uma recentemente e eles passaram a receber mais clientes pelas buscas. Vi a ${nome} e achei que faz sentido conversar. Tem interesse?`,
 ];
 
 
@@ -82,10 +82,8 @@ function eAutoMotivo(cat) {
   ].some(k => c.includes(k));
 }
 
-function MSG_1(nome, cat, rating, reviewCount) {
-  const r = rating ? rating.toFixed(1) : '4.5';
-  const rv = reviewCount || 50;
-  return MSGS_1_AUTO[Math.floor(Math.random() * MSGS_1_AUTO.length)](nome, r, rv);
+function MSG_1(nome) {
+  return MSGS_1_AUTO[Math.floor(Math.random() * MSGS_1_AUTO.length)](nome);
 }
 
 // ─── MSG_3 follow-up (automotivo especialista / outros genérico) ──────────────
@@ -156,25 +154,6 @@ const CIDADES_LOCAL = [
   { nome: 'Jundiaí SP',                pontos: [[-23.1864,-46.8836]] },
   { nome: 'Itatiba SP',                pontos: [[-23.0053,-46.8389]] },
   { nome: 'Araras SP',                 pontos: [[-22.3569,-47.3839]] },
-];
-
-// ─── Interior SP — expansão quando local estiver esgotado ────────────────────
-const CIDADES_SP = [
-  { nome: 'Ribeirão Preto SP',         pontos: [[-21.1699,-47.8099],[-21.1699,-47.7699],[-21.2099,-47.8099],[-21.2099,-47.7699]] },
-  { nome: 'São José dos Campos SP',    pontos: [[-23.1794,-45.8869],[-23.2194,-45.8869]] },
-  { nome: 'Sorocaba SP',               pontos: [[-23.5015,-47.4526],[-23.5015,-47.4026]] },
-  { nome: 'São José do Rio Preto SP',  pontos: [[-20.8197,-49.3794],[-20.8597,-49.3794]] },
-  { nome: 'Bauru SP',                  pontos: [[-22.3246,-49.0961]] },
-  { nome: 'Franca SP',                 pontos: [[-20.5386,-47.4008]] },
-  { nome: 'Taubaté SP',                pontos: [[-23.0261,-45.5558]] },
-  { nome: 'São Carlos SP',             pontos: [[-21.9794,-47.8906]] },
-  { nome: 'Araraquara SP',             pontos: [[-21.7945,-48.1756]] },
-  { nome: 'Marília SP',                pontos: [[-22.2133,-49.9458]] },
-  { nome: 'Araçatuba SP',              pontos: [[-21.2094,-50.4428]] },
-  { nome: 'Presidente Prudente SP',    pontos: [[-22.1256,-51.3889]] },
-  { nome: 'Botucatu SP',               pontos: [[-22.8869,-48.4450]] },
-  { nome: 'Guaratinguetá SP',          pontos: [[-22.8167,-45.1939]] },
-  { nome: 'Ourinhos SP',               pontos: [[-22.9789,-49.8697]] },
 ];
 
 function temSiteProprio(uri) {
@@ -351,18 +330,21 @@ async function jobBuscar() {
   const vagas = LIMITE_DIA - dispararHoje;
   if (vagas <= 0) { console.log('Limite diário atingido.'); return; }
 
-  // A+ todo dia; Tier A e Outros só seg/qua/sex (uma rotativa de cada)
+  // Rotaciona 3 categorias A+ por dia + 1 Tier A (seg/qua/sex)
+  const rot1 = await proximaCategoria('auto_rot1', CATEGORIAS_AUTO);
+  const idxRot1 = CATEGORIAS_AUTO.indexOf(rot1);
+  const cat2 = CATEGORIAS_AUTO[(idxRot1 + 1) % CATEGORIAS_AUTO.length];
+  const cat3 = CATEGORIAS_AUTO[(idxRot1 + 2) % CATEGORIAS_AUTO.length];
+  const categoriasDia = [rot1, cat2, cat3];
+
   const brtBuscar = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
-  const categoriasDia = [...CATEGORIAS_AUTO];
   if ([1, 3, 5].includes(brtBuscar.getDay())) {
     const rotA = await proximaCategoriaAutoA();
     categoriasDia.push(rotA);
-    console.log(`Categorias: A+(${CATEGORIAS_AUTO.length}) + ${rotA} (Tier A)`);
+    console.log(`Categorias: ${categoriasDia.join(', ')}`);
   } else {
-    console.log(`Categorias: A+(${CATEGORIAS_AUTO.length})`);
+    console.log(`Categorias: ${categoriasDia.join(', ')}`);
   }
-
-  const LIMIAR_EXPANSAO = 15; // se local achar menos de X novos, expande pro estado
 
   async function buscarESalvar(cidades, limite) {
     let prospects = [];
@@ -404,19 +386,8 @@ async function jobBuscar() {
     return novos;
   }
 
-  // Fase 1: região local
-  console.log('Fase 1: região de Campinas...');
-  let novos = await buscarESalvar(CIDADES_LOCAL, vagas * 2);
-  console.log(`Local: ${novos} novos`);
-
-  // Fase 2: interior SP se local estiver esgotado
-  if (novos < LIMIAR_EXPANSAO) {
-    console.log(`Poucos novos localmente (${novos}) — expandindo para interior SP...`);
-    const novosSP = await buscarESalvar(CIDADES_SP, vagas * 2 - novos);
-    novos += novosSP;
-    console.log(`Interior SP: ${novosSP} novos`);
-  }
-
+  console.log('Buscando na região de Campinas...');
+  const novos = await buscarESalvar(CIDADES_LOCAL, vagas * 2);
   console.log(`Total: ${novos} novos adicionados à fila.`);
 }
 
