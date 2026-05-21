@@ -62,11 +62,11 @@ function saudacao() {
 }
 
 const MSGS_1_AUTO = [
-  (nome) => `${saudacao()}! Trabalhei no Google de uma oficina aqui da região e eles passaram a receber mais clientes das buscas. Tem interesse em ter o mesmo na ${nome}?`,
-  (nome) => `${saudacao()}! Ajudei uma oficina aqui da região a aparecer melhor no Google e no Maps. Desde então eles recebem mais contatos de clientes novos. Tem interesse em ter o mesmo resultado aí na ${nome}?`,
-  (nome) => `${saudacao()}! Sou o Ryan, trabalho com presença digital pra oficinas da região. Recentemente uma oficina aqui começou a aparecer na frente das buscas do Google e o movimento aumentou bastante. Tem interesse em ter o mesmo na ${nome}?`,
-  (nome) => `${saudacao()}! Trabalho ajudando oficinas da região a aparecerem melhor nas buscas locais — site, perfil do Google, Maps. Uma que atendi recentemente aumentou bastante o contato de clientes novos. Tem interesse em ter o mesmo resultado na ${nome}?`,
-  (nome) => `${saudacao()}! Atendi uma oficina aqui da região e eles passaram a receber mais clientes pelas buscas do Google e do Maps. Tem interesse em ter o mesmo resultado na ${nome}?`,
+  (nome) => `${saudacao()}!\n\nTrabalhei no Google de uma oficina aqui da região e eles passaram a receber mais clientes das buscas.\n\nTem interesse em ter o mesmo na ${nome}?`,
+  (nome) => `${saudacao()}!\n\nAjudei uma oficina aqui da região a aparecer melhor no Google e no Maps. Desde então eles recebem mais contatos de clientes novos.\n\nTem interesse em ter o mesmo resultado aí na ${nome}?`,
+  (nome) => `${saudacao()}!\n\nSou o Ryan, trabalho com presença digital pra oficinas da região. Recentemente uma oficina aqui começou a aparecer na frente das buscas do Google e o movimento aumentou bastante.\n\nTem interesse em ter o mesmo na ${nome}?`,
+  (nome) => `${saudacao()}!\n\nTrabalho ajudando oficinas da região a aparecerem melhor nas buscas locais — site, perfil do Google, Maps. Uma que atendi recentemente aumentou bastante o contato de clientes novos.\n\nTem interesse em ter o mesmo resultado na ${nome}?`,
+  (nome) => `${saudacao()}!\n\nAtendi uma oficina aqui da região e eles passaram a receber mais clientes pelas buscas do Google e do Maps.\n\nTem interesse em ter o mesmo resultado na ${nome}?`,
 ];
 
 
