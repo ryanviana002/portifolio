@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RD Creator | Presença Digital Automotiva</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Geist', 'sans-serif'],
+          },
+          colors: {
+            primary: '#0066CC',
+            brandGray: '#efefef',
+            textGray: 'rgba(0,0,0,0.55)'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #ffffff;
+      -webkit-font-smoothing: antialiased;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes rough-notation-dash {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+    .hover-bg-transition {
+      transition: background-color 0.2s ease, opacity 0.2s ease;
+    }
+
+    /* Scroll animations */
+    [data-anim] {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 1s ease, transform 1s cubic-bezier(0.16,1,0.3,1);
+    }
+    [data-anim].visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* SVG icon draw — valores aplicados via JS com getTotalLength() */
+    .icon-draw path {
+      fill: none;
+    }
+
+    /* Sticky stack cards */
+    #stack-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .scard {
+      position: sticky;
+      top: calc(16px + var(--i) * 14px);
+      background: white;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 1.5rem;
+      padding: 2.5rem 2.5rem 3rem;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.07);
+      z-index: calc(10 + var(--i));
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16,1,0.3,1);
+    }
+    .scard.scard-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .scard[style*="--i:0"] {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .scard-icon {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: auto;
+      padding-top: 2rem;
+    }
+  </style>
+</head>
+<body class="overflow-x-hidden min-h-screen">
+  <main class="min-h-[100dvh] p-3 flex flex-col gap-3">
+    <!-- Top Announcement Banner -->
+    <div role="region" aria-label="Product update" class="relative z-20 flex shrink-0 items-center gap-2 rounded-2xl bg-[#0066cc] px-2 py-2.5 sm:px-4 shrink-0 shadow-sm border border-black/5 justify-between md:justify-center overflow-hidden">
+      <div></div>
+      <p class="min-w-0 flex-1 text-center text-sm font-normal leading-snug text-white">
+        <span class="font-bold">+30 oficinas já cresceram com a RDCreator</span> — a sua pode ser a próxima.
+      </p>
+      <button type="button" onclick="this.closest('[role=region]').remove()" class="shrink-0 inline-flex cursor-pointer items-center justify-center rounded-lg p-2 text-white/75 transition hover:bg-white/10 hover:text-white" aria-label="Dismiss announcement">
+        <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6l-12 12"></path>
+          <path d="M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Navbar -->
+    <header class="flex items-center justify-between px-8 py-4 rounded-[24px] bg-[#efefef] shadow-inner">
+      <div class="flex items-center">
+        <img src="/logo_aut_nobg.png" alt="RD Creator" style="height:32px;width:auto;">
+      </div>
+      <nav class="hidden md:flex items-center gap-7 text-[14px] font-medium text-black/75">
+        <a href="#servicos" class="hover:text-black transition-colors">Serviços</a>
+        <a href="#planos" class="hover:text-black transition-colors">Planos</a>
+        <a href="#sobre" class="hover:text-black transition-colors">Sobre</a>
+        <a href="#faq" class="hover:text-black transition-colors">Dúvidas</a>
+        <a href="https://wa.me/5519994175385" target="_blank" rel="noreferrer" class="hover:text-black transition-colors">Entrar em contato</a>
+        <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20quero%20dominar%20minha%20regi%C3%A3o%20no%20Google!" target="_blank" rel="noreferrer" class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-[#0066cc] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#0055b3]">Começar agora</a>
+      </nav>
+    </header>
+
+    <!-- Main Wrapper -->
+    <div class="flex min-h-0 flex-1 flex-col rounded-[24px] bg-[#efefef] w-full text-black shadow-inner">
+
+      <!-- Hero Section -->
+      <section class="flex flex-col w-full min-w-0 flex-1 items-center">
+        <div class="w-full pt-16 sm:pt-20 lg:pt-24 text-center px-4">
+          <h1 data-anim class="mx-auto max-w-lg text-[1.875rem] font-normal leading-snug tracking-tight text-black sm:max-w-2xl sm:text-4xl lg:max-w-3xl lg:text-[2.25rem] lg:leading-[1.12]">
+            <span class="block">Sua oficina</span>
+            <span class="mt-2 block sm:mt-2.5">
+              merece mais do que
+              <span class="relative inline bg-transparent text-black">
+                invisibilidade
+                <svg class="rough-annotation pointer-events-none absolute left-0 top-0 h-full w-[110%] overflow-visible -ml-[5%]" preserveAspectRatio="none" viewBox="0 0 100 100">
+                  <path id="underline-path" d="M5 95 Q 50 85 95 90" fill="none" stroke="#0066cc" stroke-width="8" class="opacity-80" stroke-linecap="round" stroke-dasharray="136" stroke-dashoffset="136"></path>
+                </svg>
+              </span>.
+            </span>
+          </h1>
+          <p data-anim class="mx-auto mt-4 max-w-lg text-[15px] leading-snug text-black/55 sm:mt-5 sm:text-base">
+            Comece a dominar sua região como um profissional.
+          </p>
+          <div data-anim class="mt-8">
+            <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20quero%20dominar%20minha%20regi%C3%A3o%20no%20Google!" target="_blank" rel="noreferrer" class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-[#0066cc] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#0055b3] shadow-sm">
+              Falar no WhatsApp
+            </a>
+          </div>
+        </div>
+
+        <div data-anim class="mt-14 mb-8 sm:mb-12 flex w-full flex-col justify-center items-center">
+          <img src="https://aqryl.app/_next/image?url=%2Flanding%2Fhero_illustration.webp&w=3840&q=75" alt="RD Creator no celular" width="600" height="800" class="h-auto max-h-[min(66vh,580px)] w-auto max-w-[90%] sm:max-w-[26rem] object-contain drop-shadow-2xl">
+          <p class="mt-8 max-w-md text-center text-[13px] text-black/45 leading-relaxed">
+            Especialista em presença digital automotiva. Transformamos buscas em veículos na sua rampa.
+          </p>
+        </div>
+      </section>
+
+      <!-- Features Carousel -->
+      <section class="mx-auto w-full max-w-5xl px-4 pt-16 pb-12 sm:pt-20 lg:pt-28 lg:pb-16 text-center">
+        <h2 data-anim class="mx-auto max-w-2xl text-[1.5rem] font-normal leading-snug tracking-tight text-black sm:text-2xl lg:text-3xl">
+          <span class="block">Tudo que você</span>
+          <span class="mt-2 block sm:mt-2.5">precisa, <span class="relative inline-block">em um só lugar.<svg class="absolute -bottom-1 left-0 w-full overflow-visible" height="6" viewBox="0 0 200 6" preserveAspectRatio="none"><path id="underline-features" d="M0 4 Q100 0 200 4" fill="none" stroke="#0066cc" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="210" stroke-dashoffset="210"/></svg></span></span>
+        </h2>
+
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-5 max-w-4xl mx-auto text-left px-2">
+
+          <article data-anim class="flex flex-col gap-3">
+            <div class="relative flex aspect-[5/3] w-full shrink-0 items-center justify-center rounded-xl bg-neutral-200 shadow-sm border border-black/5">
+              <svg viewBox="0 0 24 24" class="h-14 w-14 text-[#0066cc] icon-draw" aria-hidden="true">
+                <path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-11a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1m3 0v18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M13 8l2 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M13 12l2 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </div>
+            <h3 class="text-[15px] font-medium leading-snug text-black">Site profissional que converte meses depois</h3>
+            <p class="text-[13px] text-black/55 leading-snug min-h-[40px]">Vitrine rápida, otimizada para mobile e desenhada para transformar visitantes em orçamentos.</p>
+            <a href="https://wa.me/5519994175385" target="_blank" rel="noreferrer" class="mt-1 w-fit rounded-md text-sm font-medium text-[#0066cc] hover:bg-neutral-200 transition-colors px-2 py-1 -ml-2">Saber mais</a>
+          </article>
+
+          <article data-anim class="flex flex-col gap-3">
+            <div class="relative flex aspect-[5/3] w-full shrink-0 items-center justify-center rounded-xl bg-neutral-200 shadow-sm border border-black/5">
+              <svg viewBox="0 0 24 24" class="h-14 w-14 text-[#0066cc] icon-draw" aria-hidden="true">
+                <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M16 3v4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M8 3v4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M4 11h16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M11 15h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M12 15v3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </div>
+            <h3 class="text-[15px] font-medium leading-snug text-black">Google Meu Negócio — mais clientes todo mês</h3>
+            <p class="text-[13px] text-black/55 leading-snug min-h-[40px]">Otimização avançada da sua ficha para dominar os primeiros resultados de busca da sua cidade.</p>
+            <a href="https://wa.me/5519994175385" target="_blank" rel="noreferrer" class="mt-1 w-fit rounded-md text-sm font-medium text-[#0066cc] hover:bg-neutral-200 transition-colors px-2 py-1 -ml-2">Saber mais</a>
+          </article>
+
+          <article data-anim class="flex flex-col gap-3">
+            <div class="relative flex aspect-[5/3] w-full shrink-0 items-center justify-center rounded-xl bg-neutral-200 shadow-sm border border-black/5">
+              <svg viewBox="0 0 24 24" class="h-14 w-14 text-[#0066cc] icon-draw" aria-hidden="true">
+                <path d="M3 13a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M15 9a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M9 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M4 20h14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </div>
+            <h3 class="text-[15px] font-medium leading-snug text-black">Anúncios e SEO local — do mês ao dia</h3>
+            <p class="text-[13px] text-black/55 leading-snug min-h-[40px]">Campanhas segmentadas + tráfego orgânico. Clientes no mapa e na sua rampa em um só lugar.</p>
+            <a href="https://wa.me/5519994175385" target="_blank" rel="noreferrer" class="mt-1 w-fit rounded-md text-sm font-medium text-[#0066cc] hover:bg-neutral-200 transition-colors px-2 py-1 -ml-2">Saber mais</a>
+          </article>
+        </div>
+      </section>
+
+      <!-- Share Mockup Section -->
+      <section class="max-w-5xl mx-auto px-4 py-8 lg:py-16 grid grid-cols-1 md:grid-cols-5 gap-12 items-center">
+        <!-- Mockup Card -->
+        <div data-anim class="md:col-span-3 flex justify-center lg:justify-start">
+          <div class="bg-black/5 border border-black/10 rounded-[2rem] p-6 lg:p-10 flex flex-col items-center justify-center w-full max-w-lg shadow-inner">
+            <div class="bg-white rounded-[1.25rem] shadow-sm w-full max-w-[340px] overflow-hidden border border-black/10 flex flex-col font-sans">
+
+              <!-- Phone top bar -->
+              <div class="bg-[#f1f3f4] px-4 py-3 flex items-center gap-2 border-b border-black/5">
+                <div class="flex-1 bg-white rounded-full px-3 py-1.5 flex items-center gap-2 border border-black/10 shadow-sm">
+                  <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 shrink-0" fill="none"><circle cx="11" cy="11" r="7" stroke="#5f6368" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="#5f6368" stroke-width="2" stroke-linecap="round"/></svg>
+                  <span class="text-[12px] text-[#5f6368] truncate">oficina mecânica perto de mim</span>
+                </div>
+              </div>
+
+              <!-- Anúncio Google Ads -->
+              <div class="px-4 pt-3 pb-2 border-b border-black/5">
+                <div class="flex items-center gap-1.5 mb-1">
+                  <span class="text-[9px] border border-[#5f6368] text-[#5f6368] px-1 rounded leading-tight">Patrocinado</span>
+                </div>
+                <p class="text-[13px] text-[#0066cc] font-medium leading-snug">RDCarros Oficina — Site Oficial</p>
+                <p class="text-[11px] text-[#5f6368] leading-snug">genuinaofficina.com.br</p>
+                <p class="text-[11px] text-[#202124] leading-snug mt-0.5">Serviços automotivos em Campinas · WhatsApp direto · Orçamento grátis</p>
+              </div>
+
+              <!-- Maps result -->
+              <div class="px-4 pt-3 pb-1">
+                <p class="text-[11px] text-[#5f6368] mb-2">Resultados locais</p>
+                <div class="bg-[#f8f9fa] rounded-xl border border-black/5 overflow-hidden">
+                  <!-- mapa placeholder -->
+                  <div class="h-[72px] relative overflow-hidden">
+                    <svg width="100%" height="72" viewBox="0 0 340 72" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                      <!-- fundo -->
+                      <rect width="340" height="72" fill="#e8ead3"/>
+                      <!-- quadras -->
+                      <rect x="0" y="0" width="80" height="35" fill="#f5f5f0"/>
+                      <rect x="90" y="0" width="60" height="35" fill="#f5f5f0"/>
+                      <rect x="160" y="0" width="90" height="35" fill="#f5f5f0"/>
+                      <rect x="260" y="0" width="80" height="35" fill="#f5f5f0"/>
+                      <rect x="0" y="45" width="70" height="27" fill="#f5f5f0"/>
+                      <rect x="80" y="45" width="100" height="27" fill="#f5f5f0"/>
+                      <rect x="190" y="45" width="80" height="27" fill="#f5f5f0"/>
+                      <rect x="280" y="45" width="60" height="27" fill="#f5f5f0"/>
+                      <!-- ruas horizontais -->
+                      <rect x="0" y="35" width="340" height="10" fill="#ffffff"/>
+                      <rect x="0" y="0" width="340" height="3" fill="#ffffff"/>
+                      <rect x="0" y="69" width="340" height="3" fill="#ffffff"/>
+                      <!-- ruas verticais -->
+                      <rect x="80" y="0" width="10" height="72" fill="#ffffff"/>
+                      <rect x="150" y="0" width="10" height="72" fill="#ffffff"/>
+                      <rect x="250" y="0" width="10" height="72" fill="#ffffff"/>
+                      <!-- rua diagonal -->
+                      <line x1="0" y1="72" x2="100" y2="0" stroke="#ffffff" stroke-width="8"/>
+                      <!-- área verde -->
+                      <rect x="160" y="45" width="30" height="27" fill="#c8e6c9" rx="3"/>
+                      <!-- nomes das ruas -->
+                      <text x="170" y="32" font-size="5.5" fill="#888" font-family="Arial,sans-serif" text-anchor="middle" transform="rotate(0,170,32)">Av. Brasil</text>
+                      <text x="85" y="20" font-size="5" fill="#888" font-family="Arial,sans-serif" text-anchor="middle" transform="rotate(90,85,20)">R. das Palmeiras</text>
+                      <text x="155" y="58" font-size="5" fill="#888" font-family="Arial,sans-serif" text-anchor="middle" transform="rotate(90,155,58)">R. 7 de Setembro</text>
+                      <text x="38" y="60" font-size="5" fill="#888" font-family="Arial,sans-serif" text-anchor="middle" transform="rotate(-38,38,60)">Av. Independência</text>
+                      <!-- pin -->
+                      <circle cx="163" cy="36" r="7" fill="#0066cc" stroke="white" stroke-width="2"/>
+                      <circle cx="163" cy="36" r="3" fill="white"/>
+                    </svg>
+                    <div class="absolute bottom-0 left-0 right-0 h-5 bg-gradient-to-t from-[#f8f9fa] to-transparent"></div>
+                  </div>
+                  <!-- listing -->
+                  <div class="p-3 flex flex-col gap-1.5">
+                    <div class="flex items-start justify-between gap-2">
+                      <div>
+                        <p class="text-[13px] font-semibold text-[#202124] leading-snug">Oficina RDCarros</p>
+                        <div class="flex items-center gap-1 mt-0.5">
+                          <span class="text-[11px] font-medium text-[#e67700]">4,9</span>
+                          <span class="text-[#e67700] text-[11px]">★★★★★</span>
+                          <span class="text-[10px] text-[#5f6368]">(47)</span>
+                        </div>
+                        <p class="text-[11px] text-[#5f6368] mt-0.5">Oficina mecânica · Aberto agora</p>
+                      </div>
+                      <div class="w-10 h-10 rounded-lg bg-[#0066cc] flex items-center justify-center shrink-0">
+                        <i class="ph-fill ph-car text-white text-xl"></i>
+                      </div>
+                    </div>
+                    <div class="flex gap-2 mt-1">
+                      <button class="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full border border-black/15 text-[11px] font-medium text-[#0066cc]">
+                        <i class="ph ph-phone text-sm"></i> Ligar
+                      </button>
+                      <button class="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full border border-black/15 text-[11px] font-medium text-[#0066cc]">
+                        <i class="ph ph-navigation-arrow text-sm"></i> Rota
+                      </button>
+                      <button class="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full border border-black/15 text-[11px] font-medium text-[#0066cc]">
+                        <i class="ph ph-globe text-sm"></i> Site
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="px-4 pb-4 pt-2">
+                <p class="text-[10px] text-[#5f6368] text-center">Simulação de resultado — Google Search</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info Grid -->
+        <div data-anim class="md:col-span-2 grid grid-cols-2 gap-x-6 gap-y-10">
+          <div>
+            <i class="ph ph-globe text-black/40 text-lg mb-2 inline-block"></i>
+            <h4 class="text-[14px] font-medium mb-1">Site no ar 24h</h4>
+            <p class="text-[13px] text-black/55 leading-snug">Sua vitrine online funcionando todo dia, mesmo quando a oficina está fechada.</p>
+          </div>
+          <div>
+            <i class="ph ph-currency-circle-dollar text-black/40 text-lg mb-2 inline-block"></i>
+            <h4 class="text-[14px] font-medium mb-1">Sem mensalidade</h4>
+            <p class="text-[13px] text-black/55 leading-snug">Pague uma vez e tenha o site para sempre. Sem taxas mensais escondidas.</p>
+          </div>
+          <div>
+            <i class="ph ph-whatsapp-logo text-black/40 text-lg mb-2 inline-block"></i>
+            <h4 class="text-[14px] font-medium mb-1">WhatsApp integrado</h4>
+            <p class="text-[13px] text-black/55 leading-snug">Botão de contato direto para o cliente falar com você em um clique.</p>
+          </div>
+          <div>
+            <i class="ph ph-device-mobile text-black/40 text-lg mb-2 inline-block"></i>
+            <h4 class="text-[14px] font-medium mb-1">Mobile primeiro</h4>
+            <p class="text-[13px] text-black/55 leading-snug">Design adaptado para celular, onde 90% dos seus clientes pesquisam.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Public Performance Section -->
+      <section class="max-w-5xl mx-auto px-4 py-16 grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24 items-center border-t border-black/5 mt-8">
+
+        <div flex="flex flex-col">
+          <div data-anim class="text-[13px] text-black/50 mb-2">Cases reais de clientes</div>
+          <h2 data-anim class="text-2xl font-normal leading-snug mb-12">O que os clientes veem depois de trabalhar com a RDCreator.</h2>
+
+          <div data-anim class="grid grid-cols-2 gap-x-8 gap-y-10">
+            <div>
+              <i class="ph ph-map-pin text-black/40 text-lg mb-2 inline-block"></i>
+              <h4 class="text-[14px] font-semibold mb-1">Mais posições no Google Maps</h4>
+              <p class="text-[13px] text-black/55 leading-snug">Melhora progressiva do posicionamento para aparecer antes dos concorrentes quando o cliente pesquisa na região.</p>
+            </div>
+            <div>
+              <i class="ph ph-star text-black/40 text-lg mb-2 inline-block"></i>
+              <h4 class="text-[14px] font-semibold mb-1">Avaliações que vendem</h4>
+              <p class="text-[13px] text-black/55 leading-snug">Reputação construída para converter antes de qualquer ligação.</p>
+            </div>
+            <div>
+              <i class="ph ph-trend-up text-black/40 text-lg mb-2 inline-block"></i>
+              <h4 class="text-[14px] font-semibold mb-1">Mais contatos todo mês</h4>
+              <p class="text-[13px] text-black/55 leading-snug">Resultado combinado de SEO local e Google Ads — orgânico e pago trabalhando juntos.</p>
+            </div>
+            <div>
+              <i class="ph ph-whatsapp-logo text-black/40 text-lg mb-2 inline-block"></i>
+              <h4 class="text-[14px] font-semibold mb-1">WhatsApp direto no site</h4>
+              <p class="text-[13px] text-black/55 leading-snug">CTA integrado para o cliente entrar em contato com um clique.</p>
+            </div>
+          </div>
+        </div>
+
+        <div data-anim class="bg-[#0066cc] rounded-[2rem] p-6 lg:p-12 flex justify-center items-center shadow-inner relative overflow-hidden">
+          <div class="bg-white rounded-2xl w-full max-w-[320px] shadow-2xl relative border border-black/5 flex flex-col font-sans">
+            <!-- Header -->
+            <div class="p-3.5 flex items-center justify-between border-b border-black/5">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded bg-[#0066cc] flex items-center justify-center shrink-0">
+                  <i class="ph-fill ph-car text-white text-[14px]"></i>
+                </div>
+                <span class="text-[14px] font-semibold flex items-center gap-1">Oficina RDCarros <img src="https://aqryl.app/explore/user-verified.svg" alt="Verificado" class="w-4 h-4"></span>
+              </div>
+              <button class="p-1 rounded hover:bg-black/5 text-black/40 transition">
+                <i class="ph ph-export text-lg"></i>
+              </button>
+            </div>
+            <!-- Body -->
+            <div class="p-5 flex flex-col gap-5">
+              <div>
+                <h3 class="text-xl font-medium tracking-tight mb-1">Presença digital</h3>
+                <p class="text-[13px] text-[#0066cc]">Resultado real — case RDCreator</p>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3 mt-1">
+                <div class="bg-[#f7f7f7] border border-black/5 rounded-xl p-3.5 flex flex-col gap-1.5 h-[84px] justify-between shadow-sm">
+                  <div class="text-[12px] font-medium text-black/50">Posição no Maps</div>
+                  <div class="text-[20px] font-medium">↑ Subiu</div>
+
+                </div>
+                <div class="bg-[#f7f7f7] border border-[rgba(37,211,102,0.15)] bg-[#f5fdf7] rounded-xl p-3.5 flex flex-col gap-1.5 h-[84px] justify-between shadow-sm">
+                  <div class="text-[12px] font-medium text-black/50">Avaliação Google</div>
+                  <div class="text-[15px] font-medium tracking-wide"><span class="text-[#25D366]" data-count="4.9" data-suffix="">0</span><span class="text-black/20 mx-1">★</span><span class="text-black/50 text-[13px]" data-count="47" data-suffix=" avaliações">0 avaliações</span></div>
+                </div>
+                <div class="bg-[#f7f7f7] border border-black/5 rounded-xl p-3.5 flex flex-col gap-1.5 h-[84px] justify-between shadow-sm relative overflow-hidden">
+                  <div class="text-[12px] font-medium text-black/50">Contatos/mês</div>
+                  <div class="text-[18px] font-medium text-[#25D366]" data-count="312" data-suffix="%">0%</div>
+                  <svg class="absolute bottom-[-10px] right-[-10px] w-12 h-12 text-[#25D366] opacity-30" viewBox="0 0 36 36"><path stroke-dasharray="60, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"/></svg>
+                </div>
+                <div class="bg-[#f7f7f7] border border-black/5 rounded-xl p-3.5 flex flex-col gap-1.5 h-[84px] justify-between shadow-sm">
+                  <div class="text-[12px] font-medium text-black/50">Entrega do site</div>
+                  <div class="text-[18px] font-medium" data-count="5" data-suffix=" dias">0 dias</div>
+                </div>
+              </div>
+
+              <div class="bg-[#f7f7f7] border border-black/5 rounded-xl p-3.5 flex items-end justify-between shadow-sm h-[84px]">
+                 <div>
+                   <div class="text-[12px] font-medium text-black/50 mb-1">Investimento</div>
+                   <div class="text-[20px] font-medium">R$<span data-count="697" data-suffix="">0</span></div>
+                 </div>
+                 <div class="text-[11px] text-black/40 font-normal mb-1">pagamento único</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Comparison Table -->
+      <section class="max-w-4xl mx-auto px-4 py-16 lg:py-24 w-full">
+        <div data-anim class="text-[13px] text-black/50 mb-2">Como a RDCreator se compara</div>
+        <h2 data-anim class="text-xl md:text-2xl font-normal mb-8">Aprimorado em cada entrega, cliente após cliente.</h2>
+
+        <div data-anim class="w-full overflow-x-auto rounded-xl border border-black/10 bg-white shadow-sm hide-scrollbar">
+          <table class="w-full text-left border-collapse text-[14px]">
+            <thead>
+              <tr>
+                <th class="p-4 md:px-5 font-normal text-black/50 w-2/5 border-b border-r border-black/10">Recurso</th>
+                <th class="p-4 md:px-5 font-semibold text-[#0066cc] w-1/5 text-center bg-[#f6fafe] border-b border-r border-black/10">RDCreator</th>
+                <th class="p-4 md:px-5 font-normal text-black/50 w-1/5 text-center border-b border-r border-black/10">Agência Genérica</th>
+                <th class="p-4 md:px-5 font-normal text-black/50 w-1/5 text-center border-b border-black/10">Freelancer</th>
+              </tr>
+            </thead>
+            <tbody class="text-black/80 font-medium">
+              <tr>
+                <td class="p-4 md:px-5 font-normal border-b border-r border-black/10">Foco no setor automotivo</td>
+                <td class="p-4 border-b border-r border-black/10 bg-[#f6fafe] text-center text-[#25D366]"><i class="ph-bold ph-check text-lg"></i></td>
+                <td class="p-4 border-b border-r border-black/10 text-center text-black/30 font-normal">—</td>
+                <td class="p-4 border-b border-black/10 text-center text-black/30 font-normal">—</td>
+              </tr>
+              <tr>
+                <td class="p-4 md:px-5 font-normal border-b border-r border-black/10 bg-black/5">Site profissional incluso</td>
+                <td class="p-4 border-b border-r border-black/10 bg-[#eaf4fc] text-center text-[#25D366]"><i class="ph-bold ph-check text-lg"></i></td>
+                <td class="p-4 border-b border-r border-black/10 bg-black/5 text-center text-black/60 font-normal text-[13px]">Extra pago</td>
+                <td class="p-4 border-b border-black/10 bg-black/5 text-center text-[#25D366]"><i class="ph-bold ph-check text-lg"></i></td>
+              </tr>
+              <tr>
+                <td class="p-4 md:px-5 font-normal border-b border-r border-black/10">Sem mensalidade (sites)</td>
+                <td class="p-4 border-b border-r border-black/10 bg-[#f6fafe] text-center text-[#25D366]"><i class="ph-bold ph-check text-lg"></i></td>
+                <td class="p-4 border-b border-r border-black/10 text-center text-black/30 font-normal">—</td>
+                <td class="p-4 border-b border-black/10 text-center text-black/30 font-normal">—</td>
+              </tr>
+              <tr>
+                <td class="p-4 md:px-5 font-normal border-b border-r border-black/10 bg-black/5">Google Meu Negócio (mensal)</td>
+                <td class="p-4 border-b border-r border-black/10 bg-[#eaf4fc] text-center text-[#25D366]"><i class="ph-bold ph-check text-lg"></i></td>
+                <td class="p-4 border-b border-r border-black/10 bg-black/5 text-center text-[#25D366]"><i class="ph-bold ph-check text-lg"></i></td>
+                <td class="p-4 border-b border-black/10 bg-black/5 text-center text-black/30 font-normal">—</td>
+              </tr>
+              <tr>
+                <td class="p-4 md:px-5 font-normal border-b border-r border-black/10">WhatsApp integrado no site</td>
+                <td class="p-4 border-b border-r border-black/10 bg-[#f6fafe] text-center text-[#25D366]"><i class="ph-bold ph-check text-lg"></i></td>
+                <td class="p-4 border-b border-r border-black/10 text-center text-[#25D366]"><i class="ph-bold ph-check text-lg"></i></td>
+                <td class="p-4 border-b border-black/10 text-center text-[#25D366]"><i class="ph-bold ph-check text-lg"></i></td>
+              </tr>
+              <tr>
+                <td class="p-4 md:px-5 font-normal border-b border-r border-black/10 bg-black/5">SEO local estratégico</td>
+                <td class="p-4 border-b border-r border-black/10 bg-[#eaf4fc] text-center text-black font-medium text-[13px]">Padrão+</td>
+                <td class="p-4 border-b border-r border-black/10 bg-black/5 text-center text-[#25D366]"><i class="ph-bold ph-check text-lg"></i></td>
+                <td class="p-4 border-b border-black/10 bg-black/5 text-center text-black/30 font-normal">—</td>
+              </tr>
+              <tr>
+                <td class="p-4 md:px-5 font-normal border-b border-r border-black/10">Copywriting estratégico</td>
+                <td class="p-4 border-b border-r border-black/10 bg-[#f6fafe] text-center text-black font-medium text-[13px]">Premium</td>
+                <td class="p-4 border-b border-r border-black/10 text-center text-black/30 font-normal">—</td>
+                <td class="p-4 border-b border-black/10 text-center text-black/30 font-normal">—</td>
+              </tr>
+              <tr>
+                <td class="p-4 md:px-5 font-normal border-b border-r border-black/10 bg-black/5">Domínio + hospedagem incluso</td>
+                <td class="p-4 border-b border-r border-black/10 bg-[#eaf4fc] text-center text-black font-medium text-[13px]">Padrão+</td>
+                <td class="p-4 border-b border-r border-black/10 bg-black/5 text-center text-black/30 font-normal">—</td>
+                <td class="p-4 border-b border-black/10 bg-black/5 text-center text-black/30 font-normal">—</td>
+              </tr>
+              <tr>
+                <td class="p-4 md:px-5 font-normal border-r border-black/10">Preço inicial</td>
+                <td class="p-4 border-r border-black/10 bg-[#f6fafe] text-center font-medium">R$<span data-count="697" data-suffix="">0</span></td>
+                <td class="p-4 border-r border-black/10 text-center font-medium text-black/70">R$<span data-count="2000" data-suffix="+/mês">0</span></td>
+                <td class="p-4 text-center font-medium text-black/70">Variável</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-4 text-[10px] text-black/40 text-center leading-relaxed px-4">
+          As informações de comparação são baseadas em estimativas de mercado. Preços e recursos de terceiros podem variar. Nomes de terceiros são marcas de seus respectivos donos.
+        </p>
+      </section>
+
+      <!-- O Que Vem Por Aí Section -->
+      <section class="max-w-5xl mx-auto px-4 py-16 w-full relative">
+        <div data-anim class="text-[13px] text-black/50 mb-2">O que oferecemos</div>
+        <h2 data-anim class="text-xl md:text-2xl font-normal mb-10">Tudo que sua oficina precisa para crescer online.</h2>
+
+        <div id="stack-cards">
+
+          <div class="scard" style="--i:0">
+            <p class="text-[11px] font-medium text-[#0066cc] uppercase tracking-widest mb-4">01</p>
+            <h3 class="text-[22px] font-medium mb-3 leading-snug">Gestão do Google Meu Negócio</h3>
+            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">Otimização e gestão mensal da sua ficha no Google. Atualização de fotos, horários, serviços, respostas a avaliações e publicações periódicas. Uma ficha bem gerenciada aparece mais nas buscas locais e converte mais.</p>
+            <div class="scard-icon">
+              <svg viewBox="0 0 24 24" class="h-32 w-32 text-[#0066cc]" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 11.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="scard" style="--i:1">
+            <p class="text-[11px] font-medium text-[#0066cc] uppercase tracking-widest mb-4">02</p>
+            <h3 class="text-[22px] font-medium mb-3 leading-snug">Google Ads — Tráfego Pago Local</h3>
+            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">Campanhas de anúncio no Google segmentadas para a sua cidade e região. Apareça no topo da busca quando alguém pesquisar por serviços automotivos perto de você. Controle total do orçamento, otimização contínua e relatório mensal.</p>
+            <div class="scard-icon">
+              <svg viewBox="0 0 24 24" class="h-32 w-32 text-[#0066cc]" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
+                <path d="M12 12m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0"/>
+                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
+                <path d="M15 9l3.35-3.35"/><path d="M18 6h-3v-3"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="scard" style="--i:2">
+            <p class="text-[11px] font-medium text-[#0066cc] uppercase tracking-widest mb-4">03</p>
+            <h3 class="text-[22px] font-medium mb-3 leading-snug">Criação de Site Profissional</h3>
+            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">Site rápido, responsivo e otimizado para converter visitantes em orçamentos. Design focado no nicho automotivo, com seções de serviços, galeria, localização, avaliações e WhatsApp integrado.</p>
+            <div class="scard-icon">
+              <svg viewBox="0 0 24 24" class="h-32 w-32 text-[#0066cc]" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4m0 1a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/>
+                <path d="M4 8h16"/><path d="M8 4v4"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="scard" style="--i:3">
+            <p class="text-[11px] font-medium text-[#0066cc] uppercase tracking-widest mb-4">04</p>
+            <h3 class="text-[22px] font-medium mb-3 leading-snug">Landing Pages de Campanha</h3>
+            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">Página de conversão focada em um único serviço. Uma página específica converte muito mais do que um site genérico, porque o cliente vê exatamente o que procurou. Criamos, publicamos e conectamos direto à campanha.</p>
+            <div class="scard-icon">
+              <svg viewBox="0 0 24 24" class="h-32 w-32 text-[#0066cc]" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 13a8 8 0 0 1 7 7 6 6 0 0 0 3-5 9 9 0 0 0 6-8 3 3 0 0 0-3-3 9 9 0 0 0-8 6 6 6 0 0 0-5 3"/>
+                <path d="M7 14a6 6 0 0 0-3 6 6 6 0 0 0 6-3"/>
+                <path d="M15 9m-1 0a1 1 0 1 0 2 0a1 1 0 1 0-2 0"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="scard" style="--i:4">
+            <p class="text-[11px] font-medium text-[#0066cc] uppercase tracking-widest mb-4">05</p>
+            <h3 class="text-[22px] font-medium mb-3 leading-snug">Relatório Mensal Google Ads</h3>
+            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">Para clientes com campanha ativa: relatório mensal com cliques, impressões, custo por clique, conversões e retorno sobre o investimento. Dados claros, sem enrolação — para você saber exatamente o que rende.</p>
+            <div class="scard-icon">
+              <svg viewBox="0 0 24 24" class="h-32 w-32 text-[#0066cc]" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 13a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>
+                <path d="M15 9a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/>
+                <path d="M9 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="scard" style="--i:5">
+            <p class="text-[11px] font-medium text-[#0066cc] uppercase tracking-widest mb-4">06</p>
+            <h3 class="text-[22px] font-medium mb-3 leading-snug">Combo Site + Google Meu Negócio</h3>
+            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">Site profissional e gestão mensal do Google Meu Negócio juntos. O site é o destino — o Google Meu Negócio é o caminho. Uma presença digital completa a partir de um único parceiro.</p>
+            <div class="scard-icon">
+              <svg viewBox="0 0 24 24" class="h-32 w-32 text-[#0066cc]" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 11h4l3-3 4 6 2-3h3"/>
+                <path d="M3 7m0 1a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>
+                <path d="M18 7m0 1a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1z"/>
+              </svg>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Pricing Section -->
+      <section id="planos" class="max-w-5xl mx-auto px-4 py-16 w-full">
+        <div data-anim class="text-[13px] text-black/50 mb-2">Planos</div>
+        <h2 data-anim class="text-xl md:text-2xl font-normal mb-8">Investimento único. Resultado permanente.</h2>
+
+        <!-- Tabs -->
+        <div class="flex justify-start mb-10 w-max">
+          <div class="bg-black/5 p-1.5 rounded-full flex text-[14px] font-medium border border-black/10 gap-1">
+            <button id="tab-unico" onclick="switchTab('unico')" class="px-7 py-2 rounded-full bg-white shadow-sm text-black transition-colors">Pagamento Único</button>
+            <button id="tab-mensal" onclick="switchTab('mensal')" class="px-7 py-2 rounded-full text-black/50 hover:text-black transition-colors">Mensal</button>
+          </div>
+        </div>
+
+        <!-- Pagamento Único -->
+        <div id="plans-unico" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Básico Card -->
+          <div data-anim class="border border-black/10 rounded-[1.25rem] p-7 bg-white shadow-sm flex flex-col">
+            <h3 class="text-lg font-semibold mb-2">Básico</h3>
+            <div class="flex items-end gap-1 mb-3">
+              <span class="text-3xl font-medium tracking-tight">R$<span data-count="697" data-suffix="">0</span></span>
+            </div>
+            <p class="text-[11px] text-black/40 mb-1 -mt-1">pagamento único</p>
+            <p class="text-[13px] text-black/60 mt-3 leading-relaxed min-h-[64px] mb-6">Presença digital completa para quem está começando a aparecer online.</p>
+            <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20tenho%20interesse%20no%20plano%20B%C3%A1sico!" target="_blank" rel="noreferrer" class="w-full py-2.5 rounded-[10px] bg-black/5 hover:bg-black/10 transition text-[14px] font-medium mb-6 text-center block">Escolher este plano</a>
+            <ul class="text-[13px] text-black/70 space-y-3.5 flex-1">
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Site one page (6 seções)</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Botão WhatsApp integrado</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Galeria de serviços</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Mapa Google incorporado</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Entrega em 5 dias úteis</li>
+            </ul>
+          </div>
+
+          <!-- Padrão Card (highlighted) -->
+          <div data-anim class="border border-[#0f2d6b] rounded-[1.25rem] p-7 bg-[#0f2d6b] shadow-lg flex flex-col relative overflow-hidden">
+            <span class="absolute top-5 right-5 text-[10px] bg-white/20 text-white px-2.5 py-0.5 rounded-full font-medium">Mais escolhido</span>
+            <h3 class="text-lg font-semibold mb-2 text-white">Padrão</h3>
+            <div class="flex items-end gap-1 mb-3">
+              <span class="text-3xl font-medium tracking-tight text-white">R$<span data-count="1197" data-suffix="">0</span></span>
+            </div>
+            <p class="text-[11px] text-white/40 mb-1 -mt-1">pagamento único</p>
+            <p class="text-[13px] text-white/60 mt-3 leading-relaxed min-h-[64px] mb-6">Para oficinas que querem se destacar e crescer de forma consistente.</p>
+            <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20tenho%20interesse%20no%20plano%20Padr%C3%A3o!" target="_blank" rel="noreferrer" class="w-full py-2.5 rounded-[10px] bg-white text-[#0f2d6b] hover:bg-white/90 transition text-[14px] font-medium mb-6 shadow-sm text-center block">Escolher este plano</a>
+            <ul class="text-[13px] text-white/75 space-y-3.5 flex-1 relative z-10">
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Tudo do plano Básico</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Até 3 páginas</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> SEO básico configurado</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Animações e micro-interações</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Domínio + hospedagem inclusos</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Entrega em 12 dias úteis</li>
+            </ul>
+          </div>
+
+          <!-- Premium Card -->
+          <div data-anim class="border border-black/10 rounded-[1.25rem] p-7 bg-white shadow-sm flex flex-col">
+            <h3 class="text-lg font-semibold mb-2">Premium</h3>
+            <div class="flex items-end gap-1 mb-3">
+              <span class="text-3xl font-medium tracking-tight">R$<span data-count="1597" data-suffix="">0</span></span>
+            </div>
+            <p class="text-[11px] text-black/40 mb-1 -mt-1">pagamento único</p>
+            <p class="text-[13px] text-black/60 mt-3 leading-relaxed min-h-[64px] mb-6">Para quem quer o melhor — design premium e estratégia completa de conversão.</p>
+            <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20tenho%20interesse%20no%20plano%20Premium!" target="_blank" rel="noreferrer" class="w-full py-2.5 rounded-[10px] bg-black/5 hover:bg-black/10 transition text-[14px] font-medium mb-6 text-center block">Escolher este plano</a>
+            <ul class="text-[13px] text-black/70 space-y-3.5 flex-1">
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Tudo do plano Padrão</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Até 5 páginas</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Copywriting estratégico</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Design premium exclusivo</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Estrutura de conversão otimizada</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Mensal -->
+        <div id="plans-mensal" class="hidden grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
+          <!-- Google Meu Negócio -->
+          <div data-anim class="border border-[#0f2d6b] rounded-[1.25rem] p-7 bg-[#0f2d6b] shadow-lg flex flex-col">
+            <h3 class="text-lg font-semibold mb-2 text-white">Google Meu Negócio</h3>
+            <div class="flex items-end gap-1 mb-3">
+              <span class="text-3xl font-medium tracking-tight text-white">R$<span data-count="349" data-suffix="">0</span></span>
+              <span class="text-white/40 text-[13px] mb-1">/mês</span>
+            </div>
+            <p class="text-[11px] text-white/40 mb-1 -mt-1">renovação mensal</p>
+            <p class="text-[13px] text-white/60 mt-3 leading-relaxed min-h-[64px] mb-6">Gestão contínua da sua ficha para aparecer mais nas buscas locais todo mês.</p>
+            <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20quero%20saber%20mais%20sobre%20o%20Google%20Meu%20Neg%C3%B3cio!" target="_blank" rel="noreferrer" class="w-full py-2.5 rounded-[10px] bg-white text-[#0f2d6b] hover:bg-white/90 transition text-[14px] font-medium mb-6 shadow-sm text-center block">Escolher este plano</a>
+            <ul class="text-[13px] text-white/75 space-y-3.5 flex-1">
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Otimização mensal da ficha</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Publicação de fotos e posts</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Resposta a avaliações</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Atualização de horários e serviços</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Relatório mensal de desempenho</li>
+            </ul>
+          </div>
+
+          <!-- Google Ads -->
+          <div class="border border-black/10 rounded-[1.25rem] p-7 bg-white shadow-sm flex flex-col">
+            <h3 class="text-lg font-semibold mb-2">Google Ads</h3>
+            <div class="flex items-end gap-1 mb-3">
+              <span class="text-[15px] font-medium tracking-tight text-black/60 mt-2">sob consulta</span>
+            </div>
+            <p class="text-[11px] text-black/40 mb-1">gestão mensal + verba de anúncio</p>
+            <p class="text-[13px] text-black/60 mt-3 leading-relaxed min-h-[64px] mb-6">Campanhas no Google para aparecer no topo quando o cliente pesquisar serviços automotivos na sua região.</p>
+            <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20quero%20saber%20mais%20sobre%20o%20Google%20Ads!" target="_blank" rel="noreferrer" class="w-full py-2.5 rounded-[10px] bg-black/5 hover:bg-black/10 transition text-[14px] font-medium mb-6 text-center block">Escolher este plano</a>
+            <ul class="text-[13px] text-black/70 space-y-3.5 flex-1">
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Criação e configuração da campanha</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Segmentação por cidade e região</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Otimização semanal</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Relatório mensal de resultado</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <script>
+        function switchTab(tab) {
+          const unico = document.getElementById('plans-unico');
+          const mensal = document.getElementById('plans-mensal');
+          const tabUnico = document.getElementById('tab-unico');
+          const tabMensal = document.getElementById('tab-mensal');
+
+          if (tab === 'unico') {
+            unico.classList.remove('hidden');
+            mensal.classList.add('hidden');
+            tabUnico.classList.add('bg-white', 'shadow-sm', 'text-black');
+            tabUnico.classList.remove('text-black/50');
+            tabMensal.classList.remove('bg-white', 'shadow-sm', 'text-black');
+            tabMensal.classList.add('text-black/50');
+            unico.querySelectorAll('[data-count]').forEach(el => animateCount(el, parseFloat(el.dataset.count), el.dataset.suffix || '', 900));
+          } else {
+            mensal.classList.remove('hidden');
+            unico.classList.add('hidden');
+            tabMensal.classList.add('bg-white', 'shadow-sm', 'text-black');
+            tabMensal.classList.remove('text-black/50');
+            tabUnico.classList.remove('bg-white', 'shadow-sm', 'text-black');
+            tabUnico.classList.add('text-black/50');
+            mensal.querySelectorAll('[data-count]').forEach(el => animateCount(el, parseFloat(el.dataset.count), el.dataset.suffix || '', 900));
+          }
+        }
+      </script>
+
+      <!-- FAQ Section -->
+      <section id="faq" class="max-w-2xl mx-auto px-4 py-20 pb-28 w-full">
+        <div data-anim class="text-[13px] text-black/50 mb-2">Dúvidas?</div>
+        <h2 data-anim class="text-xl md:text-2xl font-normal mb-8">Perguntas frequentes</h2>
+
+        <div class="divide-y divide-black/10 border-t border-b border-black/10">
+
+          <details data-anim class="group py-5">
+            <summary class="flex justify-between items-center cursor-pointer list-none">
+              <h4 class="text-[15px] font-medium">Meu site fica pronto em quanto tempo?</h4>
+              <i class="ph ph-caret-down text-black/40 group-open:rotate-180 transition-transform"></i>
+            </summary>
+            <p class="mt-3 text-[13px] text-black/55 leading-relaxed">Depende do plano. O Básico (one page) é entregue em até 5 dias úteis. O Padrão (até 3 páginas) em até 12 dias úteis. O Premium em até 18 dias úteis. O prazo começa após o envio do briefing e aprovação do layout.</p>
+          </details>
+
+          <details data-anim class="group py-5">
+            <summary class="flex justify-between items-center cursor-pointer list-none">
+              <h4 class="text-[15px] font-medium">Preciso pagar mensalidade pelo site?</h4>
+              <i class="ph ph-caret-down text-black/40 group-open:rotate-180 transition-transform"></i>
+            </summary>
+            <p class="mt-3 text-[13px] text-black/55 leading-relaxed">Não. Os planos de site são pagamento único — você paga uma vez e o site é seu. O plano Padrão e o Premium já incluem domínio e hospedagem no preço. O único serviço com mensalidade é o Google Meu Negócio (R$349/mês) e Google Ads, que são opcionais e separados.</p>
+          </details>
+
+          <details data-anim class="group py-5">
+            <summary class="flex justify-between items-center cursor-pointer list-none">
+              <h4 class="text-[15px] font-medium">O Google Meu Negócio é o mesmo que o site?</h4>
+              <i class="ph ph-caret-down text-black/40 group-open:rotate-180 transition-transform"></i>
+            </summary>
+            <p class="mt-3 text-[13px] text-black/55 leading-relaxed">Não. São dois canais diferentes. O site é a sua vitrine completa na internet. O Google Meu Negócio é a ficha que aparece no Google Maps e nos resultados locais quando alguém pesquisa "oficina mecânica perto de mim". Os dois juntos geram muito mais resultado do que separados.</p>
+          </details>
+
+          <details data-anim class="group py-5">
+            <summary class="flex justify-between items-center cursor-pointer list-none">
+              <h4 class="text-[15px] font-medium">Funciona para qualquer tipo de oficina?</h4>
+              <i class="ph ph-caret-down text-black/40 group-open:rotate-180 transition-transform"></i>
+            </summary>
+            <p class="mt-3 text-[13px] text-black/55 leading-relaxed">Sim. Oficina mecânica geral, funilaria e pintura, elétrica automotiva, injeção eletrônica, ar condicionado veicular, pneus, alinhamento — qualquer segmento automotivo. O conteúdo do site é adaptado para o seu tipo de serviço.</p>
+          </details>
+
+          <details data-anim class="group py-5">
+            <summary class="flex justify-between items-center cursor-pointer list-none">
+              <h4 class="text-[15px] font-medium">Como vou aparecer no Google depois do site pronto?</h4>
+              <i class="ph ph-caret-down text-black/40 group-open:rotate-180 transition-transform"></i>
+            </summary>
+            <p class="mt-3 text-[13px] text-black/55 leading-relaxed">O site já vem com SEO básico configurado (plano Padrão+). Para resultados mais rápidos, o Google Meu Negócio e o Google Ads aceleram muito a visibilidade local. SEO orgânico leva tempo — geralmente 30 a 90 dias para os primeiros resultados visíveis.</p>
+          </details>
+
+          <details data-anim class="group py-5">
+            <summary class="flex justify-between items-center cursor-pointer list-none">
+              <h4 class="text-[15px] font-medium">Posso ver o trabalho antes de contratar?</h4>
+              <i class="ph ph-caret-down text-black/40 group-open:rotate-180 transition-transform"></i>
+            </summary>
+            <p class="mt-3 text-[13px] text-black/55 leading-relaxed">Sim. Entre em contato pelo WhatsApp e peço cases de clientes reais como a Genuína Automotivo e Auto Ar Shop. Você vê o resultado antes de decidir — sem pressão.</p>
+          </details>
+
+          <details data-anim class="group py-5">
+            <summary class="flex justify-between items-center cursor-pointer list-none">
+              <h4 class="text-[15px] font-medium">Como faço para começar?</h4>
+              <i class="ph ph-caret-down text-black/40 group-open:rotate-180 transition-transform"></i>
+            </summary>
+            <p class="mt-3 text-[13px] text-black/55 leading-relaxed">Manda uma mensagem no WhatsApp. A gente conversa sobre sua oficina, o que você já tem (site, ficha, redes), o que quer melhorar e qual plano faz mais sentido. Sem compromisso e sem enrolação.</p>
+          </details>
+
+        </div>
+      </section>
+
+      <!-- Footer CTA Box -->
+      <section class="max-w-5xl mx-auto px-4 pb-16 w-full">
+        <div data-anim class="bg-[#0f1014] text-white rounded-[1.5rem] p-8 md:p-10 flex flex-col md:flex-row gap-6 md:gap-8 items-start md:items-center justify-between overflow-hidden relative shadow-2xl">
+          <div class="flex flex-col gap-4 max-w-xl z-10">
+            <img src="/logo_aut_nb_white.png" alt="RD Creator" style="height:auto;width:auto;max-width:90px;max-height:24px;object-fit:contain;align-self:flex-start;">
+            <div class="mt-2">
+              <h3 class="text-xl font-medium tracking-tight mb-2">Sua oficina cheia. Todo santo dia.</h3>
+              <p class="text-[13px] text-white/50 leading-relaxed font-normal">Site, Google Meu Negócio e presença digital para oficinas automotivas. Pagamento único, resultado permanente.</p>
+            </div>
+          </div>
+          <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20quero%20dominar%20minha%20regi%C3%A3o%20no%20Google!" target="_blank" rel="noreferrer" class="shrink-0 bg-white text-black px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-neutral-200 transition z-10 flex items-center gap-2">
+            <i class="ph-fill ph-whatsapp-logo text-[#25D366] text-lg"></i>
+            Falar no WhatsApp
+          </a>
+
+          <!-- background decoration subtle flare -->
+          <div class="absolute right-0 bottom-0 w-[400px] h-[300px] bg-[#0066cc]/10 blur-[80px] rounded-full pointer-events-none transform translate-y-1/2 translate-x-1/3"></div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Footer — fora do wrapper cinza, igual ao nav -->
+    <div class="flex min-h-0 flex-col rounded-[24px] bg-[#efefef] w-full overflow-hidden px-3 pb-3">
+      <footer class="max-w-5xl mx-auto px-4 py-16 grid grid-cols-2 md:grid-cols-5 gap-y-12 gap-x-8 w-full pb-8 select-none">
+        <div data-anim class="col-span-2 flex flex-col pr-8 items-start text-left">
+          <img src="/logo_aut_nobg.png" alt="RD Creator" style="height:auto;width:auto;max-width:120px;max-height:32px;margin-bottom:1rem;object-fit:contain;">
+          <p class="text-[13px] text-black/55 leading-relaxed mb-6 font-normal">
+            Presença digital especializada para oficinas automotivas. Site profissional, Google Meu Negócio e SEO local para dominar sua região.
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-3 font-normal">
+          <span class="text-black/40 text-[12px] mb-2 font-medium tracking-wide font-sans">Serviços</span>
+          <a href="#servicos" class="text-[13px] text-black/75 hover:text-[#0066cc] transition-colors">Site Profissional</a>
+          <a href="#servicos" class="text-[13px] text-black/75 hover:text-[#0066cc] transition-colors">Google Meu Negócio</a>
+          <a href="#planos" class="text-[13px] text-black/75 hover:text-[#0066cc] transition-colors">Planos</a>
+        </div>
+
+        <div class="flex flex-col gap-3 font-normal">
+          <span class="text-black/40 text-[12px] mb-2 font-medium tracking-wide font-sans">Contato</span>
+          <a href="https://wa.me/5519994175385" target="_blank" rel="noreferrer" class="text-[13px] text-black/75 hover:text-[#0066cc] transition-colors">WhatsApp</a>
+          <a href="https://instagram.com/rdcreator" target="_blank" rel="noreferrer" class="text-[13px] text-black/75 hover:text-[#0066cc] transition-colors">Instagram</a>
+          <a href="mailto:contato@ryancreator.dev" class="text-[13px] text-black/75 hover:text-[#0066cc] transition-colors">E-mail</a>
+        </div>
+
+        <div class="flex flex-col gap-3 font-normal">
+          <span class="text-black/40 text-[12px] mb-2 font-medium tracking-wide font-sans">Dúvidas</span>
+          <a href="#faq" class="text-[13px] text-black/75 hover:text-[#0066cc] transition-colors">Perguntas frequentes</a>
+          <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20tenho%20uma%20d%C3%BAvida!" target="_blank" rel="noreferrer" class="text-[13px] text-black/75 hover:text-[#0066cc] transition-colors">Falar com Ryan</a>
+        </div>
+      </footer>
+
+      <!-- Bottom bar -->
+      <div class="max-w-5xl mx-auto w-full border-t border-black/5 py-4 px-4 flex items-center">
+        <p class="text-[11px] text-black/35 font-normal">&copy; 2026 <a href="https://ryancreator.dev" target="_blank" rel="noreferrer" class="text-[#0066cc] hover:underline transition-colors font-medium">RDCreator</a>. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Fade + slide-up — repete ao entrar/sair
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) e.target.classList.add('visible');
+        else e.target.classList.remove('visible');
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+    document.querySelectorAll('[data-anim]').forEach(el => observer.observe(el));
+
+    // Underline hero — on load
+    const underline = document.getElementById('underline-path');
+    if (underline) {
+      setTimeout(() => {
+        underline.style.transition = 'stroke-dashoffset 0.7s cubic-bezier(0.16,1,0.3,1)';
+        underline.style.strokeDashoffset = '0';
+      }, 600);
+    }
+
+    // Underline features — repete ao entrar/sair
+    const underlineFeatures = document.getElementById('underline-features');
+    if (underlineFeatures) {
+      const ulObs = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            underlineFeatures.style.transition = 'none';
+            underlineFeatures.style.strokeDashoffset = '210';
+            requestAnimationFrame(() => {
+              setTimeout(() => {
+                underlineFeatures.style.transition = 'stroke-dashoffset 0.8s cubic-bezier(0.16,1,0.3,1)';
+                underlineFeatures.style.strokeDashoffset = '0';
+              }, 50);
+            });
+          }
+        });
+      }, { threshold: 0.5 });
+      ulObs.observe(underlineFeatures);
+    }
+
+    // SVG icon draw — path a path, velocidade proporcional ao comprimento
+    function prepareIcon(svg) {
+      const paths = svg.querySelectorAll('path');
+      paths.forEach(p => {
+        const len = p.getTotalLength ? p.getTotalLength() : 60;
+        p.style.strokeDasharray = len;
+        p.style.strokeDashoffset = len;
+        p.style.transition = 'none';
+      });
+    }
+
+    function drawIcon(svg, iconDelay) {
+      const paths = svg.querySelectorAll('path');
+      let cursor = iconDelay;
+      paths.forEach(p => {
+        const len = parseFloat(p.style.strokeDasharray) || 60;
+        const dur = Math.max(0.2, len / 120); // ~120px/s
+        p.style.transition = `stroke-dashoffset ${dur.toFixed(2)}s cubic-bezier(0.4,0,0.2,1) ${cursor.toFixed(2)}s`;
+        p.style.strokeDashoffset = 0;
+        cursor += dur * 0.85; // próximo path começa antes do anterior terminar
+      });
+    }
+
+    function resetIcon(svg) {
+      const paths = svg.querySelectorAll('path');
+      paths.forEach(p => {
+        p.style.transition = 'none';
+        p.style.strokeDashoffset = p.style.strokeDasharray;
+      });
+    }
+
+    const allIcons = Array.from(document.querySelectorAll('.icon-draw'));
+    allIcons.forEach(svg => prepareIcon(svg));
+
+    const iconObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        const svg = e.target;
+        const idx = allIcons.indexOf(svg);
+        if (e.isIntersecting) {
+          resetIcon(svg);
+          const iconDelay = (idx % 3) * 0.15;
+          requestAnimationFrame(() => requestAnimationFrame(() => drawIcon(svg, iconDelay)));
+        } else {
+          resetIcon(svg);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    allIcons.forEach(el => iconObserver.observe(el));
+
+    // Counter animation — global so switchTab can call it too
+    window.animateCount = function(el, target, suffix, duration) {
+      const isFloat = target % 1 !== 0;
+      let start = null;
+      const fmt = (n) => isFloat ? n.toFixed(1) : Math.floor(n).toLocaleString('pt-BR');
+      const step = (ts) => {
+        if (!start) start = ts;
+        const progress = Math.min((ts - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        el.textContent = fmt(target * ease) + suffix;
+        if (progress < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+
+    // Counter — repete ao entrar/sair
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const el = e.target;
+          animateCount(el, parseFloat(el.dataset.count), el.dataset.suffix || '', 1200);
+        }
+      });
+    }, { threshold: 0.4 });
+    document.querySelectorAll('[data-count]').forEach(el => counterObserver.observe(el));
+
+    // Sticky stack — revela ao scroll + redesenha ícone
+    document.querySelectorAll('.scard').forEach((card, i) => {
+      if (i === 0) {
+        // primeiro já visível — só desenha ícone após load
+        const svg = card.querySelector('.icon-draw');
+        if (svg) setTimeout(() => drawIcon(svg, 0), 300);
+        return;
+      }
+      const svg = card.querySelector('.icon-draw');
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            card.classList.add('scard-visible');
+            if (svg) {
+              resetIcon(svg);
+              requestAnimationFrame(() => requestAnimationFrame(() => drawIcon(svg, 0)));
+            }
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+      obs.observe(card);
+    });
+  </script>
+</body>
+</html>
