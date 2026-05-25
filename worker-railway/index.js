@@ -681,11 +681,11 @@ async function jobAtualizarMembros(force = false) {
       console.log(`[membros] ${novos.length} novo(s) adicionado(s)`);
     }
   }
-  // Incrementa K5 (contador de encontros)
-  const k5Res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!K5')}`, { headers: authHdr });
+  // Incrementa L5 (contador de encontros)
+  const k5Res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!L5')}`, { headers: authHdr });
   const k5Data = await k5Res.json();
   const qtdAtual = parseInt(k5Data.values?.[0]?.[0] || '0') || 0;
-  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!K5')}?valueInputOption=RAW`, {
+  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!L5')}?valueInputOption=RAW`, {
     method: 'PUT', headers: authHdr, body: JSON.stringify({ values: [[qtdAtual + 1]] }),
   });
   console.log(`[membros] encontros: ${qtdAtual} → ${qtdAtual + 1}`);
