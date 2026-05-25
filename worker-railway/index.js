@@ -568,8 +568,18 @@ async function lerFormsSabado(force) {
   if (force) {
     dataAlvo = rows.filter(r => r[0]).map(r => r[0].split(' ')[0]).pop();
   } else {
-    const s = new Date(); s.setDate(s.getDate() - 2);
-    dataAlvo = `${String(s.getDate()).padStart(2,'0')}/${String(s.getMonth()+1).padStart(2,'0')}/${s.getFullYear()}`;
+    const brt = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+    const limite = new Date(brt); limite.setDate(limite.getDate() - 7);
+    const datasRecentes = rows
+      .filter(r => r[0])
+      .map(r => r[0].split(' ')[0])
+      .filter(d => {
+        const [dia, mes, ano] = d.split('/');
+        const dt = new Date(`${ano}-${mes}-${dia}`);
+        return dt >= limite && dt < brt;
+      });
+    if (!datasRecentes.length) return { rows: [], dataAlvo: null };
+    dataAlvo = datasRecentes.sort().pop();
   }
   return { rows: rows.filter(r => r[0] && r[0].split(' ')[0] === dataAlvo), dataAlvo };
 }
@@ -763,15 +773,27 @@ async function jobRelatorioPresenca(force = false) {
     dataAlvo = datas[datas.length - 1];
     console.log('[presenca] force — data mais recente:', dataAlvo);
   } else {
-    const sabado = new Date();
-    sabado.setDate(sabado.getDate() - 2);
-    dataAlvo = `${String(sabado.getDate()).padStart(2, '0')}/${String(sabado.getMonth() + 1).padStart(2, '0')}/${sabado.getFullYear()}`;
+    // Busca a data mais recente do Forms que seja nos últimos 7 dias (BRT)
+    const brt = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+    const limite = new Date(brt); limite.setDate(limite.getDate() - 7);
+    const datasRecentes = rows
+      .filter(r => r[0])
+      .map(r => r[0].split(' ')[0])
+      .filter(d => {
+        const [dia, mes, ano] = d.split('/');
+        const dt = new Date(`${ano}-${mes}-${dia}`);
+        return dt >= limite && dt < brt;
+      });
+    if (!datasRecentes.length) { console.log('[presenca] nenhum encontro nos últimos 7 dias — nada enviado'); return; }
+    // Pega a mais recente
+    dataAlvo = datasRecentes.sort().pop();
+    console.log('[presenca] data encontro detectada:', dataAlvo);
   }
 
   const doUltimoEncontro = rows.filter(r => r[0] && r[0].split(' ')[0] === dataAlvo);
 
   if (!doUltimoEncontro.length) {
-    console.log('[presenca] nenhum dado da última sexta — nada enviado');
+    console.log('[presenca] nenhum dado do último encontro — nada enviado');
     return;
   }
 
