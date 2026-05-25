@@ -566,7 +566,11 @@ async function lerFormsSabado(force) {
   const rows = (await res.json()).values || [];
   let dataAlvo;
   if (force) {
-    dataAlvo = rows.filter(r => r[0]).map(r => r[0].split(' ')[0]).pop();
+    const datas = [...new Set(rows.filter(r => r[0]).map(r => r[0].split(' ')[0]))];
+    dataAlvo = datas.sort((a, b) => {
+      const [da, ma, aa] = a.split('/'); const [db, mb, ab] = b.split('/');
+      return new Date(`${aa}-${ma}-${da}`) - new Date(`${ab}-${mb}-${db}`);
+    }).pop();
   } else {
     const brt = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
     const limite = new Date(brt); limite.setDate(limite.getDate() - 7);
@@ -769,8 +773,11 @@ async function jobRelatorioPresenca(force = false) {
   // Data do encontro: segunda - 2 = sábado; force = data mais recente da planilha
   let dataAlvo;
   if (force) {
-    const datas = rows.filter(r => r[0]).map(r => r[0].split(' ')[0]);
-    dataAlvo = datas[datas.length - 1];
+    const datas = [...new Set(rows.filter(r => r[0]).map(r => r[0].split(' ')[0]))];
+    dataAlvo = datas.sort((a, b) => {
+      const [da, ma, aa] = a.split('/'); const [db, mb, ab] = b.split('/');
+      return new Date(`${aa}-${ma}-${da}`) - new Date(`${ab}-${mb}-${db}`);
+    }).pop();
     console.log('[presenca] force — data mais recente:', dataAlvo);
   } else {
     // Busca a data mais recente do Forms que seja nos últimos 7 dias (BRT)
