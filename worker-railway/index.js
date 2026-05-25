@@ -713,12 +713,32 @@ async function jobAtualizarMembros(force = false) {
         },
       ],
     }));
+    const borda = { style: 'SOLID', color: { red: 0.8, green: 0.8, blue: 0.8 } };
     const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, {
       method: 'POST', headers: authHdr,
       body: JSON.stringify({ requests: [{ appendCells: { sheetId: MEMBERS_GID, rows: appendRows, fields: 'userEnteredValue,userEnteredFormat,note' } }] }),
     });
-    if (!r.ok) console.error('[membros] erro append:', await r.text());
-    else console.log(`[membros] ${novos.length} novo(s) adicionado(s)`);
+    const rd = await r.json();
+    if (!r.ok) { console.error('[membros] erro append:', JSON.stringify(rd)); }
+    else {
+      // Aplica bordas nas linhas inseridas
+      const match = rd.replies?.[0]?.appendCells;
+      const lastRow = rd.updates?.updatedRange?.match(/(\d+)$/)?.[1];
+      if (lastRow) {
+        const startRow = parseInt(lastRow) - novos.length;
+        const borderReqs = novos.map((_, i) => ({
+          updateBorders: {
+            range: { sheetId: MEMBERS_GID, startRowIndex: startRow + i, endRowIndex: startRow + i + 1, startColumnIndex: 1, endColumnIndex: 10 },
+            top: borda, bottom: borda, left: borda, right: borda,
+            innerHorizontal: borda, innerVertical: borda,
+          },
+        }));
+        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, {
+          method: 'POST', headers: authHdr, body: JSON.stringify({ requests: borderReqs }),
+        });
+      }
+      console.log(`[membros] ${novos.length} novo(s) adicionado(s)`);
+    }
   }
   // Conta datas únicas do Forms = total real de encontros
   const formsAllRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/Respostas%20ao%20formul%C3%A1rio%201!A2:A?key=${GOOGLE_API_KEY}`);
