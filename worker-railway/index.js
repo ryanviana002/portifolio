@@ -628,7 +628,15 @@ async function jobAtualizarMembros(force = false) {
 
     if (match) {
       const novaFreq = (match.freq || 0) + 1;
-      const novaNota = match.nota ? `${match.nota}\n${dataAlvo}` : dataAlvo;
+      const linhasNota = match.nota ? match.nota.split('\n').filter(Boolean) : [];
+      const jaTemData = linhasNota.some(l => l.includes(dataAlvo));
+      if (!jaTemData) linhasNota.push(`✅ ${dataAlvo}`);
+      linhasNota.sort((a, b) => {
+        const da = a.replace(/[^0-9\/]/g,'').trim(), db = b.replace(/[^0-9\/]/g,'').trim();
+        const [dda,mma,aaa]=da.split('/'), [ddb,mmb,aab]=db.split('/');
+        return new Date(`${aaa}-${mma}-${dda}`) - new Date(`${aab}-${mmb}-${ddb}`);
+      });
+      const novaNota = linhasNota.join('\n');
       match.freq = novaFreq;
       match.foiNoUltimo = true;
       updates.push({ updateCells: {
@@ -681,14 +689,14 @@ async function jobAtualizarMembros(force = false) {
       console.log(`[membros] ${novos.length} novo(s) adicionado(s)`);
     }
   }
-  // Incrementa L5 (contador de encontros)
-  const k5Res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!L5')}`, { headers: authHdr });
-  const k5Data = await k5Res.json();
-  const qtdAtual = parseInt(k5Data.values?.[0]?.[0] || '0') || 0;
+  // Conta datas únicas do Forms = total real de encontros
+  const formsAllRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/Respostas%20ao%20formul%C3%A1rio%201!A2:A?key=${GOOGLE_API_KEY}`);
+  const formsAllRows = (await formsAllRes.json()).values || [];
+  const totalEncontros = new Set(formsAllRows.filter(r => r[0]).map(r => r[0].split(' ')[0])).size;
   await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!L5')}?valueInputOption=RAW`, {
-    method: 'PUT', headers: authHdr, body: JSON.stringify({ values: [[qtdAtual + 1]] }),
+    method: 'PUT', headers: authHdr, body: JSON.stringify({ values: [[totalEncontros]] }),
   });
-  console.log(`[membros] encontros: ${qtdAtual} → ${qtdAtual + 1}`);
+  console.log(`[membros] total encontros: ${totalEncontros}`);
 
   console.log('[membros] concluído.');
 }

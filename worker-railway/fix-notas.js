@@ -61,7 +61,10 @@ async function main() {
     }
   }
   // Todas as datas únicas de encontros (ordem cronológica)
-  const todasDatas = [...new Set(formsRows.filter(r => r[0]).map(r => r[0].split(' ')[0]))].sort();
+  const todasDatas = [...new Set(formsRows.filter(r => r[0]).map(r => r[0].split(' ')[0]))].sort((a, b) => {
+    const [da,ma,aa] = a.split('/'), [db,mb,ab] = b.split('/');
+    return new Date(`${aa}-${ma}-${da}`) - new Date(`${ab}-${mb}-${db}`);
+  });
   console.log(`${historico.length} pessoas | ${todasDatas.length} encontros: ${todasDatas.join(', ')}`);
 
   // 2. Lê membros da planilha
