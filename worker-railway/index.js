@@ -675,9 +675,18 @@ async function jobAtualizarMembros(force = false) {
       values: [
         {},                                                                          // A — vazio
         {},                                                                          // B — foto (vazio)
-        { userEnteredValue: { stringValue: novo[0] } },                              // C — nome
+        {                                                                            // C — nome (maiúsculo, bold)
+          userEnteredValue: { stringValue: (novo[0] || '').toUpperCase() },
+          userEnteredFormat: { textFormat: { bold: true } },
+        },
         { userEnteredValue: { stringValue: novo[1] } },                              // D — whatsapp
-        { userEnteredValue: { stringValue: novo[2] } },                              // E — link wa
+        {                                                                            // E — link "Abrir WA"
+          userEnteredValue: { stringValue: 'Abrir WA' },
+          userEnteredFormat: {
+            textFormat: { link: { uri: novo[2] }, foregroundColor: { red: 0.02, green: 0.4, blue: 0.8 } },
+            horizontalAlignment: 'CENTER',
+          },
+        },
         { userEnteredValue: { numberValue: novo[3] }, note: dataAlvo },              // F — freq + nota
         { userEnteredValue: { stringValue: novo[4] } },                              // G — último encontro
         { userEnteredValue: { stringValue: novo[5] } },                              // H — sistema
@@ -687,7 +696,7 @@ async function jobAtualizarMembros(force = false) {
     }));
     const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, {
       method: 'POST', headers: authHdr,
-      body: JSON.stringify({ requests: [{ appendCells: { sheetId: MEMBERS_GID, rows: appendRows, fields: 'userEnteredValue,note' } }] }),
+      body: JSON.stringify({ requests: [{ appendCells: { sheetId: MEMBERS_GID, rows: appendRows, fields: 'userEnteredValue,userEnteredFormat,note' } }] }),
     });
     if (!r.ok) console.error('[membros] erro append:', await r.text());
     else console.log(`[membros] ${novos.length} novo(s) adicionado(s)`);
