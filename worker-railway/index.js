@@ -632,24 +632,27 @@ async function jobAtualizarMembros(force = false) {
     );
 
     if (match) {
-      const novaFreq = (match.freq || 0) + 1;
       const linhasNota = match.nota ? match.nota.split('\n').filter(Boolean) : [];
       const jaTemData = linhasNota.some(l => l.includes(dataAlvo));
-      if (!jaTemData) linhasNota.push(`✅ ${dataAlvo}`);
-      linhasNota.sort((a, b) => {
-        const da = a.replace(/[^0-9\/]/g,'').trim(), db = b.replace(/[^0-9\/]/g,'').trim();
-        const [dda,mma,aaa]=da.split('/'), [ddb,mmb,aab]=db.split('/');
-        return new Date(`${aaa}-${mma}-${dda}`) - new Date(`${aab}-${mmb}-${ddb}`);
-      });
-      const novaNota = linhasNota.join('\n');
-      match.freq = novaFreq;
+      if (!jaTemData) {
+        linhasNota.push(`✅ ${dataAlvo}`);
+        linhasNota.sort((a, b) => {
+          const da = a.replace(/[^0-9\/]/g,'').trim(), db = b.replace(/[^0-9\/]/g,'').trim();
+          const [dda,mma,aaa]=da.split('/'), [ddb,mmb,aab]=db.split('/');
+          return new Date(`${aaa}-${mma}-${dda}`) - new Date(`${aab}-${mmb}-${ddb}`);
+        });
+        const novaFreq = (match.freq || 0) + 1;
+        match.freq = novaFreq;
+        updates.push({ updateCells: {
+          rows: [{ values: [{ userEnteredValue: { numberValue: novaFreq }, note: linhasNota.join('\n') }] }],
+          fields: 'userEnteredValue,note',
+          range: { sheetId: MEMBERS_GID, startRowIndex: match.rowIndex, endRowIndex: match.rowIndex+1, startColumnIndex: 5, endColumnIndex: 6 },
+        }});
+        console.log(`[membros] ✓ ${match.nome} → freq ${novaFreq}`);
+      } else {
+        console.log(`[membros] = ${match.nome} já registrado em ${dataAlvo}`);
+      }
       match.foiNoUltimo = true;
-      updates.push({ updateCells: {
-        rows: [{ values: [{ userEnteredValue: { numberValue: novaFreq }, note: novaNota }] }],
-        fields: 'userEnteredValue,note',
-        range: { sheetId: MEMBERS_GID, startRowIndex: match.rowIndex, endRowIndex: match.rowIndex+1, startColumnIndex: 5, endColumnIndex: 6 },
-      }});
-      console.log(`[membros] ✓ ${match.nome} → freq ${novaFreq}`);
     } else {
       // C=nome, D=tel, E=link, F=freq, G=último encontro, H=sistema, I=HG, J=C17
       const notaNovo = todasDatas.map(d => (d === dataAlvo ? '✅' : '❌') + ' ' + d).join('\n');
