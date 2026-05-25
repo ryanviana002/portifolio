@@ -713,7 +713,8 @@ async function jobAtualizarMembros(force = false) {
         },
       ],
     }));
-    const borda = { style: 'SOLID', color: { red: 0.8, green: 0.8, blue: 0.8 } };
+    const bordaFina   = { style: 'SOLID',       color: { red: 0, green: 0, blue: 0 } };
+    const bordaGrossa = { style: 'SOLID_MEDIUM', color: { red: 0, green: 0, blue: 0 } };
     const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, {
       method: 'POST', headers: authHdr,
       body: JSON.stringify({ requests: [{ appendCells: { sheetId: MEMBERS_GID, rows: appendRows, fields: 'userEnteredValue,userEnteredFormat,note' } }] }),
@@ -729,8 +730,8 @@ async function jobAtualizarMembros(force = false) {
         const borderReqs = novos.map((_, i) => ({
           updateBorders: {
             range: { sheetId: MEMBERS_GID, startRowIndex: startRow + i, endRowIndex: startRow + i + 1, startColumnIndex: 1, endColumnIndex: 10 },
-            top: borda, bottom: borda, left: borda, right: borda,
-            innerHorizontal: borda, innerVertical: borda,
+            top: bordaFina, bottom: bordaFina, left: bordaGrossa, right: bordaGrossa,
+            innerHorizontal: bordaFina, innerVertical: bordaFina,
           },
         }));
         await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, {
