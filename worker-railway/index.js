@@ -625,6 +625,7 @@ async function jobAtualizarMembros(force = false) {
   for (const form of doSabado) {
     const nomeForm = form[1] || '';
     const telForm  = (form[2] || '').replace(/\D/g, '');
+    const primeiraVez = (form[3] || '').toLowerCase().includes('sim');
     const temCadastro = (form[4] || '').toLowerCase().includes('sim');
 
     const match = membros.find(m =>
@@ -635,7 +636,7 @@ async function jobAtualizarMembros(force = false) {
       const linhasNota = match.nota ? match.nota.split('\n').filter(Boolean) : [];
       const jaTemData = linhasNota.some(l => l.includes(dataAlvo));
       if (!jaTemData) {
-        linhasNota.push(`✅ ${dataAlvo}`);
+        linhasNota.push(`✅ ${dataAlvo}${primeiraVez ? ' (primeira vez)' : ''}`);
         linhasNota.sort((a, b) => {
           const da = a.replace(/[^0-9\/]/g,'').trim(), db = b.replace(/[^0-9\/]/g,'').trim();
           const [dda,mma,aaa]=da.split('/'), [ddb,mmb,aab]=db.split('/');
@@ -655,7 +656,7 @@ async function jobAtualizarMembros(force = false) {
       match.foiNoUltimo = true;
     } else {
       // C=nome, D=tel, E=link, F=freq, G=último encontro, H=sistema, I=HG, J=C17
-      const notaNovo = todasDatas.map(d => (d === dataAlvo ? '✅' : '❌') + ' ' + d).join('\n');
+      const notaNovo = todasDatas.map(d => (d === dataAlvo ? `✅ ${d}${primeiraVez ? ' (primeira vez)' : ''}` : `❌ ${d}`)).join('\n');
       novos.push([nomeForm, telForm, telForm ? `https://wa.me/55${telForm}` : '', 1, 'SIM', temCadastro ? 'SIM' : 'NÃO', '', '', notaNovo]);
       console.log(`[membros] + novo: ${nomeForm}`);
     }

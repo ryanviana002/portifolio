@@ -11,7 +11,7 @@ const G_CLIENT_ID     = process.env.GOOGLE_CLIENT_ID;
 const G_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const G_REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
 
-const PRIMEIRA_LINHA = 69;
+const PRIMEIRA_LINHA = 68;
 const ULTIMA_LINHA   = 74;
 
 function normNome(s) {
@@ -63,7 +63,13 @@ async function main() {
 
   const requests = membros.map(m => {
     // Novos membros — só foram no encontro de 23/05
-    const nota = todasDatas.map(d => (d === DATA_ALVO ? '✅' : '❌') + ' ' + d).join('\n');
+    // Primeira vez = data mais antiga que o membro aparece no Forms
+    const primeiraVezMembro = DATA_ALVO; // novos só têm 23/05
+    const nota = todasDatas.map(d => {
+      const present = d === DATA_ALVO;
+      const label = present ? `✅ ${d}${d === primeiraVezMembro ? ' (primeira vez)' : ''}` : `❌ ${d}`;
+      return label;
+    }).join('\n');
     console.log(`  ${m.nome}`);
     return {
       updateCells: {

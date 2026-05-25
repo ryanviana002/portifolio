@@ -46,18 +46,20 @@ async function main() {
   const formsRows = (await formsRes.json()).values || [];
 
   // Agrupa datas por pessoa (tel + nome)
-  const historico = []; // { nome, tel, datas[] }
+  const historico = []; // { nome, tel, datas[], primeiraVezDatas[] }
   for (const row of formsRows) {
-    const nome = row[1] || '';
-    const tel  = (row[2] || '').replace(/\D/g, '');
-    const data = (row[0] || '').split(' ')[0];
+    const nome       = row[1] || '';
+    const tel        = (row[2] || '').replace(/\D/g, '');
+    const data       = (row[0] || '').split(' ')[0];
+    const primVez    = (row[3] || '').toLowerCase().includes('sim');
     if (!nome || !data) continue;
 
     const match = historico.find(p => normTel(p.tel) === normTel(tel) && nomeMatch(nome, p.nome));
     if (match) {
       if (!match.datas.includes(data)) match.datas.push(data);
+      if (primVez && !match.primeiraVezDatas.includes(data)) match.primeiraVezDatas.push(data);
     } else {
-      historico.push({ nome, tel, datas: [data] });
+      historico.push({ nome, tel, datas: [data], primeiraVezDatas: primVez ? [data] : [] });
     }
   }
   // Todas as datas únicas de encontros (ordem cronológica)
@@ -92,7 +94,11 @@ async function main() {
     const h = historico.find(p => normTel(p.tel) === normTel(membro.tel) && nomeMatch(membro.nome, p.nome));
     if (!h) continue;
 
-    const nota = todasDatas.map(d => (h.datas.includes(d) ? '✅' : '❌') + ' ' + d).join('\n');
+    const nota = todasDatas.map(d => {
+      const foi = h.datas.includes(d);
+      const primVez = foi && h.primeiraVezDatas?.includes(d);
+      return foi ? `✅ ${d}${primVez ? ' (primeira vez)' : ''}` : `❌ ${d}`;
+    }).join('\n');
     requests.push({
       updateCells: {
         rows: [{ values: [{ note: nota }] }],
