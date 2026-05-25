@@ -670,24 +670,27 @@ async function jobAtualizarMembros(force = false) {
   }
 
   if (novos.length) {
-    const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!C:J')}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, {
-      method: 'POST', headers: authHdr, body: JSON.stringify({ values: novos }),
+    // appendCells respeita startColumnIndex — não sofre deslocamento do append REST
+    const appendRows = novos.map(novo => ({
+      values: [
+        {},                                                                          // A — vazio
+        {},                                                                          // B — foto (vazio)
+        { userEnteredValue: { stringValue: novo[0] } },                              // C — nome
+        { userEnteredValue: { stringValue: novo[1] } },                              // D — whatsapp
+        { userEnteredValue: { stringValue: novo[2] } },                              // E — link wa
+        { userEnteredValue: { numberValue: novo[3] }, note: dataAlvo },              // F — freq + nota
+        { userEnteredValue: { stringValue: novo[4] } },                              // G — último encontro
+        { userEnteredValue: { stringValue: novo[5] } },                              // H — sistema
+        { userEnteredValue: { stringValue: novo[6] } },                              // I — HG
+        { userEnteredValue: { stringValue: novo[7] } },                              // J — C17
+      ],
+    }));
+    const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, {
+      method: 'POST', headers: authHdr,
+      body: JSON.stringify({ requests: [{ appendCells: { sheetId: MEMBERS_GID, rows: appendRows, fields: 'userEnteredValue,note' } }] }),
     });
-    const rd = await r.json();
-    if (!r.ok) { console.error('[membros] erro append:', JSON.stringify(rd)); }
-    else {
-      const firstRow = rd.updates?.updatedRange?.match(/(\d+):/)?.[1];
-      if (firstRow) {
-        const noteReqs = novos.map((_, i) => ({ updateCells: {
-          rows: [{ values: [{ note: dataAlvo }] }], fields: 'note',
-          range: { sheetId: MEMBERS_GID, startRowIndex: parseInt(firstRow)-1+i, endRowIndex: parseInt(firstRow)+i, startColumnIndex: 5, endColumnIndex: 6 },
-        }}));
-        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, {
-          method: 'POST', headers: authHdr, body: JSON.stringify({ requests: noteReqs }),
-        });
-      }
-      console.log(`[membros] ${novos.length} novo(s) adicionado(s)`);
-    }
+    if (!r.ok) console.error('[membros] erro append:', await r.text());
+    else console.log(`[membros] ${novos.length} novo(s) adicionado(s)`);
   }
   // Conta datas únicas do Forms = total real de encontros
   const formsAllRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/Respostas%20ao%20formul%C3%A1rio%201!A2:A?key=${GOOGLE_API_KEY}`);
