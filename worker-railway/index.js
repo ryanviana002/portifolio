@@ -646,8 +646,8 @@ async function jobAtualizarMembros(force = false) {
       }});
       console.log(`[membros] ✓ ${match.nome} → freq ${novaFreq}`);
     } else {
-      // A=vazia, B=vazia, C=nome, D=tel, E=link, F=freq, G=último encontro, H=sistema, I=HG, J=C17
-      novos.push(['', '', nomeForm, telForm, telForm ? `https://wa.me/55${telForm}` : '', 1, 'SIM', temCadastro ? 'SIM' : 'NÃO', '', '']);
+      // C=nome, D=tel, E=link, F=freq, G=último encontro, H=sistema, I=HG, J=C17
+      novos.push([nomeForm, telForm, telForm ? `https://wa.me/55${telForm}` : '', 1, 'SIM', temCadastro ? 'SIM' : 'NÃO', '', '']);
       console.log(`[membros] + novo: ${nomeForm}`);
     }
   }
@@ -670,7 +670,7 @@ async function jobAtualizarMembros(force = false) {
   }
 
   if (novos.length) {
-    const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!A:J')}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, {
+    const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!C:J')}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, {
       method: 'POST', headers: authHdr, body: JSON.stringify({ values: novos }),
     });
     const rd = await r.json();
