@@ -687,11 +687,31 @@ async function jobAtualizarMembros(force = false) {
             horizontalAlignment: 'CENTER',
           },
         },
-        { userEnteredValue: { numberValue: novo[3] }, note: dataAlvo },              // F — freq + nota
-        { userEnteredValue: { stringValue: novo[4] } },                              // G — último encontro
-        { userEnteredValue: { stringValue: novo[5] } },                              // H — sistema
-        { userEnteredValue: { stringValue: novo[6] } },                              // I — HG
-        { userEnteredValue: { stringValue: novo[7] } },                              // J — C17
+        {                                                                            // F — freq + nota
+          userEnteredValue: { numberValue: novo[3] },
+          note: dataAlvo,
+          userEnteredFormat: {
+            backgroundColor: { red: 0.98, green: 0.9, blue: 0.9 },
+            textFormat: { bold: true, foregroundColor: { red: 0.8, green: 0.1, blue: 0.1 } },
+            horizontalAlignment: 'CENTER', verticalAlignment: 'MIDDLE',
+          },
+        },
+        {                                                                            // G — último encontro
+          userEnteredValue: { stringValue: novo[4] },
+          userEnteredFormat: { textFormat: { bold: true }, horizontalAlignment: 'CENTER', verticalAlignment: 'MIDDLE' },
+        },
+        {                                                                            // H — sistema
+          userEnteredValue: { stringValue: novo[5] },
+          userEnteredFormat: { textFormat: { bold: true }, horizontalAlignment: 'CENTER', verticalAlignment: 'MIDDLE' },
+        },
+        {                                                                            // I — HG
+          userEnteredValue: { stringValue: novo[6] },
+          userEnteredFormat: { horizontalAlignment: 'CENTER', verticalAlignment: 'MIDDLE' },
+        },
+        {                                                                            // J — C17
+          userEnteredValue: { stringValue: novo[7] },
+          userEnteredFormat: { horizontalAlignment: 'CENTER', verticalAlignment: 'MIDDLE' },
+        },
       ],
     }));
     const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, {
