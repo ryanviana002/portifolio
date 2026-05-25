@@ -826,7 +826,7 @@ const semCadastro = doUltimoEncontro.filter(r => {
   }
 
   const linhas = semCadastro.map(r => {
-    const nome        = r[1] || 'Sem nome';
+    const nome        = (r[1] || 'Sem nome').trim();
     const numero      = (r[2] || '').replace(/\D/g, '');
     const primeiraVez = (r[3] || '').toLowerCase().includes('sim');
     const temCadastro = !((r[4] || '').toLowerCase().includes('não') || (r[4] || '').toLowerCase().includes('nao') || r[4] === '');
