@@ -615,6 +615,11 @@ async function jobAtualizarMembros(force = false) {
     nota: row.values?.[5]?.note || '',
   })).filter(m => m.nome);
 
+  // Todas as datas únicas do Forms em ordem cronológica (para tooltip dos novos)
+  const formsTodasRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/Respostas%20ao%20formul%C3%A1rio%201!A2:A?key=${GOOGLE_API_KEY}`);
+  const todasDatas = [...new Set((await formsTodasRes.json()).values?.filter(r => r[0]).map(r => r[0].split(' ')[0]) || [])]
+    .sort((a, b) => { const [da,ma,aa]=a.split('/'), [db,mb,ab]=b.split('/'); return new Date(`${aa}-${ma}-${da}`) - new Date(`${ab}-${mb}-${db}`); });
+
   const updates = [], novos = [];
 
   for (const form of doSabado) {
@@ -647,7 +652,8 @@ async function jobAtualizarMembros(force = false) {
       console.log(`[membros] ✓ ${match.nome} → freq ${novaFreq}`);
     } else {
       // C=nome, D=tel, E=link, F=freq, G=último encontro, H=sistema, I=HG, J=C17
-      novos.push([nomeForm, telForm, telForm ? `https://wa.me/55${telForm}` : '', 1, 'SIM', temCadastro ? 'SIM' : 'NÃO', '', '']);
+      const notaNovo = todasDatas.map(d => (d === dataAlvo ? '✅' : '❌') + ' ' + d).join('\n');
+      novos.push([nomeForm, telForm, telForm ? `https://wa.me/55${telForm}` : '', 1, 'SIM', temCadastro ? 'SIM' : 'NÃO', '', '', notaNovo]);
       console.log(`[membros] + novo: ${nomeForm}`);
     }
   }
@@ -679,7 +685,10 @@ async function jobAtualizarMembros(force = false) {
           userEnteredValue: { stringValue: (novo[0] || '').toUpperCase() },
           userEnteredFormat: { textFormat: { bold: true } },
         },
-        { userEnteredValue: { stringValue: novo[1] } },                              // D — whatsapp
+        {                                                                            // D — whatsapp
+          userEnteredValue: { stringValue: novo[1] },
+          userEnteredFormat: { textFormat: { foregroundColor: { red: 0.294, green: 0.333, blue: 0.349 } } },
+        },
         {                                                                            // E — link "Abrir WA"
           userEnteredValue: { stringValue: 'Abrir WA' },
           userEnteredFormat: {
@@ -689,9 +698,9 @@ async function jobAtualizarMembros(force = false) {
         },
         {                                                                            // F — freq + nota
           userEnteredValue: { numberValue: novo[3] },
-          note: dataAlvo,
+          note: novo[8],
           userEnteredFormat: {
-            textFormat: { bold: true },
+            textFormat: { bold: true, fontSize: 12 },
             horizontalAlignment: 'CENTER', verticalAlignment: 'MIDDLE',
           },
         },
@@ -727,13 +736,24 @@ async function jobAtualizarMembros(force = false) {
       const lastRow = rd.updates?.updatedRange?.match(/(\d+)$/)?.[1];
       if (lastRow) {
         const startRow = parseInt(lastRow) - novos.length;
-        const borderReqs = novos.map((_, i) => ({
-          updateBorders: {
-            range: { sheetId: MEMBERS_GID, startRowIndex: startRow + i, endRowIndex: startRow + i + 1, startColumnIndex: 1, endColumnIndex: 10 },
-            top: bordaFina, bottom: bordaFina, left: bordaGrossa, right: bordaGrossa,
-            innerHorizontal: bordaFina, innerVertical: bordaFina,
+        const borderReqs = [
+          // Bordas de cada linha
+          ...novos.map((_, i) => ({
+            updateBorders: {
+              range: { sheetId: MEMBERS_GID, startRowIndex: startRow + i, endRowIndex: startRow + i + 1, startColumnIndex: 1, endColumnIndex: 10 },
+              top: bordaFina, bottom: bordaFina, left: bordaGrossa, right: bordaGrossa,
+              innerHorizontal: bordaFina, innerVertical: bordaFina,
+            },
+          })),
+          // Altura de 29px igual às demais linhas
+          {
+            updateDimensionProperties: {
+              range: { sheetId: MEMBERS_GID, dimension: 'ROWS', startIndex: startRow, endIndex: startRow + novos.length },
+              properties: { pixelSize: 29 },
+              fields: 'pixelSize',
+            },
           },
-        }));
+        ];
         await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}:batchUpdate`, {
           method: 'POST', headers: authHdr, body: JSON.stringify({ requests: borderReqs }),
         });
@@ -741,10 +761,8 @@ async function jobAtualizarMembros(force = false) {
       console.log(`[membros] ${novos.length} novo(s) adicionado(s)`);
     }
   }
-  // Conta datas únicas do Forms = total real de encontros
-  const formsAllRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/Respostas%20ao%20formul%C3%A1rio%201!A2:A?key=${GOOGLE_API_KEY}`);
-  const formsAllRows = (await formsAllRes.json()).values || [];
-  const totalEncontros = new Set(formsAllRows.filter(r => r[0]).map(r => r[0].split(' ')[0])).size;
+  // Conta datas únicas do Forms = total real de encontros (reutiliza todasDatas já buscado)
+  const totalEncontros = todasDatas.length;
   await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!L5')}?valueInputOption=RAW`, {
     method: 'PUT', headers: authHdr, body: JSON.stringify({ values: [[totalEncontros]] }),
   });
