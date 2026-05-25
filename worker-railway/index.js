@@ -691,8 +691,7 @@ async function jobAtualizarMembros(force = false) {
           userEnteredValue: { numberValue: novo[3] },
           note: dataAlvo,
           userEnteredFormat: {
-            backgroundColor: { red: 0.98, green: 0.9, blue: 0.9 },
-            textFormat: { bold: true, foregroundColor: { red: 0.8, green: 0.1, blue: 0.1 } },
+            textFormat: { bold: true },
             horizontalAlignment: 'CENTER', verticalAlignment: 'MIDDLE',
           },
         },
