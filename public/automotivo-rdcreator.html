@@ -49,12 +49,10 @@
     /* Scroll animations */
     [data-anim] {
       opacity: 0;
-      transform: translateY(32px);
-      transition: opacity 1s ease, transform 1s cubic-bezier(0.16,1,0.3,1);
+      transition: opacity 0.7s ease;
     }
     [data-anim].visible {
       opacity: 1;
-      transform: translateY(0);
     }
 
     /* SVG icon draw — valores aplicados via JS com getTotalLength() */
@@ -107,7 +105,7 @@
     <div role="region" aria-label="Product update" class="relative z-20 flex shrink-0 items-center gap-2 rounded-2xl bg-[#0066cc] px-2 py-2.5 sm:px-4 shrink-0 shadow-sm border border-black/5 justify-between md:justify-center overflow-hidden">
       <div></div>
       <p class="min-w-0 flex-1 text-center text-sm font-normal leading-snug text-white">
-        <span class="font-bold">+30 oficinas já cresceram com a RDCreator</span> — a sua pode ser a próxima.
+        <span class="font-bold">+30 oficinas mecânicas já dominam o Google com a RDCreator</span> — a sua pode ser a próxima.
       </p>
       <button type="button" onclick="this.closest('[role=region]').remove()" class="shrink-0 inline-flex cursor-pointer items-center justify-center rounded-lg p-2 text-white/75 transition hover:bg-white/10 hover:text-white" aria-label="Dismiss announcement">
         <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
@@ -127,7 +125,7 @@
         <a href="#planos" class="hover:text-black transition-colors">Planos</a>
         <a href="#sobre" class="hover:text-black transition-colors">Sobre</a>
         <a href="#faq" class="hover:text-black transition-colors">Dúvidas</a>
-        <a href="https://wa.me/5519994175385" target="_blank" rel="noreferrer" class="hover:text-black transition-colors">Entrar em contato</a>
+        <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20vim%20pelo%20site%20e%20quero%20saber%20mais%20sobre%20presença%20digital%20para%20minha%20oficina!" target="_blank" rel="noreferrer" class="hover:text-black transition-colors">Entrar em contato</a>
         <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20quero%20dominar%20minha%20regi%C3%A3o%20no%20Google!" target="_blank" rel="noreferrer" class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-[#0066cc] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#0055b3]">Começar agora</a>
       </nav>
     </header>
@@ -151,34 +149,45 @@
             </span>
           </h1>
           <p data-anim class="mx-auto mt-4 max-w-lg text-[15px] leading-snug text-black/55 sm:mt-5 sm:text-base">
-            Comece a dominar sua região como um profissional.
+            Presença digital feita para quem vive de motor, rampa e chave de fenda.
           </p>
+          <div data-anim class="mt-5 flex flex-wrap justify-center gap-2 px-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-black/10 text-[12px] text-black/60 font-medium shadow-sm"><i class="ph-fill ph-wrench text-[#0066cc]"></i> Mecânica Geral</span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-black/10 text-[12px] text-black/60 font-medium shadow-sm"><i class="ph-fill ph-paint-brush text-[#0066cc]"></i> Funilaria e Pintura</span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-black/10 text-[12px] text-black/60 font-medium shadow-sm"><i class="ph-fill ph-lightning text-[#0066cc]"></i> Elétrica Automotiva</span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-black/10 text-[12px] text-black/60 font-medium shadow-sm"><i class="ph-fill ph-cpu text-[#0066cc]"></i> Injeção Eletrônica</span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-black/10 text-[12px] text-black/60 font-medium shadow-sm"><i class="ph-fill ph-wind text-[#0066cc]"></i> Ar Condicionado</span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-black/10 text-[12px] text-black/60 font-medium shadow-sm"><i class="ph-fill ph-arrows-out-cardinal text-[#0066cc]"></i> Suspensão e Direção</span>
+          </div>
           <div data-anim class="mt-8">
             <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20quero%20dominar%20minha%20regi%C3%A3o%20no%20Google!" target="_blank" rel="noreferrer" class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-[#0066cc] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#0055b3] shadow-sm">
               Falar no WhatsApp
             </a>
           </div>
+
         </div>
 
-        <div data-anim class="mt-14 mb-8 sm:mb-12 flex w-full flex-col justify-center items-center">
+        <div data-anim class="mt-0 mb-8 sm:mb-12 flex w-full flex-col justify-center items-center">
           <!-- iPhone Mockup Real -->
-          <div style="position:relative;width:900px;height:600px;flex-shrink:0;left:-10px;">
+          <div style="position:relative;width:1050px;height:700px;flex-shrink:0;left:-10px;">
+            <!-- fade bottom -->
+            <div style="position:absolute;bottom:0;left:0;right:0;height:180px;background:linear-gradient(to bottom,transparent,#efefef);z-index:15;pointer-events:none;"></div>
 
             <!-- tela CSS — posicionada para encaixar no iPhone frontal -->
-            <div style="position:absolute;top:11.2%;left:39.5%;width:23%;height:74.8%;overflow:hidden;transform:none;border-radius:3px;background:#f5f5f7;display:flex;flex-direction:column;z-index:2;">
+            <div style="position:absolute;top:11%;left:39.5%;width:23%;height:77%;overflow:hidden;transform:none;border-radius:18px 18px 3px 3px;background:#f5f5f7;display:flex;flex-direction:column;z-index:2;">
 
               <div style="position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;border-radius:3px;z-index:0;display:flex;flex-direction:column;">
 
               <!-- Banner de ligação dentro do overflow:hidden — desce de cima -->
-              <div id="call-banner" style="position:absolute;top:-80px;left:4px;right:4px;z-index:20;background:rgba(30,30,30,0.96);border-radius:12px;padding:9px 11px;display:flex;align-items:flex-start;gap:9px;box-shadow:0 6px 18px rgba(0,0,0,0.4);transition:top 0.5s cubic-bezier(0.16,1,0.3,1);">
-                <div style="width:32px;height:32px;background:#0066cc;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:10px;">
+              <div id="call-banner" style="position:absolute;top:8%;left:4px;right:4px;z-index:20;background:rgba(30,30,30,0.96);border-radius:12px;padding:9px 11px;display:flex;align-items:center;gap:9px;box-shadow:0 6px 18px rgba(0,0,0,0.4);transition:top 0.5s cubic-bezier(0.16,1,0.3,1);">
+                <div style="width:32px;height:32px;background:#0066cc;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                   <img src="/logo_aut_nb_white.png" style="width:22px;height:auto;object-fit:contain;">
                 </div>
-                <div style="flex:1;min-width:0;margin-top:10px;">
-                  <div style="font-size:8px;color:rgba(255,255,255,0.5);font-family:sans-serif;">Ligação recebida</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:10px;color:rgba(255,255,255,0.5);font-family:sans-serif;">Ligação recebida</div>
                   <div id="call-number" style="font-size:11px;font-weight:700;color:#ffffff;font-family:sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">+55 (19) 9 8765-4321</div>
                 </div>
-                <div style="display:flex;gap:6px;flex-shrink:0;margin-top:10px;">
+                <div style="display:flex;gap:6px;flex-shrink:0;">
                   <div id="call-decline" style="width:26px;height:26px;background:#ff3b30;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" transform="rotate(135 12 12)"/></svg>
                   </div>
@@ -329,7 +338,7 @@
               if(showing) return;
               showing = true;
               document.getElementById('call-number').textContent = phones[Math.floor(Math.random()*phones.length)];
-              banner.style.top = '6px';
+              banner.style.top = '6%';
               setTimeout(function(){
                 if(!showing) return;
                 hideBanner();
@@ -337,7 +346,7 @@
             }
 
             function hideBanner() {
-              banner.style.top = '-60px';
+              banner.style.top = '-20%';
               showing = false;
               // Incrementa ligações
               var elc = document.getElementById('mock-calls');
@@ -365,46 +374,128 @@
         <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-5 max-w-4xl mx-auto text-left px-2">
 
           <article data-anim class="flex flex-col gap-3">
-            <div class="relative flex aspect-[5/3] w-full shrink-0 items-center justify-center rounded-xl bg-neutral-200 shadow-sm border border-black/5">
-              <svg viewBox="0 0 24 24" class="h-14 w-14 text-[#0066cc] icon-draw" aria-hidden="true">
-                <path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-11a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1m3 0v18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M13 8l2 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M13 12l2 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-              </svg>
+            <div class="relative flex aspect-[5/3] w-full shrink-0 items-center justify-center rounded-xl bg-neutral-200 shadow-sm border border-black/5 overflow-hidden">
+              <!-- Mini site mockup automotivo -->
+              <div style="width:180px;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.12);overflow:hidden;border:1px solid rgba(0,0,0,0.08);">
+                <div style="background:#0066cc;padding:8px 10px;display:flex;align-items:center;gap:6px;">
+                  <img src="/logo_aut_nb_white.png" style="height:14px;width:auto;">
+                  <div style="flex:1;"></div>
+                  <div style="display:flex;gap:3px;">
+                    <div style="width:5px;height:5px;background:rgba(255,255,255,0.4);border-radius:50%;"></div>
+                    <div style="width:5px;height:5px;background:rgba(255,255,255,0.4);border-radius:50%;"></div>
+                  </div>
+                </div>
+                <div style="background:#f8f8f8;padding:10px;display:flex;flex-direction:column;gap:6px;">
+                  <div style="height:26px;background:#0066cc;border-radius:5px;display:flex;align-items:center;justify-content:center;">
+                    <span style="color:#fff;font-size:7px;font-family:sans-serif;font-weight:600;">Mecânica · Funilaria · Elétrica</span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                    <div style="background:#fff;border-radius:4px;padding:5px;border:1px solid #eee;">
+                      <div style="width:12px;height:12px;background:#e8f0fe;border-radius:3px;margin-bottom:3px;"></div>
+                      <div style="height:5px;background:#eee;border-radius:2px;width:80%;"></div>
+                      <div style="height:4px;background:#eee;border-radius:2px;width:60%;margin-top:2px;"></div>
+                    </div>
+                    <div style="background:#fff;border-radius:4px;padding:5px;border:1px solid #eee;">
+                      <div style="width:12px;height:12px;background:#e8f0fe;border-radius:3px;margin-bottom:3px;"></div>
+                      <div style="height:5px;background:#eee;border-radius:2px;width:80%;"></div>
+                      <div style="height:4px;background:#eee;border-radius:2px;width:60%;margin-top:2px;"></div>
+                    </div>
+                  </div>
+                  <div style="background:#25D366;border-radius:4px;padding:4px;display:flex;align-items:center;justify-content:center;gap:3px;">
+                    <i class="ph-fill ph-whatsapp-logo" style="color:#fff;font-size:8px;"></i>
+                    <span style="color:#fff;font-size:6px;font-family:sans-serif;font-weight:600;">Pedir orçamento</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <h3 class="text-[15px] font-medium leading-snug text-black">Site profissional que converte meses depois</h3>
-            <p class="text-[13px] text-black/55 leading-snug min-h-[40px]">Vitrine rápida, otimizada para mobile e desenhada para transformar visitantes em orçamentos.</p>
-            <a href="https://wa.me/5519994175385" target="_blank" rel="noreferrer" class="mt-1 w-fit rounded-md text-sm font-medium text-[#0066cc] hover:bg-neutral-200 transition-colors px-2 py-1 -ml-2">Saber mais</a>
+            <h3 class="text-[15px] font-medium leading-snug text-black">Site que transforma visita em orçamento</h3>
+            <p class="text-[13px] text-black/55 leading-snug min-h-[40px]">Vitrine rápida com serviços, galeria, localização e WhatsApp — feita para o cliente da sua rampa.</p>
+            <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20quero%20um%20site%20profissional%20para%20minha%20oficina!" target="_blank" rel="noreferrer" class="mt-1 w-fit rounded-md text-sm font-medium text-[#0066cc] hover:bg-neutral-200 transition-colors px-2 py-1 -ml-2">Saber mais</a>
           </article>
 
           <article data-anim class="flex flex-col gap-3">
-            <div class="relative flex aspect-[5/3] w-full shrink-0 items-center justify-center rounded-xl bg-neutral-200 shadow-sm border border-black/5">
-              <svg viewBox="0 0 24 24" class="h-14 w-14 text-[#0066cc] icon-draw" aria-hidden="true">
-                <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M16 3v4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M8 3v4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M4 11h16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M11 15h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M12 15v3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-              </svg>
+            <div class="relative flex aspect-[5/3] w-full shrink-0 items-center justify-center rounded-xl bg-neutral-200 shadow-sm border border-black/5 overflow-hidden">
+              <!-- Mini ficha Google Maps automotiva -->
+              <div style="width:180px;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.12);overflow:hidden;border:1px solid rgba(0,0,0,0.08);font-family:sans-serif;">
+                <div style="background:#e8ead3;height:52px;position:relative;overflow:hidden;">
+                  <svg width="100%" height="52" viewBox="0 0 180 52" preserveAspectRatio="xMidYMid slice">
+                    <rect width="180" height="52" fill="#e8ead3"/>
+                    <rect x="0" y="0" width="42" height="26" fill="#f5f5f0"/>
+                    <rect x="48" y="0" width="32" height="26" fill="#f5f5f0"/>
+                    <rect x="86" y="0" width="48" height="26" fill="#f5f5f0"/>
+                    <rect x="0" y="30" width="36" height="22" fill="#f5f5f0"/>
+                    <rect x="42" y="30" width="52" height="22" fill="#f5f5f0"/>
+                    <rect x="100" y="30" width="44" height="22" fill="#f5f5f0"/>
+                    <rect x="0" y="26" width="180" height="4" fill="#fff"/>
+                    <rect x="42" y="0" width="6" height="52" fill="#fff"/>
+                    <rect x="80" y="0" width="6" height="52" fill="#fff"/>
+                    <circle cx="72" cy="24" r="6" fill="#0066cc" stroke="white" stroke-width="1.5"/>
+                    <circle cx="72" cy="24" r="2.5" fill="white"/>
+                    <circle cx="72" cy="34" r="8" fill="rgba(0,102,204,0.15)"/>
+                  </svg>
+                </div>
+                <div style="padding:8px 10px;">
+                  <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                    <div style="width:20px;height:20px;background:#0066cc;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                      <img src="/logo_aut_nb_white.png" style="width:14px;height:auto;">
+                    </div>
+                    <div>
+                      <div style="font-size:8px;font-weight:700;color:#202124;line-height:1.2;">Oficina RDCarros</div>
+                      <div style="font-size:6px;color:#70757a;">Mecânica · Aberto agora</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:3px;margin-bottom:6px;">
+                    <span style="font-size:7px;font-weight:700;color:#202124;">4,9</span>
+                    <span style="color:#fbbc04;font-size:7px;">★★★★★</span>
+                    <span style="font-size:6px;color:#70757a;">(247)</span>
+                  </div>
+                  <div style="display:flex;gap:3px;">
+                    <div style="flex:1;background:#e8f0fe;border-radius:10px;padding:3px 0;text-align:center;font-size:6px;color:#0066cc;font-weight:500;">Ligar</div>
+                    <div style="flex:1;background:#e8f0fe;border-radius:10px;padding:3px 0;text-align:center;font-size:6px;color:#0066cc;font-weight:500;">Rota</div>
+                    <div style="flex:1;background:#e8f0fe;border-radius:10px;padding:3px 0;text-align:center;font-size:6px;color:#0066cc;font-weight:500;">Site</div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <h3 class="text-[15px] font-medium leading-snug text-black">Google Meu Negócio — mais clientes todo mês</h3>
-            <p class="text-[13px] text-black/55 leading-snug min-h-[40px]">Otimização avançada da sua ficha para dominar os primeiros resultados de busca da sua cidade.</p>
-            <a href="https://wa.me/5519994175385" target="_blank" rel="noreferrer" class="mt-1 w-fit rounded-md text-sm font-medium text-[#0066cc] hover:bg-neutral-200 transition-colors px-2 py-1 -ml-2">Saber mais</a>
+            <h3 class="text-[15px] font-medium leading-snug text-black">Google Meu Negócio — sua ficha no topo</h3>
+            <p class="text-[13px] text-black/55 leading-snug min-h-[40px]">Ficha otimizada para aparecer quando alguém busca "mecânica perto de mim" na sua cidade.</p>
+            <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20quero%20otimizar%20o%20Google%20Meu%20Neg%C3%B3cio%20da%20minha%20oficina!" target="_blank" rel="noreferrer" class="mt-1 w-fit rounded-md text-sm font-medium text-[#0066cc] hover:bg-neutral-200 transition-colors px-2 py-1 -ml-2">Saber mais</a>
           </article>
 
           <article data-anim class="flex flex-col gap-3">
-            <div class="relative flex aspect-[5/3] w-full shrink-0 items-center justify-center rounded-xl bg-neutral-200 shadow-sm border border-black/5">
-              <svg viewBox="0 0 24 24" class="h-14 w-14 text-[#0066cc] icon-draw" aria-hidden="true">
-                <path d="M3 13a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M15 9a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M9 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M4 20h14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-              </svg>
+            <div class="relative flex aspect-[5/3] w-full shrink-0 items-center justify-center rounded-xl bg-neutral-200 shadow-sm border border-black/5 overflow-hidden">
+              <!-- Mini Google Ads automotivo -->
+              <div style="width:180px;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.12);overflow:hidden;border:1px solid rgba(0,0,0,0.08);font-family:sans-serif;">
+                <div style="background:#f1f3f4;padding:6px 8px;display:flex;align-items:center;gap:4px;border-bottom:1px solid #e0e0e0;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#5f6368" stroke-width="2.5"/><path d="M16.5 16.5L21 21" stroke="#5f6368" stroke-width="2.5" stroke-linecap="round"/></svg>
+                  <span style="font-size:7px;color:#5f6368;flex:1;">troca de óleo perto de mim</span>
+                </div>
+                <div style="padding:8px 10px;border-bottom:1px solid #f0f0f0;">
+                  <div style="display:inline-block;border:1px solid #5f6368;border-radius:2px;padding:1px 3px;font-size:5px;color:#5f6368;margin-bottom:3px;">Patrocinado</div>
+                  <div style="font-size:8px;color:#0066cc;font-weight:600;line-height:1.3;">Troca de Óleo na Hora — RDCarros</div>
+                  <div style="font-size:6px;color:#5f6368;">rdcarros.com.br</div>
+                  <div style="font-size:6px;color:#202124;margin-top:2px;">Revisão completa · Sem fila · WhatsApp</div>
+                </div>
+                <div style="padding:8px 10px;">
+                  <div style="font-size:6px;color:#5f6368;margin-bottom:4px;">Resultados locais</div>
+                  <div style="display:flex;flex-direction:column;gap:3px;">
+                    <div style="display:flex;align-items:center;gap:4px;padding:4px;background:#f8f9fa;border-radius:4px;">
+                      <div style="width:8px;height:8px;background:#0066cc;border-radius:50%;flex-shrink:0;"></div>
+                      <span style="font-size:6.5px;font-weight:700;color:#202124;flex:1;">Oficina RDCarros</span>
+                      <span style="font-size:6px;color:#e67700;">★ 4,9</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:4px;padding:4px;background:#f8f9fa;border-radius:4px;opacity:0.5;">
+                      <div style="width:8px;height:8px;background:#bbb;border-radius:50%;flex-shrink:0;"></div>
+                      <span style="font-size:6.5px;color:#5f6368;flex:1;">Outra oficina</span>
+                      <span style="font-size:6px;color:#e67700;">★ 3,8</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <h3 class="text-[15px] font-medium leading-snug text-black">Anúncios e SEO local — do mês ao dia</h3>
-            <p class="text-[13px] text-black/55 leading-snug min-h-[40px]">Campanhas segmentadas + tráfego orgânico. Clientes no mapa e na sua rampa em um só lugar.</p>
-            <a href="https://wa.me/5519994175385" target="_blank" rel="noreferrer" class="mt-1 w-fit rounded-md text-sm font-medium text-[#0066cc] hover:bg-neutral-200 transition-colors px-2 py-1 -ml-2">Saber mais</a>
+            <h3 class="text-[15px] font-medium leading-snug text-black">Anúncios e SEO — clientes na sua rampa</h3>
+            <p class="text-[13px] text-black/55 leading-snug min-h-[40px]">Google Ads segmentado + SEO local. Aparece quando buscam troca de óleo, revisão ou funilaria na sua cidade.</p>
+            <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20quero%20anunciar%20minha%20oficina%20no%20Google%20Ads!" target="_blank" rel="noreferrer" class="mt-1 w-fit rounded-md text-sm font-medium text-[#0066cc] hover:bg-neutral-200 transition-colors px-2 py-1 -ml-2">Saber mais</a>
           </article>
         </div>
       </section>
@@ -430,7 +521,7 @@
                   <span class="text-[9px] border border-[#5f6368] text-[#5f6368] px-1 rounded leading-tight">Patrocinado</span>
                 </div>
                 <p class="text-[13px] text-[#0066cc] font-medium leading-snug">RDCarros Oficina — Site Oficial</p>
-                <p class="text-[11px] text-[#5f6368] leading-snug">genuinaofficina.com.br</p>
+                <p class="text-[11px] text-[#5f6368] leading-snug">rdcarros.com.br</p>
                 <p class="text-[11px] text-[#202124] leading-snug mt-0.5">Serviços automotivos em Campinas · WhatsApp direto · Orçamento grátis</p>
               </div>
 
@@ -488,7 +579,7 @@
                         <p class="text-[11px] text-[#5f6368] mt-0.5">Oficina mecânica · Aberto agora</p>
                       </div>
                       <div class="w-10 h-10 rounded-lg bg-[#0066cc] flex items-center justify-center shrink-0">
-                        <i class="ph-fill ph-car text-white text-xl"></i>
+                        <img src="/logo_aut_nb_white.png" style="width:28px;height:auto;object-fit:contain;">
                       </div>
                     </div>
                     <div class="flex gap-2 mt-1">
@@ -516,9 +607,9 @@
         <!-- Info Grid -->
         <div data-anim class="md:col-span-2 grid grid-cols-2 gap-x-6 gap-y-10">
           <div>
-            <i class="ph ph-globe text-black/40 text-lg mb-2 inline-block"></i>
-            <h4 class="text-[14px] font-medium mb-1">Site no ar 24h</h4>
-            <p class="text-[13px] text-black/55 leading-snug">Sua vitrine online funcionando todo dia, mesmo quando a oficina está fechada.</p>
+            <i class="ph ph-wrench text-black/40 text-lg mb-2 inline-block"></i>
+            <h4 class="text-[14px] font-medium mb-1">Feito para oficinas</h4>
+            <p class="text-[13px] text-black/55 leading-snug">Serviços, galeria da rampa, localização e orçamento por WhatsApp — tudo que o cliente procura.</p>
           </div>
           <div>
             <i class="ph ph-currency-circle-dollar text-black/40 text-lg mb-2 inline-block"></i>
@@ -527,13 +618,13 @@
           </div>
           <div>
             <i class="ph ph-whatsapp-logo text-black/40 text-lg mb-2 inline-block"></i>
-            <h4 class="text-[14px] font-medium mb-1">WhatsApp integrado</h4>
-            <p class="text-[13px] text-black/55 leading-snug">Botão de contato direto para o cliente falar com você em um clique.</p>
+            <h4 class="text-[14px] font-medium mb-1">Orçamento em 1 clique</h4>
+            <p class="text-[13px] text-black/55 leading-snug">Cliente viu o serviço, clicou, já está no seu WhatsApp pedindo orçamento.</p>
           </div>
           <div>
             <i class="ph ph-device-mobile text-black/40 text-lg mb-2 inline-block"></i>
             <h4 class="text-[14px] font-medium mb-1">Mobile primeiro</h4>
-            <p class="text-[13px] text-black/55 leading-snug">Design adaptado para celular, onde 90% dos seus clientes pesquisam.</p>
+            <p class="text-[13px] text-black/55 leading-snug">90% dos clientes pesquisam pelo celular. Seu site já nasce pronto pra isso.</p>
           </div>
         </div>
       </section>
@@ -548,23 +639,23 @@
           <div data-anim class="grid grid-cols-2 gap-x-8 gap-y-10">
             <div>
               <i class="ph ph-map-pin text-black/40 text-lg mb-2 inline-block"></i>
-              <h4 class="text-[14px] font-semibold mb-1">Mais posições no Google Maps</h4>
-              <p class="text-[13px] text-black/55 leading-snug">Melhora progressiva do posicionamento para aparecer antes dos concorrentes quando o cliente pesquisa na região.</p>
+              <h4 class="text-[14px] font-semibold mb-1">Sua oficina no topo do Maps</h4>
+              <p class="text-[13px] text-black/55 leading-snug">Quando alguém busca "mecânica perto de mim", você aparece antes da concorrência.</p>
             </div>
             <div>
               <i class="ph ph-star text-black/40 text-lg mb-2 inline-block"></i>
-              <h4 class="text-[14px] font-semibold mb-1">Avaliações que vendem</h4>
-              <p class="text-[13px] text-black/55 leading-snug">Reputação construída para converter antes de qualquer ligação.</p>
+              <h4 class="text-[14px] font-semibold mb-1">Avaliações que fecham venda</h4>
+              <p class="text-[13px] text-black/55 leading-snug">5 estrelas no Google convencem antes de qualquer ligação — gerimos sua reputação.</p>
             </div>
             <div>
-              <i class="ph ph-trend-up text-black/40 text-lg mb-2 inline-block"></i>
-              <h4 class="text-[14px] font-semibold mb-1">Mais contatos todo mês</h4>
-              <p class="text-[13px] text-black/55 leading-snug">Resultado combinado de SEO local e Google Ads — orgânico e pago trabalhando juntos.</p>
+              <i class="ph ph-phone-call text-black/40 text-lg mb-2 inline-block"></i>
+              <h4 class="text-[14px] font-semibold mb-1">Mais ligações e orçamentos</h4>
+              <p class="text-[13px] text-black/55 leading-snug">SEO local + Google Ads: clientes buscando troca de óleo, revisão ou funilaria chegam até você.</p>
             </div>
             <div>
-              <i class="ph ph-whatsapp-logo text-black/40 text-lg mb-2 inline-block"></i>
-              <h4 class="text-[14px] font-semibold mb-1">WhatsApp direto no site</h4>
-              <p class="text-[13px] text-black/55 leading-snug">CTA integrado para o cliente entrar em contato com um clique.</p>
+              <i class="ph ph-wrench text-black/40 text-lg mb-2 inline-block"></i>
+              <h4 class="text-[14px] font-semibold mb-1">Especialista no setor</h4>
+              <p class="text-[13px] text-black/55 leading-snug">Conhecemos o vocabulário da oficina — rampa, laudo, peças, revisão — e usamos isso no seu marketing.</p>
             </div>
           </div>
         </div>
@@ -575,7 +666,7 @@
             <div class="p-3.5 flex items-center justify-between border-b border-black/5">
               <div class="flex items-center gap-2">
                 <div class="w-6 h-6 rounded bg-[#0066cc] flex items-center justify-center shrink-0">
-                  <i class="ph-fill ph-car text-white text-[14px]"></i>
+                  <img src="/logo_aut_nb_white.png" style="width:16px;height:auto;object-fit:contain;">
                 </div>
                 <span class="text-[14px] font-semibold flex items-center gap-1">Oficina RDCarros <img src="https://aqryl.app/explore/user-verified.svg" alt="Verificado" class="w-4 h-4"></span>
               </div>
@@ -586,8 +677,8 @@
             <!-- Body -->
             <div class="p-5 flex flex-col gap-5">
               <div>
-                <h3 class="text-xl font-medium tracking-tight mb-1">Presença digital</h3>
-                <p class="text-[13px] text-[#0066cc]">Resultado real — case RDCreator</p>
+                <h3 class="text-xl font-medium tracking-tight mb-1">Oficina RDCarros</h3>
+                <p class="text-[13px] text-[#0066cc]">Case real — mecânica automotiva</p>
               </div>
 
               <div class="grid grid-cols-2 gap-3 mt-1">
@@ -702,6 +793,72 @@
         </p>
       </section>
 
+      <!-- Checklist Section -->
+      <section class="max-w-4xl mx-auto px-4 py-16 w-full">
+        <div data-anim class="text-[13px] text-black/50 mb-2">Diagnóstico rápido</div>
+        <h2 data-anim class="text-xl md:text-2xl font-normal mb-10">Sua oficina está perdendo clientes agora?</h2>
+        <div data-anim class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl">
+          <div class="flex items-start gap-4 bg-white rounded-2xl p-5 border border-black/8 shadow-sm">
+            <div class="w-8 h-8 rounded-full bg-black/5 border border-black/10 flex items-center justify-center shrink-0 mt-0.5">
+              <i class="ph-bold ph-x text-black/30 text-sm"></i>
+            </div>
+            <div>
+              <p class="text-[14px] font-medium text-black">Sua oficina não aparece no Google Maps</p>
+              <p class="text-[12px] text-black/45 mt-1">Clientes pesquisam "mecânica perto de mim" e encontram o concorrente.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 bg-white rounded-2xl p-5 border border-black/8 shadow-sm">
+            <div class="w-8 h-8 rounded-full bg-black/5 border border-black/10 flex items-center justify-center shrink-0 mt-0.5">
+              <i class="ph-bold ph-x text-black/30 text-sm"></i>
+            </div>
+            <div>
+              <p class="text-[14px] font-medium text-black">Você não tem site ou o que tem parece amador</p>
+              <p class="text-[12px] text-black/45 mt-1">Primeira impressão ruim — cliente vai embora antes de ligar.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 bg-white rounded-2xl p-5 border border-black/8 shadow-sm">
+            <div class="w-8 h-8 rounded-full bg-black/5 border border-black/10 flex items-center justify-center shrink-0 mt-0.5">
+              <i class="ph-bold ph-x text-black/30 text-sm"></i>
+            </div>
+            <div>
+              <p class="text-[14px] font-medium text-black">Sua ficha no Google tem poucas avaliações</p>
+              <p class="text-[12px] text-black/45 mt-1">Menos estrelas = menos confiança = menos ligações.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 bg-white rounded-2xl p-5 border border-black/8 shadow-sm">
+            <div class="w-8 h-8 rounded-full bg-black/5 border border-black/10 flex items-center justify-center shrink-0 mt-0.5">
+              <i class="ph-bold ph-x text-black/30 text-sm"></i>
+            </div>
+            <div>
+              <p class="text-[14px] font-medium text-black">Você depende só do boca a boca</p>
+              <p class="text-[12px] text-black/45 mt-1">Movimento instável — bom um mês, fraco no outro.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 bg-white rounded-2xl p-5 border border-black/8 shadow-sm">
+            <div class="w-8 h-8 rounded-full bg-black/5 border border-black/10 flex items-center justify-center shrink-0 mt-0.5">
+              <i class="ph-bold ph-x text-black/30 text-sm"></i>
+            </div>
+            <div>
+              <p class="text-[14px] font-medium text-black">Clientes não acham seu WhatsApp facilmente</p>
+              <p class="text-[12px] text-black/45 mt-1">Cada clique a mais que o cliente precisa dar é uma desistência.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 bg-white rounded-2xl p-5 border border-black/8 shadow-sm">
+            <div class="w-8 h-8 rounded-full bg-black/5 border border-black/10 flex items-center justify-center shrink-0 mt-0.5">
+              <i class="ph-bold ph-x text-black/30 text-sm"></i>
+            </div>
+            <div>
+              <p class="text-[14px] font-medium text-black">Você não sabe quantas pessoas buscam sua oficina</p>
+              <p class="text-[12px] text-black/45 mt-1">Sem dados, sem controle — você não sabe o que está perdendo.</p>
+            </div>
+          </div>
+        </div>
+        <div data-anim class="mt-8 flex items-center gap-4 bg-[#0066cc]/5 border border-[#0066cc]/15 rounded-2xl p-5 max-w-3xl">
+          <i class="ph-fill ph-warning-circle text-[#0066cc] text-2xl shrink-0"></i>
+          <p class="text-[14px] text-black/70 leading-snug">Se você marcou 2 ou mais acima, sua oficina está perdendo clientes para a concorrência <strong>agora mesmo</strong>. A RDCreator resolve cada um desses pontos.</p>
+        </div>
+      </section>
+
       <!-- O Que Vem Por Aí Section -->
       <section class="max-w-5xl mx-auto px-4 py-16 w-full relative">
         <div data-anim class="text-[13px] text-black/50 mb-2">O que oferecemos</div>
@@ -712,7 +869,7 @@
           <div class="scard" style="--i:0">
             <p class="text-[11px] font-medium text-[#0066cc] uppercase tracking-widest mb-4">01</p>
             <h3 class="text-[22px] font-medium mb-3 leading-snug">Gestão do Google Meu Negócio</h3>
-            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">Otimização e gestão mensal da sua ficha no Google. Atualização de fotos, horários, serviços, respostas a avaliações e publicações periódicas. Uma ficha bem gerenciada aparece mais nas buscas locais e converte mais.</p>
+            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">Sua ficha no Google é a vitrine digital da oficina — aparece quando alguém busca "mecânica perto de mim" ou "troca de óleo na cidade". Gerimos tudo: fotos da rampa, horários, serviços, respostas a avaliações e publicações periódicas para manter a ficha ativa e bem posicionada.</p>
             <div class="scard-icon">
               <svg viewBox="0 0 24 24" class="h-32 w-32 text-[#0066cc]" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 11.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
@@ -724,13 +881,10 @@
           <div class="scard" style="--i:1">
             <p class="text-[11px] font-medium text-[#0066cc] uppercase tracking-widest mb-4">02</p>
             <h3 class="text-[22px] font-medium mb-3 leading-snug">Google Ads — Tráfego Pago Local</h3>
-            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">Campanhas de anúncio no Google segmentadas para a sua cidade e região. Apareça no topo da busca quando alguém pesquisar por serviços automotivos perto de você. Controle total do orçamento, otimização contínua e relatório mensal.</p>
+            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">Anúncios segmentados para a sua cidade: quando alguém busca "troca de óleo", "funilaria" ou "mecânica automotiva" na sua região, sua oficina aparece no topo. Definimos palavras-chave do setor, controlamos o orçamento diário e enviamos relatório mensal com cliques e conversões.</p>
             <div class="scard-icon">
               <svg viewBox="0 0 24 24" class="h-32 w-32 text-[#0066cc]" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
-                <path d="M12 12m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0"/>
-                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
-                <path d="M15 9l3.35-3.35"/><path d="M18 6h-3v-3"/>
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
               </svg>
             </div>
           </div>
@@ -738,7 +892,7 @@
           <div class="scard" style="--i:2">
             <p class="text-[11px] font-medium text-[#0066cc] uppercase tracking-widest mb-4">03</p>
             <h3 class="text-[22px] font-medium mb-3 leading-snug">Criação de Site Profissional</h3>
-            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">Site rápido, responsivo e otimizado para converter visitantes em orçamentos. Design focado no nicho automotivo, com seções de serviços, galeria, localização, avaliações e WhatsApp integrado.</p>
+            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">Site rápido e responsivo com seções de serviços (mecânica, funilaria, elétrica, suspensão, alinhamento...), galeria da rampa, localização no mapa, avaliações do Google e botão de orçamento pelo WhatsApp. Entregue em até 12 dias, sem mensalidade.</p>
             <div class="scard-icon">
               <svg viewBox="0 0 24 24" class="h-32 w-32 text-[#0066cc]" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M4 4m0 1a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/>
@@ -750,7 +904,7 @@
           <div class="scard" style="--i:3">
             <p class="text-[11px] font-medium text-[#0066cc] uppercase tracking-widest mb-4">04</p>
             <h3 class="text-[22px] font-medium mb-3 leading-snug">Landing Pages de Campanha</h3>
-            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">Página de conversão focada em um único serviço. Uma página específica converte muito mais do que um site genérico, porque o cliente vê exatamente o que procurou. Criamos, publicamos e conectamos direto à campanha.</p>
+            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">Página focada em um único serviço: "Revisão Completa em Campinas", "Troca de Óleo com Desconto", "Funilaria e Pintura na Hora". Quem clicou no anúncio vê exatamente o que buscou — sem distração — e pede orçamento na hora. Criamos, publicamos e conectamos à campanha.</p>
             <div class="scard-icon">
               <svg viewBox="0 0 24 24" class="h-32 w-32 text-[#0066cc]" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M4 13a8 8 0 0 1 7 7 6 6 0 0 0 3-5 9 9 0 0 0 6-8 3 3 0 0 0-3-3 9 9 0 0 0-8 6 6 6 0 0 0-5 3"/>
@@ -776,7 +930,7 @@
           <div class="scard" style="--i:5">
             <p class="text-[11px] font-medium text-[#0066cc] uppercase tracking-widest mb-4">06</p>
             <h3 class="text-[22px] font-medium mb-3 leading-snug">Combo Site + Google Meu Negócio</h3>
-            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">Site profissional e gestão mensal do Google Meu Negócio juntos. O site é o destino — o Google Meu Negócio é o caminho. Uma presença digital completa a partir de um único parceiro.</p>
+            <p class="text-[14px] text-black/55 leading-[1.7] max-w-xl">A ficha no Maps traz o cliente até você — o site fecha o orçamento. Juntos, formam a presença digital completa que a oficina precisa: aparecer na busca local, transmitir profissionalismo e converter em ligação ou WhatsApp. Tudo com um único parceiro especializado em automotivo.</p>
             <div class="scard-icon">
               <svg viewBox="0 0 24 24" class="h-32 w-32 text-[#0066cc]" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M4 11h4l3-3 4 6 2-3h3"/>
@@ -811,13 +965,14 @@
               <span class="text-3xl font-medium tracking-tight">R$<span data-count="697" data-suffix="">0</span></span>
             </div>
             <p class="text-[11px] text-black/40 mb-1 -mt-1">pagamento único</p>
-            <p class="text-[13px] text-black/60 mt-3 leading-relaxed min-h-[64px] mb-6">Presença digital completa para quem está começando a aparecer online.</p>
+            <p class="text-[13px] text-black/60 mt-3 leading-relaxed min-h-[64px] mb-6">Para a oficina que quer estar online e começar a receber orçamentos pelo WhatsApp.</p>
             <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20tenho%20interesse%20no%20plano%20B%C3%A1sico!" target="_blank" rel="noreferrer" class="w-full py-2.5 rounded-[10px] bg-black/5 hover:bg-black/10 transition text-[14px] font-medium mb-6 text-center block">Escolher este plano</a>
             <ul class="text-[13px] text-black/70 space-y-3.5 flex-1">
               <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Site one page (6 seções)</li>
-              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Botão WhatsApp integrado</li>
-              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Galeria de serviços</li>
-              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Mapa Google incorporado</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Seção de serviços da oficina</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Galeria de fotos da rampa</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Botão WhatsApp para orçamento</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Mapa e localização integrados</li>
               <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Entrega em 5 dias úteis</li>
             </ul>
           </div>
@@ -830,13 +985,13 @@
               <span class="text-3xl font-medium tracking-tight text-white">R$<span data-count="1197" data-suffix="">0</span></span>
             </div>
             <p class="text-[11px] text-white/40 mb-1 -mt-1">pagamento único</p>
-            <p class="text-[13px] text-white/60 mt-3 leading-relaxed min-h-[64px] mb-6">Para oficinas que querem se destacar e crescer de forma consistente.</p>
+            <p class="text-[13px] text-white/60 mt-3 leading-relaxed min-h-[64px] mb-6">Para oficinas que querem se destacar no Google e receber mais clientes todo mês.</p>
             <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20tenho%20interesse%20no%20plano%20Padr%C3%A3o!" target="_blank" rel="noreferrer" class="w-full py-2.5 rounded-[10px] bg-white text-[#0f2d6b] hover:bg-white/90 transition text-[14px] font-medium mb-6 shadow-sm text-center block">Escolher este plano</a>
             <ul class="text-[13px] text-white/75 space-y-3.5 flex-1 relative z-10">
               <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Tudo do plano Básico</li>
-              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Até 3 páginas</li>
-              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> SEO básico configurado</li>
-              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Animações e micro-interações</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Até 3 páginas (serviços, sobre, contato)</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> SEO local configurado</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Avaliações do Google integradas</li>
               <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Domínio + hospedagem inclusos</li>
               <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Entrega em 12 dias úteis</li>
             </ul>
@@ -849,20 +1004,20 @@
               <span class="text-3xl font-medium tracking-tight">R$<span data-count="1597" data-suffix="">0</span></span>
             </div>
             <p class="text-[11px] text-black/40 mb-1 -mt-1">pagamento único</p>
-            <p class="text-[13px] text-black/60 mt-3 leading-relaxed min-h-[64px] mb-6">Para quem quer o melhor — design premium e estratégia completa de conversão.</p>
+            <p class="text-[13px] text-black/60 mt-3 leading-relaxed min-h-[64px] mb-6">Para a oficina que quer o máximo — site premium, copywriting automotivo e conversão otimizada.</p>
             <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20tenho%20interesse%20no%20plano%20Premium!" target="_blank" rel="noreferrer" class="w-full py-2.5 rounded-[10px] bg-black/5 hover:bg-black/10 transition text-[14px] font-medium mb-6 text-center block">Escolher este plano</a>
             <ul class="text-[13px] text-black/70 space-y-3.5 flex-1">
               <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Tudo do plano Padrão</li>
               <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Até 5 páginas</li>
-              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Copywriting estratégico</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Copywriting automotivo especializado</li>
               <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Design premium exclusivo</li>
-              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Estrutura de conversão otimizada</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Landing page de campanha inclusa</li>
             </ul>
           </div>
         </div>
 
         <!-- Mensal -->
-        <div id="plans-mensal" class="hidden grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
+        <div id="plans-mensal" class="hidden grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
           <!-- Google Meu Negócio -->
           <div data-anim class="border border-[#0f2d6b] rounded-[1.25rem] p-7 bg-[#0f2d6b] shadow-lg flex flex-col">
             <h3 class="text-lg font-semibold mb-2 text-white">Google Meu Negócio</h3>
@@ -871,14 +1026,14 @@
               <span class="text-white/40 text-[13px] mb-1">/mês</span>
             </div>
             <p class="text-[11px] text-white/40 mb-1 -mt-1">renovação mensal</p>
-            <p class="text-[13px] text-white/60 mt-3 leading-relaxed min-h-[64px] mb-6">Gestão contínua da sua ficha para aparecer mais nas buscas locais todo mês.</p>
+            <p class="text-[13px] text-white/60 mt-3 leading-relaxed min-h-[64px] mb-6">Sua ficha no Maps sempre atualizada e posicionada para trazer clientes todo mês.</p>
             <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20quero%20saber%20mais%20sobre%20o%20Google%20Meu%20Neg%C3%B3cio!" target="_blank" rel="noreferrer" class="w-full py-2.5 rounded-[10px] bg-white text-[#0f2d6b] hover:bg-white/90 transition text-[14px] font-medium mb-6 shadow-sm text-center block">Escolher este plano</a>
             <ul class="text-[13px] text-white/75 space-y-3.5 flex-1">
               <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Otimização mensal da ficha</li>
-              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Publicação de fotos e posts</li>
-              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Resposta a avaliações</li>
-              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Atualização de horários e serviços</li>
-              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Relatório mensal de desempenho</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Fotos da rampa e serviços</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Resposta a avaliações de clientes</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Atualização de serviços e horários</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-white/60 text-[16px]"></i> Relatório mensal de visualizações e ligações</li>
             </ul>
           </div>
 
@@ -890,14 +1045,16 @@
             </div>
             <p class="text-[11px] text-black/40 mb-1">gestão mensal + verba de anúncio</p>
             <p class="text-[13px] text-black/60 mt-3 leading-relaxed min-h-[64px] mb-6">Campanhas no Google para aparecer no topo quando o cliente pesquisar serviços automotivos na sua região.</p>
-            <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20quero%20saber%20mais%20sobre%20o%20Google%20Ads!" target="_blank" rel="noreferrer" class="w-full py-2.5 rounded-[10px] bg-black/5 hover:bg-black/10 transition text-[14px] font-medium mb-6 text-center block">Escolher este plano</a>
+            <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20quero%20anunciar%20minha%20oficina%20no%20Google%20Ads%20-%20plano%20mensal!" target="_blank" rel="noreferrer" class="w-full py-2.5 rounded-[10px] bg-black/5 hover:bg-black/10 transition text-[14px] font-medium mb-6 text-center block">Escolher este plano</a>
             <ul class="text-[13px] text-black/70 space-y-3.5 flex-1">
               <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Criação e configuração da campanha</li>
               <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Segmentação por cidade e região</li>
+              <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Palavras-chave automotivas</li>
               <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Otimização semanal</li>
               <li class="flex items-center gap-2.5"><i class="ph ph-check-circle text-black/30 text-[16px]"></i> Relatório mensal de resultado</li>
             </ul>
           </div>
+
         </div>
       </section>
 
@@ -909,16 +1066,16 @@
           const tabMensal = document.getElementById('tab-mensal');
 
           if (tab === 'unico') {
-            unico.classList.remove('hidden');
-            mensal.classList.add('hidden');
+            unico.style.display = 'grid';
+            mensal.style.display = 'none';
             tabUnico.classList.add('bg-white', 'shadow-sm', 'text-black');
             tabUnico.classList.remove('text-black/50');
             tabMensal.classList.remove('bg-white', 'shadow-sm', 'text-black');
             tabMensal.classList.add('text-black/50');
             unico.querySelectorAll('[data-count]').forEach(el => animateCount(el, parseFloat(el.dataset.count), el.dataset.suffix || '', 900));
           } else {
-            mensal.classList.remove('hidden');
-            unico.classList.add('hidden');
+            mensal.style.display = 'grid';
+            unico.style.display = 'none';
             tabMensal.classList.add('bg-white', 'shadow-sm', 'text-black');
             tabMensal.classList.remove('text-black/50');
             tabUnico.classList.remove('bg-white', 'shadow-sm', 'text-black');
@@ -927,6 +1084,153 @@
           }
         }
       </script>
+
+      <!-- Antes e Depois -->
+      <section class="max-w-5xl mx-auto px-4 py-16 w-full">
+        <div data-anim class="text-[13px] text-black/50 mb-2">Transformação real</div>
+        <h2 data-anim class="text-xl md:text-2xl font-normal mb-10">O que muda depois da RDCreator.</h2>
+
+        <div data-anim class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- Antes -->
+          <div class="rounded-2xl border border-black/10 bg-white overflow-hidden">
+            <div class="px-6 py-4 border-b border-black/10 flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-black/30"></div>
+              <span class="text-[13px] font-semibold text-black/40 uppercase tracking-widest">Antes</span>
+            </div>
+            <div class="p-6 flex flex-col gap-4 font-sans">
+              <!-- Ficha Google sem otimização -->
+              <div class="bg-white rounded-xl border border-black/8 overflow-hidden shadow-sm">
+                <div class="h-16 relative overflow-hidden bg-white border-b border-black/8">
+                  <div class="absolute inset-0 flex items-center justify-center flex-col gap-1">
+                    <i class="ph ph-image text-black/15 text-2xl"></i>
+                    <span class="text-[9px] text-black/25 font-sans">Sem foto de capa</span>
+                  </div>
+                </div>
+                <div class="p-3">
+                  <p class="text-[12px] font-semibold text-black/40">Oficina RDCarros</p>
+                  <div class="flex items-center gap-1 mt-1">
+                    <span class="text-[10px] text-black/30">3,2</span>
+                    <span class="text-[10px]"><span class="text-yellow-400">★★★</span><span class="text-black/20">★★</span></span>
+                    <span class="text-[9px] text-black/30">(4 avaliações)</span>
+                  </div>
+                  <p class="text-[10px] text-black/30 mt-0.5">Última atualização: há 2 anos</p>
+                  <div class="flex gap-2 mt-2">
+                    <div class="flex-1 bg-black/5 rounded-full py-1 text-center text-[9px] text-black/30">Ligar</div>
+                    <div class="flex-1 bg-black/5 rounded-full py-1 text-center text-[9px] text-black/30">Rota</div>
+                  </div>
+                </div>
+              </div>
+              <ul class="text-[13px] text-black/50 space-y-2.5">
+                <li class="flex items-center gap-2"><i class="ph-bold ph-x-circle text-black/30"></i> Ficha abandonada sem fotos</li>
+                <li class="flex items-center gap-2"><i class="ph-bold ph-x-circle text-black/30"></i> Poucas avaliações, nota baixa</li>
+                <li class="flex items-center gap-2"><i class="ph-bold ph-x-circle text-black/30"></i> Não aparece nas buscas locais</li>
+                <li class="flex items-center gap-2"><i class="ph-bold ph-x-circle text-black/30"></i> Sem site profissional</li>
+                <li class="flex items-center gap-2"><i class="ph-bold ph-x-circle text-black/30"></i> 0 ligações pelo Google por mês</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Depois -->
+          <div class="rounded-2xl border-2 border-[#0066cc] bg-white overflow-hidden">
+            <div class="px-6 py-4 border-b-2 border-[#0066cc] flex items-center gap-2" style="background:#0066cc;">
+              <div class="w-2 h-2 rounded-full bg-white"></div>
+              <span class="text-[13px] font-semibold text-white uppercase tracking-widest">Depois</span>
+            </div>
+            <div class="p-6 flex flex-col gap-4 font-sans">
+              <!-- Ficha Google otimizada -->
+              <div class="bg-white rounded-xl border border-black/8 overflow-hidden shadow-sm">
+                <div class="h-16 relative overflow-hidden" style="background:linear-gradient(135deg,#0055b3 0%,#0066cc 60%,#1a8fff 100%);">
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <img src="/logo_aut_nb_white.png" style="height:28px;width:auto;object-fit:contain;opacity:0.95;">
+                  </div>
+                  <div class="absolute bottom-1.5 right-2 flex items-center gap-1">
+                    <div class="w-5 h-5 bg-white/20 rounded flex items-center justify-center"><i class="ph-fill ph-wrench text-white" style="font-size:9px;"></i></div>
+                    <div class="w-5 h-5 bg-white/20 rounded flex items-center justify-center"><i class="ph-fill ph-car text-white" style="font-size:9px;"></i></div>
+                  </div>
+                </div>
+                <div class="p-3">
+                  <div class="flex items-center gap-2">
+                    <p class="text-[12px] font-semibold text-black">Oficina RDCarros</p>
+                    <span class="text-[8px] bg-[#0066cc]/10 text-[#0066cc] px-1.5 py-0.5 rounded font-medium">Verificado</span>
+                  </div>
+                  <div class="flex items-center gap-1 mt-1">
+                    <span class="text-[10px] font-bold text-[#e67700]">4,9</span>
+                    <span class="text-[10px] text-yellow-400">★★★★★</span>
+                    <span class="text-[9px] text-black/40">(247 avaliações)</span>
+                  </div>
+                  <p class="text-[10px] text-green-600 mt-0.5 font-medium">● Aberto agora · Mecânica · Funilaria</p>
+                  <div class="flex gap-2 mt-2">
+                    <div class="flex-1 bg-[#e8f0fe] rounded-full py-1 text-center text-[9px] text-[#0066cc] font-medium">Ligar</div>
+                    <div class="flex-1 bg-[#e8f0fe] rounded-full py-1 text-center text-[9px] text-[#0066cc] font-medium">Rota</div>
+                    <div class="flex-1 bg-[#e8f0fe] rounded-full py-1 text-center text-[9px] text-[#0066cc] font-medium">Site</div>
+                  </div>
+                </div>
+              </div>
+              <ul class="text-[13px] text-black/70 space-y-2.5">
+                <li class="flex items-center gap-2"><i class="ph-bold ph-check-circle text-[#0066cc]"></i> Fotos profissionais da rampa</li>
+                <li class="flex items-center gap-2"><i class="ph-bold ph-check-circle text-[#0066cc]"></i> <span>4,9<span class="text-yellow-400">★</span> com centenas de avaliações</span></li>
+                <li class="flex items-center gap-2"><i class="ph-bold ph-check-circle text-[#0066cc]"></i> Top 3 nas buscas locais</li>
+                <li class="flex items-center gap-2"><i class="ph-bold ph-check-circle text-[#0066cc]"></i> Site profissional integrado</li>
+                <li class="flex items-center gap-2"><i class="ph-bold ph-check-circle text-[#0066cc]"></i> 40+ ligações pelo Google por mês</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Depoimentos -->
+      <section class="max-w-5xl mx-auto px-4 py-12 w-full">
+        <div data-anim class="text-[13px] text-black/50 mb-2">O que dizem os donos de oficina</div>
+        <h2 data-anim class="text-xl md:text-2xl font-normal mb-10">Resultados reais, na fala de quem viveu.</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+          <div data-anim class="bg-white rounded-2xl p-6 border border-black/8 shadow-sm flex flex-col gap-4">
+            <div class="flex gap-0.5 text-[#fbbc04] text-sm">★★★★★</div>
+            <p class="text-[14px] text-black/70 leading-relaxed flex-1">"Antes eu não aparecia no Google nem quando pesquisavam o nome da minha oficina. Hoje recebo em média 3 ligações por dia de clientes novos."</p>
+            <div class="flex items-center gap-3 mt-2">
+              <div class="w-9 h-9 rounded-full bg-[#0066cc]/10 flex items-center justify-center shrink-0">
+                <span class="text-[14px] font-bold text-[#0066cc]">M</span>
+              </div>
+              <div>
+                <div class="text-[13px] font-semibold text-black">Marcos R.</div>
+                <div class="text-[11px] text-black/40">Oficina mecânica · Campinas/SP</div>
+              </div>
+            </div>
+          </div>
+
+          <div data-anim class="bg-white rounded-2xl p-6 border border-black/8 shadow-sm flex flex-col gap-4">
+            <div class="flex gap-0.5 text-[#fbbc04] text-sm">★★★★★</div>
+            <p class="text-[14px] text-black/70 leading-relaxed flex-1">"Minha ficha no Google estava abandonada há anos. Em 30 dias com a RDCreator já estava no top 3 de funilaria na cidade. Valeu cada centavo."</p>
+            <div class="flex items-center gap-3 mt-2">
+              <div class="w-9 h-9 rounded-full bg-[#0066cc]/10 flex items-center justify-center shrink-0">
+                <span class="text-[14px] font-bold text-[#0066cc]">A</span>
+              </div>
+              <div>
+                <div class="text-[13px] font-semibold text-black">Anderson L.</div>
+                <div class="text-[11px] text-black/40">Funilaria e Pintura · Sorocaba/SP</div>
+              </div>
+            </div>
+          </div>
+
+          <div data-anim class="bg-white rounded-2xl p-6 border border-black/8 shadow-sm flex flex-col gap-4">
+            <div class="flex gap-0.5 text-[#fbbc04] text-sm">★★★★★</div>
+            <p class="text-[14px] text-black/70 leading-relaxed flex-1">"Achei que site era coisa de loja grande. Mas meu site ficou profissional, carrega rápido e já trouxe cliente da região que nem sabia que eu existia."</p>
+            <div class="flex items-center gap-3 mt-2">
+              <div class="w-9 h-9 rounded-full bg-[#0066cc]/10 flex items-center justify-center shrink-0">
+                <span class="text-[14px] font-bold text-[#0066cc]">R</span>
+              </div>
+              <div>
+                <div class="text-[13px] font-semibold text-black">Roberto S.</div>
+                <div class="text-[11px] text-black/40">Elétrica Automotiva · Limeira/SP</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
 
       <!-- FAQ Section -->
       <section id="faq" class="max-w-2xl mx-auto px-4 py-20 pb-28 w-full">
@@ -980,7 +1284,7 @@
               <h4 class="text-[15px] font-medium">Posso ver o trabalho antes de contratar?</h4>
               <i class="ph ph-caret-down text-black/40 group-open:rotate-180 transition-transform"></i>
             </summary>
-            <p class="mt-3 text-[13px] text-black/55 leading-relaxed">Sim. Entre em contato pelo WhatsApp e peço cases de clientes reais como a Genuína Automotivo e Auto Ar Shop. Você vê o resultado antes de decidir — sem pressão.</p>
+            <p class="mt-3 text-[13px] text-black/55 leading-relaxed">Sim. Entre em contato pelo WhatsApp e compartilhamos cases de oficinas reais — você vê o site no ar, a ficha no Maps e os resultados antes de decidir. Sem pressão, sem compromisso.</p>
           </details>
 
           <details data-anim class="group py-5">
@@ -989,6 +1293,22 @@
               <i class="ph ph-caret-down text-black/40 group-open:rotate-180 transition-transform"></i>
             </summary>
             <p class="mt-3 text-[13px] text-black/55 leading-relaxed">Manda uma mensagem no WhatsApp. A gente conversa sobre sua oficina, o que você já tem (site, ficha, redes), o que quer melhorar e qual plano faz mais sentido. Sem compromisso e sem enrolação.</p>
+          </details>
+
+          <details data-anim class="group py-5">
+            <summary class="flex justify-between items-center cursor-pointer list-none">
+              <h4 class="text-[15px] font-medium">Já tentei fazer sozinho e não funcionou. Por que seria diferente?</h4>
+              <i class="ph ph-caret-down text-black/40 group-open:rotate-180 transition-transform"></i>
+            </summary>
+            <p class="mt-3 text-[13px] text-black/55 leading-relaxed">Fazer o básico é fácil — criar o perfil, colocar o endereço. O que faz diferença é o que vem depois: palavras-chave certas para mecânica na sua região, fotos otimizadas, publicações periódicas, resposta estratégica às avaliações. Isso exige conhecimento de SEO local aplicado ao setor automotivo, que é o que fazemos todos os dias.</p>
+          </details>
+
+          <details data-anim class="group py-5">
+            <summary class="flex justify-between items-center cursor-pointer list-none">
+              <h4 class="text-[15px] font-medium">Não entendo nada de internet. Consigo acompanhar?</h4>
+              <i class="ph ph-caret-down text-black/40 group-open:rotate-180 transition-transform"></i>
+            </summary>
+            <p class="mt-3 text-[13px] text-black/55 leading-relaxed">Sim — e essa é exatamente a ideia. Você cuida da oficina, a gente cuida do digital. Não precisa saber nada de site, SEO ou Google. Você recebe relatório mensal simples mostrando quantas pessoas viram sua oficina, quantas ligaram e como está o desempenho. Se tiver dúvida, é só chamar no WhatsApp.</p>
           </details>
 
         </div>
@@ -1035,7 +1355,7 @@
 
         <div class="flex flex-col gap-3 font-normal">
           <span class="text-black/40 text-[12px] mb-2 font-medium tracking-wide font-sans">Contato</span>
-          <a href="https://wa.me/5519994175385" target="_blank" rel="noreferrer" class="text-[13px] text-black/75 hover:text-[#0066cc] transition-colors">WhatsApp</a>
+          <a href="https://wa.me/5519994175385?text=Ol%C3%A1%2C%20vim%20pelo%20site%20e%20quero%20saber%20mais%20sobre%20presença%20digital%20para%20minha%20oficina!" target="_blank" rel="noreferrer" class="text-[13px] text-black/75 hover:text-[#0066cc] transition-colors">WhatsApp</a>
           <a href="https://instagram.com/rdcreator" target="_blank" rel="noreferrer" class="text-[13px] text-black/75 hover:text-[#0066cc] transition-colors">Instagram</a>
           <a href="mailto:contato@ryancreator.dev" class="text-[13px] text-black/75 hover:text-[#0066cc] transition-colors">E-mail</a>
         </div>
@@ -1049,20 +1369,34 @@
 
       <!-- Bottom bar -->
       <div class="max-w-5xl mx-auto w-full border-t border-black/5 py-4 px-4 flex items-center">
-        <p class="text-[11px] text-black/35 font-normal">&copy; 2026 <a href="https://ryancreator.dev" target="_blank" rel="noreferrer" class="text-[#0066cc] hover:underline transition-colors font-medium">RDCreator</a>. Todos os direitos reservados.</p>
+        <p class="text-[11px] text-black/35 font-normal">&copy; 2026 <a href="https://ryancreator.dev/portifolio" target="_blank" rel="noreferrer" class="text-[#0066cc] hover:underline transition-colors font-medium">RDCreator</a>. Todos os direitos reservados.</p>
       </div>
     </div>
   </main>
 
   <script>
     // Fade + slide-up — repete ao entrar/sair
-    const observer = new IntersectionObserver((entries) => {
+    const observerShow = new IntersectionObserver((entries) => {
       entries.forEach(e => {
-        if (e.isIntersecting) e.target.classList.add('visible');
-        else e.target.classList.remove('visible');
+        if (!e.isIntersecting) return;
+        const el = e.target;
+        el.classList.add('visible');
+        observerShow.unobserve(el);
+        setTimeout(() => observerHide.observe(el), 800);
       });
-    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
-    document.querySelectorAll('[data-anim]').forEach(el => observer.observe(el));
+    }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
+
+    const observerHide = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) return;
+        const el = e.target;
+        el.classList.remove('visible');
+        observerHide.unobserve(el);
+        setTimeout(() => observerShow.observe(el), 100);
+      });
+    }, { threshold: 0, rootMargin: '100px 0px 100px 0px' });
+
+    document.querySelectorAll('[data-anim]').forEach(el => observerShow.observe(el));
 
     // Underline hero — on load
     const underline = document.getElementById('underline-path');
@@ -1087,6 +1421,9 @@
                 underlineFeatures.style.strokeDashoffset = '0';
               }, 50);
             });
+          } else {
+            underlineFeatures.style.transition = 'none';
+            underlineFeatures.style.strokeDashoffset = '210';
           }
         });
       }, { threshold: 0.5 });
