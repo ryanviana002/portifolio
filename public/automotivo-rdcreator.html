@@ -161,11 +161,198 @@
         </div>
 
         <div data-anim class="mt-14 mb-8 sm:mb-12 flex w-full flex-col justify-center items-center">
-          <img src="https://aqryl.app/_next/image?url=%2Flanding%2Fhero_illustration.webp&w=3840&q=75" alt="RD Creator no celular" width="600" height="800" class="h-auto max-h-[min(66vh,580px)] w-auto max-w-[90%] sm:max-w-[26rem] object-contain drop-shadow-2xl">
+          <!-- iPhone Mockup Real -->
+          <div style="position:relative;width:900px;height:600px;flex-shrink:0;left:-10px;">
+
+            <!-- tela CSS — posicionada para encaixar no iPhone frontal -->
+            <div style="position:absolute;top:11.2%;left:39.5%;width:23%;height:74.8%;overflow:hidden;transform:none;border-radius:3px;background:#f5f5f7;display:flex;flex-direction:column;z-index:2;">
+
+              <div style="position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;border-radius:3px;z-index:0;display:flex;flex-direction:column;">
+
+              <!-- Banner de ligação dentro do overflow:hidden — desce de cima -->
+              <div id="call-banner" style="position:absolute;top:-80px;left:4px;right:4px;z-index:20;background:rgba(30,30,30,0.96);border-radius:12px;padding:9px 11px;display:flex;align-items:flex-start;gap:9px;box-shadow:0 6px 18px rgba(0,0,0,0.4);transition:top 0.5s cubic-bezier(0.16,1,0.3,1);">
+                <div style="width:32px;height:32px;background:#0066cc;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:10px;">
+                  <img src="/logo_aut_nb_white.png" style="width:22px;height:auto;object-fit:contain;">
+                </div>
+                <div style="flex:1;min-width:0;margin-top:10px;">
+                  <div style="font-size:8px;color:rgba(255,255,255,0.5);font-family:sans-serif;">Ligação recebida</div>
+                  <div id="call-number" style="font-size:11px;font-weight:700;color:#ffffff;font-family:sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">+55 (19) 9 8765-4321</div>
+                </div>
+                <div style="display:flex;gap:6px;flex-shrink:0;margin-top:10px;">
+                  <div id="call-decline" style="width:26px;height:26px;background:#ff3b30;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" transform="rotate(135 12 12)"/></svg>
+                  </div>
+                  <div id="call-accept" style="width:26px;height:26px;background:#34c759;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Map pequeno -->
+              <div style="position:relative;height:60px;background:#e8eaed;overflow:hidden;flex-shrink:0;">
+                <div style="position:absolute;top:45%;left:0;right:0;height:12px;background:#fff;opacity:0.9;"></div>
+                <div style="position:absolute;top:0;bottom:0;left:38%;width:9px;background:#fff;opacity:0.9;"></div>
+                <div style="position:absolute;top:20%;left:0;right:0;height:7px;background:#fff;opacity:0.55;transform:rotate(-6deg);transform-origin:left;"></div>
+                <div style="position:absolute;top:0;bottom:0;left:68%;width:6px;background:#fff;opacity:0.55;"></div>
+                <div style="position:absolute;top:8%;left:4%;width:28%;height:28%;background:#d5d8dc;border-radius:3px;"></div>
+                <div style="position:absolute;top:58%;left:4%;width:28%;height:32%;background:#d5d8dc;border-radius:3px;"></div>
+                <div style="position:absolute;top:8%;left:50%;width:14%;height:22%;background:#d5d8dc;border-radius:3px;"></div>
+                <div style="position:absolute;top:58%;left:50%;width:14%;height:28%;background:#d5d8dc;border-radius:3px;"></div>
+                <div style="position:absolute;top:8%;left:74%;width:22%;height:28%;background:#d5d8dc;border-radius:3px;"></div>
+                <!-- pin -->
+                <div style="position:absolute;top:20%;left:32%;transform:translateX(-50%);">
+                  <div style="width:24px;height:24px;background:#4285f4;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(66,133,244,0.5);display:flex;align-items:center;justify-content:center;">
+                    <div style="transform:rotate(45deg);width:8px;height:8px;background:#fff;border-radius:50%;"></div>
+                  </div>
+                </div>
+                <div style="position:absolute;top:20%;left:32%;transform:translateX(-50%) translateY(6px);width:24px;height:24px;border-radius:50%;background:rgba(66,133,244,0.2);animation:mapPulse 2s ease-out infinite;"></div>
+              </div>
+
+              <!-- Business info -->
+              <div style="background:#fff;padding:10px 12px 8px;border-bottom:1px solid #f0f0f0;flex-shrink:0;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                  <div style="width:32px;height:32px;background:#0066cc;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <img src="/logo_aut_nb_white.png" style="width:22px;height:auto;object-fit:contain;">
+                  </div>
+                  <div>
+                    <div style="font-size:11px;font-weight:700;color:#202124;font-family:sans-serif;line-height:1.2;">Oficina RDCar</div>
+                    <div style="font-size:9px;color:#70757a;font-family:sans-serif;">Mecânica Automotiva · Aberto agora</div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:5px;">
+                  <span style="font-size:12px;font-weight:700;color:#202124;font-family:sans-serif;">4.9</span>
+                  <div style="display:flex;gap:1px;">
+                    <span style="color:#fbbc04;font-size:11px;">★★★★★</span>
+                  </div>
+                  <span style="font-size:9px;color:#70757a;font-family:sans-serif;">(<span id="mock-reviews">247</span> avaliações)</span>
+                </div>
+              </div>
+
+              <!-- Dashboard stats -->
+              <div style="flex:1;padding:12px 14px;display:flex;flex-direction:column;gap:10px;overflow:hidden;">
+
+                <div style="font-size:10px;font-weight:700;color:#70757a;font-family:sans-serif;text-transform:uppercase;letter-spacing:0.06em;">Desempenho — este mês</div>
+
+                <!-- views -->
+                <div style="background:#fff;border-radius:12px;padding:12px 14px;">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:7px;">
+                    <span style="font-size:11px;color:#70757a;font-family:sans-serif;">Visualizações no Maps</span>
+                    <span style="font-size:18px;font-weight:800;color:#0066cc;font-family:sans-serif;" id="mock-views">1.847</span>
+                  </div>
+                  <div style="height:5px;background:#f0f0f0;border-radius:4px;overflow:hidden;">
+                    <div id="mock-bar-views" style="height:100%;width:74%;background:linear-gradient(90deg,#0066cc,#4dabf7);border-radius:4px;transition:width 1.2s ease;"></div>
+                  </div>
+                  <div style="font-size:10px;color:#188038;font-family:sans-serif;margin-top:4px;font-weight:500;">↑ 38% vs mês anterior</div>
+                </div>
+
+                <!-- calls -->
+                <div style="background:#fff;border-radius:12px;padding:12px 14px;">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:7px;">
+                    <span style="font-size:11px;color:#70757a;font-family:sans-serif;">Ligações recebidas</span>
+                    <span style="font-size:18px;font-weight:800;color:#188038;font-family:sans-serif;" id="mock-calls">38</span>
+                  </div>
+                  <div style="height:5px;background:#f0f0f0;border-radius:4px;overflow:hidden;">
+                    <div id="mock-bar-calls" style="height:100%;width:55%;background:linear-gradient(90deg,#188038,#34d058);border-radius:4px;transition:width 1.2s ease;"></div>
+                  </div>
+                  <div style="font-size:10px;color:#188038;font-family:sans-serif;margin-top:4px;font-weight:500;">↑ 52% vs mês anterior</div>
+                </div>
+
+                <!-- reviews -->
+                <div style="background:#fff;border-radius:12px;padding:12px 14px;">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px;">
+                    <span style="font-size:11px;color:#70757a;font-family:sans-serif;">Novas avaliações</span>
+                    <span style="font-size:18px;font-weight:800;color:#fbbc04;font-family:sans-serif;" id="mock-new-reviews">+12</span>
+                  </div>
+                  <div style="display:flex;gap:3px;align-items:flex-end;">
+                    <div style="height:18px;width:14%;background:#fbbc04;border-radius:3px;opacity:0.5;"></div>
+                    <div style="height:24px;width:14%;background:#fbbc04;border-radius:3px;opacity:0.6;"></div>
+                    <div style="height:16px;width:14%;background:#fbbc04;border-radius:3px;opacity:0.5;"></div>
+                    <div style="height:28px;width:14%;background:#fbbc04;border-radius:3px;opacity:0.7;"></div>
+                    <div style="height:20px;width:14%;background:#fbbc04;border-radius:3px;opacity:0.6;"></div>
+                    <div id="mock-bar-rev" style="height:32px;width:14%;background:#fbbc04;border-radius:3px;transition:height 1.2s ease;"></div>
+                  </div>
+                </div>
+
+              </div>
+              </div><!-- fim div interna overflow:hidden -->
+
+            </div>
+            <!-- iPhone frame por cima -->
+            <img src="/iphone_luva.png" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;pointer-events:none;z-index:10;">
+          </div>
+
           <p class="mt-8 max-w-md text-center text-[13px] text-black/45 leading-relaxed">
             Especialista em presença digital automotiva. Transformamos buscas em veículos na sua rampa.
           </p>
         </div>
+
+        <style>
+          @keyframes mapPulse {
+            0% { transform: translateX(-50%) translateY(8px) scale(1); opacity:0.6; }
+            100% { transform: translateX(-50%) translateY(8px) scale(2.5); opacity:0; }
+          }
+        </style>
+        <script>
+          (function(){
+            var reviews = 247, views = 1847, calls = 38, newRevs = 12;
+            setInterval(function(){
+              reviews += Math.floor(Math.random()*2);
+              views += Math.floor(Math.random()*6 + 2);
+              calls += Math.floor(Math.random()*2);
+              newRevs += Math.random() > 0.6 ? 1 : 0;
+              var el = document.getElementById('mock-reviews');
+              var elv = document.getElementById('mock-views');
+              var elc = document.getElementById('mock-calls');
+              var elnr = document.getElementById('mock-new-reviews');
+              var barV = document.getElementById('mock-bar-views');
+              var barC = document.getElementById('mock-bar-calls');
+              var barR = document.getElementById('mock-bar-rev');
+              if(el) el.textContent = reviews;
+              if(elv) elv.textContent = views.toLocaleString('pt-BR');
+              if(elc) elc.textContent = calls;
+              if(elnr) elnr.textContent = '+' + newRevs;
+              if(barV) barV.style.width = Math.min(74 + (views-1847)/80, 95) + '%';
+              if(barC) barC.style.width = Math.min(55 + (calls-38)/2, 90) + '%';
+              if(barR) barR.style.height = Math.min(28 + (newRevs-12)*2, 48) + 'px';
+            }, 1800);
+          })();
+
+          // Banner de ligação
+          (function(){
+            var banner = document.getElementById('call-banner');
+            var accept = document.getElementById('call-accept');
+            var decline = document.getElementById('call-decline');
+            var phones = ['+55 (19) 9 8234-5678','+55 (11) 9 9123-4567','+55 (19) 9 7654-3210','+55 (21) 9 8877-6655'];
+            var showing = false;
+
+            function showBanner() {
+              if(showing) return;
+              showing = true;
+              document.getElementById('call-number').textContent = phones[Math.floor(Math.random()*phones.length)];
+              banner.style.top = '6px';
+              setTimeout(function(){
+                if(!showing) return;
+                hideBanner();
+              }, 6000);
+            }
+
+            function hideBanner() {
+              banner.style.top = '-60px';
+              showing = false;
+              // Incrementa ligações
+              var elc = document.getElementById('mock-calls');
+              if(elc) elc.textContent = parseInt(elc.textContent) + 1;
+              // Próxima ligação em 6-10s
+              setTimeout(showBanner, 6000 + Math.random()*4000);
+            }
+
+            if(accept) accept.addEventListener('click', hideBanner);
+            if(decline) decline.addEventListener('click', hideBanner);
+
+            // Primeira ligação após 4s
+            setTimeout(showBanner, 4000);
+          })();
+        </script>
       </section>
 
       <!-- Features Carousel -->
