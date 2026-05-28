@@ -866,18 +866,10 @@ async function jobRelatorioPresenca(force = false) {
   } else {
     // Busca a data mais recente do Forms que seja nos últimos 7 dias (BRT)
     const brt = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
-    const limite = new Date(brt); limite.setDate(limite.getDate() - 7);
-    const datasRecentes = rows
-      .filter(r => r[0])
-      .map(r => r[0].split(' ')[0])
-      .filter(d => {
-        const [dia, mes, ano] = d.split('/');
-        const dt = new Date(`${ano}-${mes}-${dia}`);
-        return dt >= limite && dt < brt;
-      });
-    if (!datasRecentes.length) { console.log('[presenca] nenhum encontro nos últimos 7 dias — nada enviado'); return; }
-    // Pega a mais recente
-    dataAlvo = datasRecentes.sort().pop();
+    const hoje = `${String(brt.getDate()).padStart(2,'0')}/${String(brt.getMonth()+1).padStart(2,'0')}/${brt.getFullYear()}`;
+    const temHoje = rows.some(r => r[0] && r[0].split(' ')[0] === hoje);
+    if (!temHoje) { console.log(`[presenca] nenhum encontro hoje (${hoje}) — nada enviado`); return; }
+    dataAlvo = hoje;
     console.log('[presenca] data encontro detectada:', dataAlvo);
   }
 
@@ -921,7 +913,7 @@ const semCadastro = doUltimoEncontro.filter(r => {
     return `• *${nome}*\n  ${numero || 'sem número'} — ${status}`;
   });
 
-  const mensagem = `📋 *Hangout — ${dataAlvo}*\n\n${linhas.join('\n\n')}`;
+  const mensagem = `📋 *Hangout — ${dataAlvo}*\n👥 *${doUltimoEncontro.length} presentes*\n\n${linhas.join('\n\n')}`;
 
   if (!EVOLUTION_URL || !EVOLUTION_KEY) { console.error('[presenca] EVOLUTION_URL/KEY não configurados'); return; }
 
@@ -935,8 +927,8 @@ const semCadastro = doUltimoEncontro.filter(r => {
 }
 
 // ─── Agendamentos (UTC, Brasília = UTC-3) ────────────────────────────────────
-cron.schedule('0 15 * * 1', jobRelatorioPresenca);   // seg 12h BRT
-cron.schedule('15 15 * * 1', jobAtualizarMembros);   // seg 12h15 BRT
+cron.schedule('30 23 * * 6', jobRelatorioPresenca);  // sab 20h30 BRT
+cron.schedule('0 11 * * 1', jobAtualizarMembros);    // seg 8h BRT
 cron.schedule('30 10 * * 1-6', jobBuscar);
 cron.schedule('0 11 * * 1-6', () => { setTimeout(() => jobDisparoLote(LIMITE_MANHA), Math.floor(Math.random() * 20 * 60 * 1000)); });
 cron.schedule('0 16 * * 1-5', () => { setTimeout(() => jobDisparoLote(LIMITE_TARDE), Math.floor(Math.random() * 20 * 60 * 1000)); });
