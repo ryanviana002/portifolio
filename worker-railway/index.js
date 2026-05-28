@@ -737,11 +737,15 @@ async function jobAtualizarMembros(force = false) {
     const rd = await r.json();
     if (!r.ok) { console.error('[membros] erro append:', JSON.stringify(rd)); }
     else {
-      // Aplica bordas nas linhas inseridas
-      const match = rd.replies?.[0]?.appendCells;
-      const lastRow = rd.updates?.updatedRange?.match(/(\d+)$/)?.[1];
-      if (lastRow) {
-        const startRow = parseInt(lastRow) - novos.length;
+      // Descobre a primeira linha inserida lendo quantas linhas existem após o append
+      const countRes = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}?ranges=${encodeURIComponent(MEMBERS_TAB+'!C:C')}&fields=sheets.data.rowData`,
+        { headers: authHdr }
+      );
+      const countData = await countRes.json();
+      const totalLinhas = (countData.sheets?.[0]?.data?.[0]?.rowData || []).length;
+      const startRow = totalLinhas - novos.length;
+      if (startRow > 0) {
         const borderReqs = [
           // Bordas de cada linha
           ...novos.map((_, i) => ({
