@@ -655,9 +655,9 @@ async function jobAtualizarMembros(force = false) {
       }
       match.foiNoUltimo = true;
     } else {
-      // C=nome, D=tel, E=link, F=freq, G=último encontro, H=sistema, I=HG, J=C17
+      // C=nome, D=tel, E=link, F=freq, G=último encontro, H=sistema, I=nova, J=nova, K=HG, L=C17
       const notaNovo = todasDatas.map(d => (d === dataAlvo ? `✅ ${d}${primeiraVez ? ' (primeira vez)' : ''}` : `❌ ${d}`)).join('\n');
-      novos.push([nomeForm, telForm, telForm ? `https://wa.me/55${telForm}` : '', 1, 'SIM', temCadastro ? 'SIM' : 'NÃO', '', '', notaNovo]);
+      novos.push([nomeForm, telForm, telForm ? `https://wa.me/55${telForm}` : '', 1, 'SIM', temCadastro ? 'SIM' : 'NÃO', '', '', '', '', notaNovo]);
       console.log(`[membros] + novo: ${nomeForm}`);
     }
   }
@@ -702,7 +702,7 @@ async function jobAtualizarMembros(force = false) {
         },
         {                                                                            // F — freq + nota
           userEnteredValue: { numberValue: novo[3] },
-          note: novo[8],
+          note: novo[10],
           userEnteredFormat: {
             textFormat: { bold: true, fontSize: 12 },
             horizontalAlignment: 'CENTER', verticalAlignment: 'MIDDLE',
@@ -716,11 +716,13 @@ async function jobAtualizarMembros(force = false) {
           userEnteredValue: { stringValue: novo[5] },
           userEnteredFormat: { textFormat: { bold: true }, horizontalAlignment: 'CENTER', verticalAlignment: 'MIDDLE' },
         },
-        {                                                                            // I — HG
+        {},                                                                          // I — nova (vazio)
+        {},                                                                          // J — nova (vazio)
+        {                                                                            // K — HG
           userEnteredValue: { stringValue: novo[6] },
           userEnteredFormat: { horizontalAlignment: 'CENTER', verticalAlignment: 'MIDDLE' },
         },
-        {                                                                            // J — C17
+        {                                                                            // L — C17
           userEnteredValue: { stringValue: novo[7] },
           userEnteredFormat: { horizontalAlignment: 'CENTER', verticalAlignment: 'MIDDLE' },
         },
@@ -744,7 +746,7 @@ async function jobAtualizarMembros(force = false) {
           // Bordas de cada linha
           ...novos.map((_, i) => ({
             updateBorders: {
-              range: { sheetId: MEMBERS_GID, startRowIndex: startRow + i, endRowIndex: startRow + i + 1, startColumnIndex: 1, endColumnIndex: 10 },
+              range: { sheetId: MEMBERS_GID, startRowIndex: startRow + i, endRowIndex: startRow + i + 1, startColumnIndex: 1, endColumnIndex: 12 },
               top: bordaFina, bottom: bordaFina, left: bordaGrossa, right: bordaGrossa,
               innerHorizontal: bordaFina, innerVertical: bordaFina,
             },
@@ -767,7 +769,7 @@ async function jobAtualizarMembros(force = false) {
   }
   // Conta datas únicas do Forms = total real de encontros (reutiliza todasDatas já buscado)
   const totalEncontros = todasDatas.length;
-  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!L5')}?valueInputOption=RAW`, {
+  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${MEMBERS_ID}/values/${encodeURIComponent(MEMBERS_TAB+'!N5')}?valueInputOption=RAW`, {
     method: 'PUT', headers: authHdr, body: JSON.stringify({ values: [[totalEncontros]] }),
   });
   console.log(`[membros] total encontros: ${totalEncontros}`);
