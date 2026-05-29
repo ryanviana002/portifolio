@@ -333,6 +333,9 @@ async function jobBuscar() {
 
   const estoque = await sbFetch('/wa_prospects?status=eq.pending&select=id').catch(() => []);
   const estoqueAtual = Array.isArray(estoque) ? estoque.length : 0;
+  if (estoqueAtual < 5) {
+    await alertar(`⚠️ Estoque de prospects baixo (${estoqueAtual} pending). Ative a API do Google Places para buscar novos.`);
+  }
   if (estoqueAtual >= 50) {
     console.log(`Estoque ok (${estoqueAtual} pending) — pulando busca.`);
     return;
