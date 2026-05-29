@@ -353,6 +353,18 @@ async function jobBuscar() {
     return;
   }
 
+  // Trava de prospects salvos por dia
+  const brtHojeP = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+  const inicioDiaP = new Date(brtHojeP); inicioDiaP.setHours(0,0,0,0);
+  const diffP = new Date() - brtHojeP;
+  const inicioDiaUTCP = new Date(inicioDiaP.getTime() - diffP);
+  const salvosHoje = await sbFetch(`/wa_prospects?status=eq.pending&created_at=gte.${inicioDiaUTCP.toISOString()}&select=id`).catch(() => []);
+  const totalSalvosHoje = Array.isArray(salvosHoje) ? salvosHoje.length : 0;
+  if (totalSalvosHoje >= 30) {
+    console.log(`[buscar] limite diário de 30 prospects salvos atingido (${totalSalvosHoje}) — abortando.`);
+    return;
+  }
+
   const dispararHoje = await contarDisparosHoje();
   const vagas = LIMITE_DIA - dispararHoje;
   if (vagas <= 0) { console.log('Limite diário atingido.'); return; }
