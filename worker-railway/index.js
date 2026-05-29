@@ -185,7 +185,18 @@ async function buscarProspects(categoria, cidades) {
       }).then(r => r.json()).then(d => d.places || []).catch(() => [])
     )
   );
-  const todos = (await Promise.all(chamadas)).flat();
+  const resultados = await Promise.all(chamadas);
+  const todos = resultados.flat();
+
+  // Registra chamadas no contador diário
+  const brtNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+  const chaveCount = `places_calls_${brtNow.getFullYear()}-${String(brtNow.getMonth()+1).padStart(2,'0')}-${String(brtNow.getDate()).padStart(2,'0')}`;
+  const rowCount = await sbFetch(`/wa_config?select=valor&id=eq.${chaveCount}`).catch(() => []);
+  const countAtual = parseInt(rowCount?.[0]?.valor || '0');
+  const novoCount = countAtual + chamadas.length;
+  await sbFetch('/wa_config', 'POST', { id: chaveCount, valor: String(novoCount), updated_at: new Date().toISOString() }).catch(() => {});
+  console.log(`[places] chamadas hoje: ${novoCount}`);
+
   const filtrados = todos.filter(p =>
     !temSiteProprio(p.websiteUri) &&
     p.businessStatus === 'OPERATIONAL' &&
@@ -327,25 +338,29 @@ async function jobBuscar() {
     return;
   }
 
+  // Trava de custo: máximo 50 chamadas Places por dia
+  const LIMITE_CHAMADAS_DIA = 50;
+  const brtHoje = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+  const chaveChamadas = `places_calls_${brtHoje.getFullYear()}-${String(brtHoje.getMonth()+1).padStart(2,'0')}-${String(brtHoje.getDate()).padStart(2,'0')}`;
+  const rowChamadas = await sbFetch(`/wa_config?select=valor&id=eq.${chaveChamadas}`).catch(() => []);
+  const chamadasHoje = parseInt(rowChamadas?.[0]?.valor || '0');
+  if (chamadasHoje >= LIMITE_CHAMADAS_DIA) {
+    console.log(`[buscar] limite de ${LIMITE_CHAMADAS_DIA} chamadas Places atingido hoje (${chamadasHoje}) — abortando.`);
+    await alertar(`⚠️ Limite diário de chamadas Places atingido (${chamadasHoje}). Busca cancelada.`);
+    return;
+  }
+
   const dispararHoje = await contarDisparosHoje();
   const vagas = LIMITE_DIA - dispararHoje;
   if (vagas <= 0) { console.log('Limite diário atingido.'); return; }
 
-  // Rotaciona 3 categorias A+ por dia + 1 Tier A (seg/qua/sex)
+  // Rotaciona 2 categorias por dia
   const rot1 = await proximaCategoria('auto_rot1', CATEGORIAS_AUTO);
   const idxRot1 = CATEGORIAS_AUTO.indexOf(rot1);
   const cat2 = CATEGORIAS_AUTO[(idxRot1 + 1) % CATEGORIAS_AUTO.length];
-  const cat3 = CATEGORIAS_AUTO[(idxRot1 + 2) % CATEGORIAS_AUTO.length];
-  const categoriasDia = [rot1, cat2, cat3];
+  const categoriasDia = [rot1, cat2];
 
-  const brtBuscar = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
-  if ([1, 3, 5].includes(brtBuscar.getDay())) {
-    const rotA = await proximaCategoriaAutoA();
-    categoriasDia.push(rotA);
-    console.log(`Categorias: ${categoriasDia.join(', ')}`);
-  } else {
-    console.log(`Categorias: ${categoriasDia.join(', ')}`);
-  }
+  console.log(`Categorias: ${categoriasDia.join(', ')}`);
 
   async function buscarESalvar(cidades, limite) {
     let prospects = [];
