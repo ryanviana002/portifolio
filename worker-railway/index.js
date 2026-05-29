@@ -1032,8 +1032,16 @@ http.createServer(async (req, res) => {
   const jaRodou = await sbFetch(`/wa_config?select=id&id=eq.${chaveHoje}`).catch(() => []);
   if (jaRodou?.length) { console.log('[startup] busca já rodou hoje — pulando.'); return; }
 
-  // Marca como rodado ANTES de executar — evita duplo disparo em redeploys simultâneos
-  await sbFetch('/wa_config', 'POST', { id: chaveHoje, valor: '1', updated_at: new Date().toISOString() }).catch(() => {});
+  // Tenta inserir — se já existe (outro deploy simultâneo), o erro indica que não deve rodar
+  try {
+    await sbFetch('/wa_config', 'POST', { id: chaveHoje, valor: '1', updated_at: new Date().toISOString() });
+  } catch (e) {
+    console.log('[startup] flag já existe (deploy simultâneo?) — pulando.'); return;
+  }
+
+  // Confirma que a flag foi salva antes de continuar
+  const confirmado = await sbFetch(`/wa_config?select=id&id=eq.${chaveHoje}`).catch(() => []);
+  if (!confirmado?.length) { console.log('[startup] falha ao confirmar flag — pulando por segurança.'); return; }
 
   console.log('[startup] busca não rodou hoje — executando...');
   await jobBuscar().catch(err => console.error('[startup] buscar:', err.message));
