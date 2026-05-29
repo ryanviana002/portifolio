@@ -961,13 +961,36 @@ cron.schedule('0 9 * * *', jobExpirarSemResposta);
 
 // Servidor HTTP para triggers manuais
 const PORT = process.env.PORT || 3000;
-const TRIGGER_KEY = process.env.TRIGGER_KEY || 'familia1@';
+const TRIGGER_KEY = process.env.TRIGGER_KEY;
+if (!TRIGGER_KEY) { console.error('TRIGGER_KEY não configurada — servidor HTTP não iniciado.'); process.exit(1); }
+
+// Números autorizados para receber mensagens via job=responder
+const NUMS_AUTORIZADOS = new Set([ALERT_NUM, LIDER_NUM, '5519994175385']);
+
+// Rate limiting simples — máx 10 requests por minuto por IP
+const rateLimitMap = new Map();
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip) || { count: 0, reset: now + 60000 };
+  if (now > entry.reset) { entry.count = 0; entry.reset = now + 60000; }
+  entry.count++;
+  rateLimitMap.set(ip, entry);
+  return entry.count <= 10;
+}
 
 http.createServer(async (req, res) => {
   if (req.method !== 'POST') { res.writeHead(405); res.end(); return; }
 
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  if (!checkRateLimit(ip)) { res.writeHead(429); res.end('too many requests'); return; }
+
   let body = '';
-  req.on('data', d => body += d);
+  let bodySize = 0;
+  req.on('data', d => {
+    bodySize += d.length;
+    if (bodySize > 10240) { res.writeHead(413); res.end('payload too large'); req.destroy(); return; }
+    body += d;
+  });
   req.on('end', async () => {
     try {
       const payload = JSON.parse(body);
@@ -977,9 +1000,9 @@ http.createServer(async (req, res) => {
       if (job === 'responder') {
         const { waNum, mensagem, simularLeitura } = payload;
         if (!waNum || !mensagem) { res.writeHead(400); res.end('missing params'); return; }
+        if (!NUMS_AUTORIZADOS.has(waNum)) { res.writeHead(403); res.end('numero nao autorizado'); return; }
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true }));
-        // Railway é long-running — delay roda em background após responder
         enviarWA(waNum, mensagem, { simularLeitura: simularLeitura || false })
           .catch(err => console.error(`[responder] ${waNum}:`, err.message));
         return;
