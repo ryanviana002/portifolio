@@ -210,9 +210,6 @@ async function buscarProspects(categoria, cidades) {
       telefone: p.nationalPhoneNumber || '',
       waNum: `55${digits}`,
       mapsUrl: p.googleMapsUri || `https://www.google.com/maps/place/?q=place_id:${id}`,
-      foto: p.photos?.[0]?.name
-        ? `https://places.googleapis.com/v1/${p.photos[0].name}/media?maxWidthPx=200&key=${PLACES_KEY}`
-        : null,
       rating: p.rating || null,
       reviewCount: p.userRatingCount || 0,
     };
