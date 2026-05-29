@@ -133,7 +133,7 @@ async function alertar(msg) {
 }
 
 // ─── Google Places ───────────────────────────────────────────────────────────
-const CAMPO_MASK = 'places.id,places.displayName,places.primaryTypeDisplayName,places.formattedAddress,places.websiteUri,places.nationalPhoneNumber,places.rating,places.userRatingCount,places.businessStatus';
+const CAMPO_MASK = 'places.id,places.displayName,places.primaryTypeDisplayName,places.websiteUri,places.nationalPhoneNumber,places.businessStatus';
 const NAO_E_SITE = ['instagram.com','facebook.com','fb.com','wa.me','whatsapp.com','linktr.ee','linktree.com','beacons.ai','bio.link','ifood.com.br','rappi.com','uber.com','booking.com','tripadvisor','twitter.com','x.com','tiktok.com','youtube.com','google.com/maps','maps.google.com','waze.com'];
 
 // ─── Região de Campinas (buscada todo dia) ────────────────────────────────────
@@ -189,9 +189,7 @@ async function buscarProspects(categoria, cidades) {
   const filtrados = todos.filter(p =>
     !temSiteProprio(p.websiteUri) &&
     p.businessStatus === 'OPERATIONAL' &&
-    temWA(p.nationalPhoneNumber) &&
-    (p.userRatingCount || 0) >= 25 &&
-    (p.rating || 0) >= 4.0
+    temWA(p.nationalPhoneNumber)
   );
   const vistos = new Set();
   return filtrados.filter(p => {
@@ -206,12 +204,8 @@ async function buscarProspects(categoria, cidades) {
       id,
       nome: p.displayName?.text || '',
       categoria: p.primaryTypeDisplayName?.text || categoria,
-      endereco: p.formattedAddress || '',
       telefone: p.nationalPhoneNumber || '',
       waNum: `55${digits}`,
-      mapsUrl: p.googleMapsUri || `https://www.google.com/maps/place/?q=place_id:${id}`,
-      rating: p.rating || null,
-      reviewCount: p.userRatingCount || 0,
     };
   });
 }
@@ -383,8 +377,7 @@ async function jobBuscar() {
         },
         body: JSON.stringify({
           id: p.id, nome: p.nome, categoria: p.categoria,
-          wa_num: p.waNum, telefone: p.telefone, maps_url: p.mapsUrl,
-          rating: p.rating, review_count: p.reviewCount,
+          wa_num: p.waNum, telefone: p.telefone,
           status: 'pending', updated_at: new Date().toISOString(),
         }),
       }).catch(err => console.error(`Erro ao salvar ${p.nome}:`, err.message));
