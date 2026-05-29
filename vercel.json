@@ -13,6 +13,8 @@
     { "src": "/delega/(.*)", "dest": "/delega/$1" },
     { "src": "/estocao", "dest": "/estocao/index.html" },
     { "src": "/estocao/(.*)", "dest": "/estocao/$1" },
+    { "src": "/lrmarcal", "dest": "/lrmarcal/index.html" },
+    { "src": "/lrmarcal/(.*)", "dest": "/lrmarcal/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }

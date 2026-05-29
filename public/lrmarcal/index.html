@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summit Steel Works</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF8731',
+                        dark: '#131313'
+                    },
+                    fontFamily: {
+                        heading: ['Oswald', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'btn': '4px'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #FFFFFF; color: #131313; }
+        h1, h2, h3, h4, h5, .font-heading { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
+        .btn-primary {
+            background-color: #FF8731; color: #FFFFFF; border-radius: 4px;
+            padding: 12px 24px; font-weight: 500; text-transform: uppercase;
+            letter-spacing: 0.05em; font-size: 14px; display: inline-block; transition: all 0.3s ease;
+        }
+        .btn-primary:hover { background-color: #e67727; }
+        .btn-secondary {
+            background-color: transparent; color: #FFFFFF; border: 1px solid #FF8731;
+            border-radius: 4px; padding: 12px 24px; font-weight: 500; text-transform: uppercase;
+            letter-spacing: 0.05em; font-size: 14px; display: inline-block; transition: all 0.3s ease;
+        }
+        .btn-secondary:hover { background-color: #FF8731; }
+        .number-outline { color: transparent; -webkit-text-stroke: 1px #d1d5db; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navbar -->
+    <nav class="absolute top-0 w-full z-50 px-8 py-6 flex justify-between items-center text-white text-sm tracking-wider uppercase font-medium">
+        <a href="#" class="font-bold text-2xl tracking-tighter">SSW</a>
+        <div class="hidden md:flex gap-10">
+            <a href="#" class="hover:text-[#FF8731] transition-colors flex items-center gap-1">Who We Are <span class="text-[10px]">▼</span></a>
+            <a href="#" class="hover:text-[#FF8731] transition-colors flex items-center gap-1">Steel Fabrication <span class="text-[10px]">▼</span></a>
+            <a href="#" class="hover:text-[#FF8731] transition-colors flex items-center gap-1">Our Work <span class="text-[10px]">▼</span></a>
+        </div>
+        <a href="#" class="border border-white/30 px-6 py-2 rounded hover:bg-white hover:text-[#131313] transition-all flex items-center gap-2">Contact Us <span>↗</span></a>
+    </nav>
+
+    <!-- Hero -->
+    <section class="relative w-full h-[90vh] min-h-[700px] bg-[#131313] text-white flex flex-col justify-center">
+        <div class="absolute inset-0 z-0 overflow-hidden">
+            <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64f5be2f7df87403e5d4d20a_summit-steel-works-home.jpg" alt="Summit Steel Works" class="w-full h-full object-cover opacity-50">
+            <div class="absolute inset-0 bg-gradient-to-r from-[#131313]/80 to-transparent"></div>
+        </div>
+        <div class="relative z-10 max-w-7xl mx-auto px-8 w-full mt-20">
+            <div class="max-w-3xl">
+                <h2 class="text-sm font-semibold tracking-widest mb-4 uppercase text-white">Summit Steel Works</h2>
+                <h1 style="font-family:'Oswald',sans-serif;text-transform:uppercase;" class="text-7xl md:text-8xl leading-[0.85] mb-6">STEEL FABRICATION<br>AT IT'S BEST</h1>
+                <p class="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl leading-relaxed">
+                    State-of-the-art BIM capabilities and 25,000 square feet of shop space in San Jose, CA. Summit Steel Works has ten talented mechanical engineers on staff. Craftsmen on the floor and professionals in the field. This combination gives Summit the unparalleled ability to deliver.
+                </p>
+                <a href="#" class="btn-primary">Get A Quote</a>
+            </div>
+        </div>
+        <div class="absolute bottom-0 left-0 w-full flex items-end">
+            <div class="absolute left-0 bottom-[10%] w-[40%] border-t border-[#FF8731]/50"></div>
+            <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64f5bf13ef4abb8f61dead77_home-shape.svg" alt="" class="w-full h-auto object-cover relative z-20 translate-y-[2px]">
+            <div class="absolute bottom-4 right-8 z-30 flex gap-2">
+                <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64f82faf694f17667872189e_home-left-arrow.svg" alt="prev" class="w-10 h-10 cursor-pointer bg-[#FF8731] p-2">
+                <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64f82fafb88049e6680bdc6e_home-right-arrow.svg" alt="next" class="w-10 h-10 cursor-pointer bg-[#FF8731] p-2">
+            </div>
+        </div>
+    </section>
+
+    <!-- Fabricating the Future -->
+    <section class="bg-[#131313] text-white pt-10 pb-24 px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start justify-between gap-12 pt-10">
+            <h2 style="font-family:'Oswald',sans-serif;text-transform:uppercase;" class="text-[#FF8731] text-6xl md:text-8xl w-full md:w-1/2 leading-[0.85]">FABRICATING THE<br>FUTURE</h2>
+            <div class="w-full md:w-1/2 mt-4">
+                <p class="text-gray-300 text-lg mb-8 leading-relaxed">Summit Steel Works serves the greater San Francisco Bay Area, Silicon Valley, and all of Northern California. Summit Steel Works is your premier design-build, miscellaneous metals, and structural steel partner.</p>
+                <a href="#" class="btn-secondary">Why We Are Different</a>
+            </div>
+        </div>
+        <div class="max-w-6xl mx-auto mt-24 relative aspect-video bg-black flex items-center justify-center overflow-hidden border border-white/10 group cursor-pointer">
+            <img src="https://i.ytimg.com/vi_webp/_EFNI4nE1rk/maxresdefault.webp" alt="Video" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity">
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform">
+                    <div class="w-0 h-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-white border-b-[12px] border-b-transparent ml-2"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What We Do -->
+    <section class="bg-gray-50 py-24 px-8">
+        <div class="max-w-7xl mx-auto">
+            <h2 style="font-family:'Oswald',sans-serif;text-transform:uppercase;" class="text-5xl md:text-6xl mb-12">WHAT WE DO</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="group relative aspect-[4/3] bg-[#131313] overflow-hidden flex flex-col justify-end p-6 cursor-pointer">
+                    <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/651b17489c7acecc2a5dc220_Summit%20Steel%20BIM%20modeling.png" alt="BIM" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700">
+                    <div class="relative z-10 text-white text-3xl uppercase" style="font-family:'Oswald',sans-serif;">BIM</div>
+                    <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64f5c439f71ee94c4a45e0ce_what-we-do-hover-arrow.svg" alt="" class="absolute top-6 right-6 w-8 h-8 opacity-0 -translate-x-4 translate-y-4 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-300">
+                </div>
+                <div class="group relative aspect-[4/3] bg-[#131313] overflow-hidden flex flex-col justify-end p-6 cursor-pointer">
+                    <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/65042e2d1b8aee29e398af24_building-information-modeling.jpg" alt="Pre Con" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700">
+                    <div class="relative z-10 text-white text-3xl uppercase" style="font-family:'Oswald',sans-serif;">Pre Con<br>& Budgeting</div>
+                </div>
+                <div class="group relative aspect-[4/3] bg-[#131313] overflow-hidden flex flex-col justify-end p-6 cursor-pointer">
+                    <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64ff0e99e51f6324bece63cb_steel-fabrication-7.jpg" alt="Shop Fabrication" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700">
+                    <div class="relative z-10 text-white text-3xl uppercase" style="font-family:'Oswald',sans-serif;">Shop Fabrication</div>
+                </div>
+                <div class="group relative aspect-[4/3] bg-[#131313] overflow-hidden flex flex-col justify-end p-6 cursor-pointer lg:col-span-2">
+                    <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64ff1431ba858f945e9c293d_field-installation-5.jpg" alt="Field Installation" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700">
+                    <div class="relative z-10 text-white text-3xl uppercase" style="font-family:'Oswald',sans-serif;">Field Installation</div>
+                </div>
+                <div class="group relative aspect-[4/3] bg-[#131313] overflow-hidden flex flex-col justify-end p-6 cursor-pointer">
+                    <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64ff08be8d8578d960e0c3e2_lytton-build-2.jpg" alt="Advance Detailing" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700">
+                    <div class="relative z-10 text-white text-3xl uppercase" style="font-family:'Oswald',sans-serif;">Advance Detailing</div>
+                </div>
+            </div>
+            <div class="mt-16 flex flex-col md:flex-row items-center justify-between gap-8">
+                <p class="text-sm font-medium text-gray-500 max-w-xl uppercase tracking-widest">Summit Steel Works values your target budget, schedule, & overall project value impact. Summit is your project partner, able to execute with accuracy, speed and efficiency un-matched by any other steel company.</p>
+                <a href="#" class="btn-primary whitespace-nowrap shrink-0">Contact Us Today</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Clientele -->
+    <section class="py-16 px-8 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto">
+            <h3 style="font-family:'Oswald',sans-serif;text-transform:uppercase;" class="text-3xl mb-12">OUR CLIENTELE</h3>
+            <div class="flex flex-wrap items-center justify-between gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+                <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/65043106c7145b13707546de_apple-logo.svg" alt="Apple" class="h-10">
+                <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/650430aff54f6d7c2a9fb85b_vance-brown-builders.png" alt="Vance Brown" class="h-6">
+                <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/65042fe415c8a84d7011eac0_tesla-logo.svg" alt="Tesla" class="h-6">
+                <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/650430142dc3c15cdd2b7fed_google-logo-black.svg" alt="Google" class="h-10">
+                <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/65043223a3d3c2f4b598a4ba_stanford-university-logo.png" alt="Stanford" class="h-12">
+            </div>
+        </div>
+    </section>
+
+    <!-- We Thrive on Impossible -->
+    <section class="py-24 px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <h2 style="font-family:'Oswald',sans-serif;text-transform:uppercase;" class="text-6xl md:text-8xl mb-20">WE THRIVE ON <span class="text-[#FF8731]">IMPOSSIBLE</span></h2>
+            <div class="space-y-12">
+                <div class="flex flex-col md:flex-row items-center border-b border-gray-200 pb-12 gap-8 relative group">
+                    <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/65017e774c32024cb040a117_stanford-university.jpg" alt="Stanford" class="w-full md:w-64 aspect-square object-cover">
+                    <div class="flex-1 pr-0 md:pr-24">
+                        <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/65017ffabd7f8fb9e2eba1c3_stanford-university-logo.svg" alt="Stanford Logo" class="h-8 mb-4">
+                        <h4 class="font-bold mb-3">Stanford University, Stanford, CA</h4>
+                        <p class="text-gray-600">Summit has worked with Stanford University in California on a multitude of projects. These projects include structural steel, complicated hip and valley roof structure, and Christmas treeing for Crothers Dining Hall. Seismic upgrades were made in the Peterson Building as well as Structural Steel infill in a concrete tilt up building for the Aquatics Center.</p>
+                    </div>
+                    <div class="hidden lg:block absolute right-0 number-outline" style="font-family:'Oswald',sans-serif;font-size:9rem;line-height:1;">01</div>
+                </div>
+                <div class="flex flex-col md:flex-row items-center border-b border-gray-200 pb-12 gap-8 relative group">
+                    <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/65017ee6418687b05916b7e8_google-campus.jpeg" alt="Google" class="w-full md:w-64 aspect-square object-cover">
+                    <div class="flex-1 pr-0 md:pr-24">
+                        <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/650180260926af0ccb3647b5_google-logo.svg" alt="Google Logo" class="h-8 mb-4">
+                        <h4 class="font-bold mb-3">Google Campus, Mountain View, CA</h4>
+                        <p class="text-gray-600">Summit Steel works provided Google Campus with stairs and railings. We partnered with XL Construction to provide a high-quality build. You can see our work for Google Campus in Mountain View, California.</p>
+                    </div>
+                    <div class="hidden lg:block absolute right-0 number-outline" style="font-family:'Oswald',sans-serif;font-size:9rem;line-height:1;">02</div>
+                </div>
+                <div class="flex flex-col md:flex-row items-center border-b border-gray-200 pb-12 gap-8 relative group">
+                    <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/65017f1d04a67b63370a9bec_planet-granite.jpeg" alt="Planet Granite" class="w-full md:w-64 aspect-square object-cover">
+                    <div class="flex-1 pr-0 md:pr-24">
+                        <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/65018079bca8a6127e7fa55e_planet-granite-logo.png" alt="Planet Granite Logo" class="h-10 mb-4 object-contain">
+                        <h4 class="font-bold mb-3">Planet Granite, San Francisco, CA</h4>
+                        <p class="text-gray-600">Working with a California rock climbing company, we provided Planet Granite with seismic upgrades along with stairs and railings. The seismic upgrades strengthened the structure for better resistance against seismic activity.</p>
+                    </div>
+                    <div class="hidden lg:block absolute right-0 number-outline" style="font-family:'Oswald',sans-serif;font-size:9rem;line-height:1;">03</div>
+                </div>
+                <div class="flex flex-col md:flex-row items-center pb-12 gap-8 relative group">
+                    <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/65017f6989575cb2d741179d_palo-alto-medical-foundation.jpeg" alt="Palo Alto" class="w-full md:w-64 aspect-square object-cover">
+                    <div class="flex-1 pr-0 md:pr-24">
+                        <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/650181508e222f81a70ffc54_palo-alto-medical-foundation.gif" alt="Palo Alto Logo" class="h-12 mb-4 object-contain">
+                        <h4 class="font-bold mb-3">Palo Alto Medical Foundation, Bay Area, CA</h4>
+                        <p class="text-gray-600">Summit Steel Works completed a project for Palo Alto Medical Foundation. This project consisted of trellises for their building. The Palo Alto Medical Foundation is a not-for-profit health care organization with office buildings throughout the Bay Area.</p>
+                    </div>
+                    <div class="hidden lg:block absolute right-0 number-outline" style="font-family:'Oswald',sans-serif;font-size:9rem;line-height:1;">04</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Process -->
+    <section class="bg-[#19191d] text-white py-24 px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-12">
+            <h2 style="font-family:'Oswald',sans-serif;text-transform:uppercase;" class="text-6xl md:text-8xl whitespace-nowrap">OUR PROCESS</h2>
+            <div class="w-full max-w-3xl space-y-16">
+                <div class="flex flex-col md:flex-row gap-8 items-start">
+                    <h3 class="text-[#FF8731] text-3xl uppercase tracking-widest shrink-0 w-32" style="font-family:'Oswald',sans-serif;">Designing</h3>
+                    <div>
+                        <p class="text-gray-300 leading-relaxed mb-6">Summit is a steel partner with design-build capability, solving on-site design problems in a streamlined manner to save on costs. Knowledgeable builders provide the translation of ideas into real-world structures.</p>
+                        <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64f5d696a78c1a194dd9cc06_proces-background-2.svg" alt="Design Plan" class="w-full max-w-sm">
+                    </div>
+                </div>
+                <div class="flex flex-col md:flex-row gap-8 items-start">
+                    <h3 class="text-[#FF8731] text-3xl uppercase tracking-widest shrink-0 w-32" style="font-family:'Oswald',sans-serif;">BIM Coord</h3>
+                    <div>
+                        <p class="text-gray-300 leading-relaxed mb-6">The building process involves in-house detailing, BIM coordination, and shop fabrication. Summit Steel Works successfully deploys BIM coordination and holds these assets and experience at the ready.</p>
+                        <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64ff0a749ee6bcd95c7a6816_lytton-plan.jpg" alt="Lytton Plan" class="w-full max-w-sm aspect-video object-cover">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Achievements -->
+    <section class="py-24 px-8 text-center bg-gray-50">
+        <div class="max-w-4xl mx-auto mb-16">
+            <h2 style="font-family:'Oswald',sans-serif;text-transform:uppercase;" class="text-6xl md:text-8xl mb-8">OUR ACHIEVEMENTS</h2>
+            <p class="text-gray-600">We assign each project a mechanical engineer to field-measure, detail, and supervise fabrication and installation. We provide an unparalleled level of care and precision.</p>
+        </div>
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4 text-left">
+            <div class="relative h-64 overflow-hidden group">
+                <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64f5d05307403e919b9194f2_clients-served.jpg" alt="Clients" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 bg-[#131313]/60"></div>
+                <div class="absolute bottom-6 left-6 text-white pr-6">
+                    <h3 class="text-3xl mb-1" style="font-family:'Oswald',sans-serif;">72+</h3>
+                    <h4 class="font-bold text-sm mb-1 uppercase">Clients</h4>
+                    <p class="text-xs text-gray-300">One of the top design/build miscellaneous metals companies in Northern California.</p>
+                </div>
+            </div>
+            <div class="relative h-64 overflow-hidden group">
+                <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64f5d273df7028173fb9ec08_staircase-designed.jpg" alt="Designs" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 bg-[#131313]/60"></div>
+                <div class="absolute bottom-6 left-6 text-white pr-6">
+                    <h3 class="text-3xl mb-1" style="font-family:'Oswald',sans-serif;">145+</h3>
+                    <h4 class="font-bold text-sm mb-1 uppercase">Designs</h4>
+                    <p class="text-xs text-gray-300">Experts in designing staircases that seamlessly connect levels.</p>
+                </div>
+            </div>
+            <div class="relative h-64 overflow-hidden group">
+                <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64f5d273596566bd33708ddc_structure-designed.jpg" alt="Structures" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 bg-[#131313]/60"></div>
+                <div class="absolute bottom-6 left-6 text-white pr-6">
+                    <h3 class="text-3xl mb-1" style="font-family:'Oswald',sans-serif;">133</h3>
+                    <h4 class="font-bold text-sm mb-1 uppercase">Structures</h4>
+                    <p class="text-xs text-gray-300">Complex design projects with professionalism unmatched in the industry.</p>
+                </div>
+            </div>
+            <div class="relative h-64 overflow-hidden group">
+                <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64f5d273fb80f1bd9d69845a_portfolio-valuation.jpg" alt="Portfolio" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 bg-[#131313]/60"></div>
+                <div class="absolute bottom-6 left-6 text-white pr-6">
+                    <h3 class="text-3xl mb-1" style="font-family:'Oswald',sans-serif;">$400M</h3>
+                    <h4 class="font-bold text-sm mb-1 uppercase">Portfolio</h4>
+                    <p class="text-xs text-gray-300">BIM coordination on a $6+B project, coordinating 900+ tons of steel.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Custom Railings -->
+    <section class="py-24 px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
+            <div class="flex-1 space-y-6">
+                <h3 class="text-2xl uppercase font-bold">Custom Metal Railings and Staircases</h3>
+                <p class="text-gray-600">When it comes to handrails and staircases, we understand that these elements are not only essential for safety and functionality, but are also key architectural features that can elevate the overall aesthetic of a home or business.</p>
+                <p class="text-gray-600">Our custom metalwork isn't just functional—it's a statement. With years of experience in precision metal fabrication, we pride ourselves on delivering handrails and staircases that combine strength, elegance, and safety.</p>
+                <p class="text-gray-600">From concept to installation, we handle every detail with meticulous care. Your design deserves more than off-the-shelf solutions—it deserves art in metal form.</p>
+            </div>
+            <div class="flex-1 w-full relative">
+                <div class="absolute top-0 right-0 w-32 h-32 border-t-2 border-r-2 border-[#FF8731] -translate-y-4 translate-x-4"></div>
+                <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64f5d273df7028173fb9ec08_staircase-designed.jpg" alt="Staircase" class="w-full aspect-[4/3] object-cover relative z-10">
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission & Vision -->
+    <section class="py-24 px-8 bg-gray-50">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-16">
+            <div class="flex-1">
+                <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64f5ca8f7591e40f7e135de9_mission-and-vision.jpg" alt="Mission" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1 flex flex-col justify-center">
+                <h2 style="font-family:'Oswald',sans-serif;text-transform:uppercase;" class="text-6xl md:text-8xl mb-8">OUR MISSION<br>& VISION</h2>
+                <p class="text-gray-600 mb-8 max-w-lg">Summit Steel Works thrives on jobs that other metal contractors avoid. From simple embeds to the most complex curved stair assemblies and challenging structural steel, we have what it takes to get the job done. 100 dedicated employees, including ten mechanical engineers.</p>
+                <a href="#" class="font-bold text-sm uppercase flex items-center gap-2 hover:text-[#FF8731] transition-colors">
+                    <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64f5caf71de7d0ee1db21adf_small-orange-arrow.svg" alt="→"> Discover More
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quality & Sustainability -->
+    <section class="py-24 px-8 bg-white">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-16">
+            <div class="flex-1 flex flex-col justify-center max-w-lg">
+                <h2 style="font-family:'Oswald',sans-serif;text-transform:uppercase;" class="text-6xl md:text-8xl mb-8">QUALITY &<br>SUSTAINABILITY</h2>
+                <p class="text-gray-600 mb-8">Summit Steel Works uses high-quality materials made to last. We don't cut corners, and we take our work seriously. Summit aims to minimize waste and energy consumption throughout all construction projects.</p>
+                <a href="#" class="font-bold text-sm uppercase flex items-center gap-2 hover:text-[#FF8731] transition-colors">
+                    <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64f5caf71de7d0ee1db21adf_small-orange-arrow.svg" alt="→"> Discover More
+                </a>
+            </div>
+            <div class="flex-1">
+                <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/64f5ccb34d7b8b89e69a762e_quality-and-sustainability-home.jpg" alt="Quality" class="w-full aspect-[4/3] object-cover">
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-24 px-8 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-16">
+            <div class="flex-1">
+                <h2 style="font-family:'Oswald',sans-serif;text-transform:uppercase;" class="text-6xl md:text-8xl mb-6">CLIENTS & <span class="text-[#FF8731]">TESTIMONIALS</span></h2>
+                <p class="text-2xl font-bold max-w-sm mt-8">Over 150 projects completed with Novo as a trusted partner.</p>
+            </div>
+            <div class="flex-1 space-y-12">
+                <div class="flex items-start gap-8">
+                    <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/65393243fed878caea2a01a1_novo-construction-logo.svg" alt="Novo" class="w-24 object-contain pt-2 grayscale hover:grayscale-0 transition">
+                    <div>
+                        <p class="font-bold mb-2">Over 150 projects completed with Novo.</p>
+                        <p class="text-sm text-gray-500 uppercase tracking-widest">Novo Construction</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-8">
+                    <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/6539314ca064eda983e2759a_turner-logo.svg" alt="Turner" class="w-24 object-contain pt-2 grayscale hover:grayscale-0 transition">
+                    <div>
+                        <p class="font-bold mb-2">Over 50 projects completed with Turner.</p>
+                        <p class="text-sm text-gray-500 uppercase tracking-widest">Turner Construction</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-8">
+                    <img src="https://cdn.prod.website-files.com/64edb502da5b3bd3d4e3528f/653931a63aef1ca7d85708f2_xl-construction-logo.svg" alt="XL" class="w-24 object-contain pt-2 grayscale hover:grayscale-0 transition">
+                    <div>
+                        <p class="font-bold mb-2">Over 60 projects completed with XL Construction.</p>
+                        <p class="text-sm text-gray-500 uppercase tracking-widest">XL Construction</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#131313] text-white pt-24 pb-12 px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-16 border-b border-white/10 pb-16">
+            <div class="w-full md:w-1/3">
+                <h4 class="text-3xl mb-6" style="font-family:'Oswald',sans-serif;">SUMMIT STEEL WORKS</h4>
+                <p class="text-gray-400 text-sm mb-6 leading-relaxed">Fabricating your vision with precision and excellence. From simple embeds to the most complex curved stair assemblies and challenging structural steel, we have what it takes to get the job done.</p>
+                <div class="grid grid-cols-2 gap-4 text-sm font-semibold tracking-wider uppercase text-gray-300">
+                    <a href="#" class="hover:text-[#FF8731] transition-colors">Who We Are</a>
+                    <a href="#" class="hover:text-[#FF8731] transition-colors">Testimonials</a>
+                    <a href="#" class="hover:text-[#FF8731] transition-colors">Steel Fabrication</a>
+                    <a href="#" class="hover:text-[#FF8731] transition-colors">Careers</a>
+                    <a href="#" class="hover:text-[#FF8731] transition-colors">Our Work</a>
+                    <a href="#" class="hover:text-[#FF8731] transition-colors">Contact</a>
+                </div>
+            </div>
+            <div class="w-full md:w-1/2">
+                <h2 class="text-5xl md:text-6xl uppercase mb-8" style="font-family:'Oswald',sans-serif;">WE'D LOVE TO <span class="text-[#FF8731]">HEAR FROM YOU</span></h2>
+                <form class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" placeholder="Name" class="bg-[#1e1e1e] border border-white/10 px-4 py-3 placeholder-gray-500 text-sm focus:outline-none focus:border-[#FF8731] text-white">
+                        <input type="email" placeholder="Email" class="bg-[#1e1e1e] border border-white/10 px-4 py-3 placeholder-gray-500 text-sm focus:outline-none focus:border-[#FF8731] text-white">
+                        <input type="tel" placeholder="Phone" class="bg-[#1e1e1e] border border-white/10 px-4 py-3 placeholder-gray-500 text-sm focus:outline-none focus:border-[#FF8731] text-white">
+                    </div>
+                    <textarea placeholder="Your Message" rows="3" class="w-full bg-[#1e1e1e] border border-white/10 px-4 py-3 placeholder-gray-500 text-sm focus:outline-none focus:border-[#FF8731] text-white"></textarea>
+                    <button type="submit" class="btn-primary px-12">Submit</button>
+                </form>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto flex justify-between items-center text-xs text-gray-500 mt-8 font-medium tracking-widest uppercase">
+            <p>2024 SUMMIT STEEL WORKS ALL RIGHTS RESERVED.</p>
+            <div class="flex gap-4">
+                <a href="#" class="hover:text-white transition-colors">PRIVACY POLICY</a>
+                <a href="#" class="hover:text-white transition-colors">TERMS OF USE</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

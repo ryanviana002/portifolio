@@ -19,7 +19,7 @@ if (!CLIENT_ID || !CLIENT_SECRET) {
 const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(SCOPE)}&access_type=offline&prompt=consent`;
 
 console.log('\nAbrindo browser para autenticação Google...\n');
-exec(`open "${authUrl}"`);
+exec(`open -a "Google Chrome" "${authUrl}"`);
 
 const server = http.createServer(async (req, res) => {
   const code = new URL(req.url, REDIRECT_URI).searchParams.get('code');

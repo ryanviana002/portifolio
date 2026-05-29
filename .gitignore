@@ -27,3 +27,28 @@ dist-ssr
 .env*.local
 .aidesigner/*
 !.aidesigner/.gitkeep
+
+# Screenshots e imagens temporárias
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.mp4
+*.mp4.part
+
+# Ferramentas locais
+.codex/
+.cursor/
+.playwright-mcp/
+
+# HTMLs de rascunho/clone
+automotivo.html
+automotivo-rdc.html
+automotivo-rdc-backup.html
+facilpay-clone.html
+stitch-rdcreator.html
+
+# Worker utils locais
+worker-railway/.env
+worker-railway/.env.example
