@@ -931,7 +931,7 @@ const semCadastro = doUltimoEncontro.filter(r => {
 }
 
 // ─── Agendamentos (UTC, Brasília = UTC-3) ────────────────────────────────────
-cron.schedule('30 23 * * 6', jobRelatorioPresenca);  // sab 20h30 BRT
+cron.schedule('0 0 * * 0', jobRelatorioPresenca);    // sab 21h BRT (dom 00h UTC)
 cron.schedule('0 11 * * 1', jobAtualizarMembros);    // seg 8h BRT
 cron.schedule('30 10 * * 1-6', jobBuscar);
 cron.schedule('0 11 * * 1-6', () => { setTimeout(() => jobDisparoLote(LIMITE_MANHA), Math.floor(Math.random() * 20 * 60 * 1000)); });
