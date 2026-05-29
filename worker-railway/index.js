@@ -336,7 +336,7 @@ async function jobBuscar() {
   if (estoqueAtual < 5) {
     await alertar(`⚠️ Estoque de prospects baixo (${estoqueAtual} pending). Ative a API do Google Places para buscar novos.`);
   }
-  if (estoqueAtual >= 50) {
+  if (estoqueAtual > 0) {
     console.log(`Estoque ok (${estoqueAtual} pending) — pulando busca.`);
     return;
   }
