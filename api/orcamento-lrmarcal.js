@@ -71,7 +71,7 @@ export default async function handler(req, res) {
 
     await transporter.sendMail({
       from: 'LRMARÇAL Site <contato@ryancreator.dev>',
-      to: 'ryanviana002@gmail.com',
+      to: 'Limarcalm@gmail.com',
       replyTo: email || undefined,
       subject: `Novo orçamento: ${nome} — ${modelo || 'veículo não informado'}`,
       html: `
