@@ -119,6 +119,35 @@ export default async function handler(req, res) {
       attachments,
     })
 
+    // Email de confirmação para o cliente
+    if (email) {
+      await transporter.sendMail({
+        from: 'LRMARÇAL Funilaria <contato@ryancreator.dev>',
+        to: email,
+        subject: `Recebemos seu orçamento, ${nome.split(' ')[0]}!`,
+        html: `
+          <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#0e0e0e;color:#fff;border-radius:12px;">
+            <div style="margin-bottom:24px;">
+              <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#00B8F0;margin-bottom:8px;">LRMARÇAL Funilaria e Pintura</div>
+              <h1 style="font-size:24px;font-weight:900;color:#fff;margin:0;">Orçamento recebido!</h1>
+            </div>
+            <p style="color:rgba(255,255,255,0.75);line-height:1.7;margin-bottom:24px;">
+              Olá, <strong>${nome.split(' ')[0]}</strong>! Recebemos seu pedido de orçamento e retornaremos em até <strong style="color:#00B8F0;">24 horas</strong> com uma prévia de valores.
+            </p>
+            ${modelo ? `<p style="color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:24px;">Veículo informado: <strong style="color:white;">${modelo}${ano ? ' ' + ano : ''}</strong></p>` : ''}
+            <a href="https://wa.me/5519991533017?text=Olá!%20Acabei%20de%20enviar%20um%20orçamento%20pelo%20site."
+               style="display:inline-block;background:#25D366;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:700;font-size:13px;margin-bottom:32px;">
+              💬 Falar pelo WhatsApp
+            </a>
+            <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:20px;font-size:11px;color:rgba(255,255,255,0.25);">
+              LRMARÇAL Funilaria e Pintura · Campinas SP<br>
+              R. João Batista Pupo de Moraes, 770 · (19) 99153-3017
+            </div>
+          </div>
+        `,
+      })
+    }
+
     return res.status(200).json({ ok: true })
   } catch (err) {
     console.error('orcamento-lrmarcal error:', err)
